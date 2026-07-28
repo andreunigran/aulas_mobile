@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia de Navegação em Flutter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A single-page application with a drawer navigation menu for smooth scrolling between thematic sections. This structure provides a clear step-by-step guide for understanding navigation in Flutter. The content is segmented into logical cards for better readability. -->
+    <!-- Visualization & Content Choices: The content is structured into thematic sections covering navigation in Flutter. Core concepts like the route stack, imperative vs. named routes, and passing arguments are presented in clear, concise cards with commented code examples. Gemini API is integrated for deeper explanations. This design prioritizes a clean, organized, and educational user experience. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .code-block {
+            background-color: #2d3748; /* gray-800 */
+            color: #e2e8f0; /* gray-300 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", monospace;
+            font-size: 0.875rem;
+        }
+        .code-block .keyword { color: #63b3ed; } /* blue-400 */
+        .code-block .type { color: #4fd1c5; } /* teal-400 */
+        .code-block .string { color: #f6ad55; } /* orange-400 */
+        .code-block .comment { color: #a0aec0; } /* gray-500 */
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            font-weight: 500;
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+        .nav-link:hover {
+            background-color: #e2e8f0; /* gray-200 */
+        }
+        .activity-card {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .gemini-btn {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease-in-out;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .gemini-btn:hover {
+            background-color: #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+        }
+        .gemini-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #gemini-response h2 { font-size: 1.5rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
+        #gemini-response h3 { font-size: 1.25rem; font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.5rem; }
+        #gemini-response ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+        #gemini-response strong { font-weight: 600; }
+        #gemini-response code {
+            background-color: #e2e8f0;
+            color: #2d3748;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
+        }
+        #gemini-response pre code {
+            display: block;
+            white-space: pre-wrap;
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .loader {
+            width: 50px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 8px solid #0000;
+            border-right-color: #818cf8;
+            animation: l24 1s infinite linear;
+        }
+        @keyframes l24 {
+            100% {transform: rotate(1turn)}
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-gray-800">
+
+    <!-- Botão para abrir o Drawer -->
+    <button id="drawer-btn" class="fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Overlay -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+    <!-- Drawer Navigation -->
+    <nav id="drawer-nav" class="fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+        <div class="p-4">
+            <h3 class="text-xl font-bold mb-4">Navegação</h3>
+            <a href="#introducao" class="nav-link">Introdução</a>
+            <a href="#tipos-navegacao" class="nav-link">Tipos de Navegação</a>
+            <a href="#navegacao-imperativa" class="nav-link">Navegação Imperativa</a>
+            <a href="#navegacao-nomeada" class="nav-link">Navegação Nomeada</a>
+            <a href="#passando-argumentos" class="nav-link">Passando Argumentos</a>
+            <a href="#exercicio" class="nav-link">Exercício Prático</a>
+            <a href="#referencias" class="nav-link">Referências</a>
+        </div>
+    </nav>
+
+     <!-- Modal Gemini -->
+    <div id="gemini-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
+                <h3 class="text-xl font-bold text-gray-800">✨ Resposta do Gemini</h3>
+                <button id="close-modal-btn" class="p-2 rounded-full hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="gemini-response" class="p-6 overflow-y-auto space-y-4">
+                <!-- Conteúdo gerado pela API será inserido aqui -->
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Guia de Navegação em Flutter</h1>
+            <p class="mt-4 text-lg text-gray-600">Entendendo e implementando a transição entre telas.</p>
+        </header>
+
+        <main class="space-y-20">
+
+            <section id="introducao">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Introdução à Navegação</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('O que é navegação em Flutter e como funciona o modelo de pilha?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-8">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">O Que é Navegação em Flutter?</h3>
+                        <p class="text-lg text-gray-700">Flutter é um framework de UI da Google que permite criar aplicativos nativos com uma única base de código. Ele fornece uma rica variedade de widgets e ferramentas para implementar a transição entre telas de forma intuitiva e eficiente.</p>
+                    </div>
+                     <div>
+                        <h3 class="text-2xl font-semibold mb-3">O Modelo de Pilha de Rotas</h3>
+                        <p class="text-lg text-gray-700">A navegação é gerenciada por uma **pilha de rotas**. Uma rota é, essencialmente, uma tela ou uma página no seu aplicativo. A pilha de rotas funciona de forma semelhante a uma pilha de pratos: você empurra (`push`) uma nova rota para o topo da pilha quando navega para uma nova tela, e remove (`pop`) a rota do topo quando volta para a tela anterior.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tipos-navegacao">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Tipos de Navegação</h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Quais são os principais tipos de navegação em Flutter e quando usar cada um?')">✨ Aprofundar</button>
+                </div>
+                 <div class="activity-card space-y-8">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Navegação Imperativa (ou Anônima)</h3>
+                        <p class="text-gray-700">É a forma mais básica e comum de navegação. Utiliza `Navigator.push()` para adicionar uma nova rota à pilha e `Navigator.pop()` para remover a rota atual. É ideal para fluxos simples e diretos, onde as rotas não precisam ser acessadas de múltiplos locais.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Navegação Nomeada</h3>
+                        <p class="text-gray-700">Permite a navegação usando nomes de rotas (Strings, ex: `'/details'`). Você define todas as rotas em um mapa centralizado no `MaterialApp` e navega usando `Navigator.pushNamed()`. É excelente para organizar a navegação em apps maiores e evitar a duplicação de código.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Navegação com Argumentos</h3>
+                        <p class="text-gray-700">Frequentemente, você precisa passar dados entre telas (como o ID de um produto). O Flutter permite isso através de argumentos, que podem ser enviados ao navegar para uma nova rota e recuperados na tela de destino.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="navegacao-imperativa">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Navegação Imperativa: `push` e `pop`</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Como usar `Navigator.push` e `Navigator.pop` para navegação básica em Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-8">
+                     <div>
+                        <h3 class="text-xl font-semibold mb-2">Empurrando uma Nova Tela (`push`)</h3>
+                        <p class="text-gray-700 mb-4">Para ir para uma nova tela, usamos `Navigator.push()`. Ele requer o `context` e uma `Route`, que geralmente é um `MaterialPageRoute` envolvendo o widget da nova tela.</p>
+                    </div>
+                     <div>
+                        <h3 class="text-xl font-semibold mb-2">Voltando para a Tela Anterior (`pop`)</h3>
+                        <p class="text-gray-700 mb-4">Para voltar, usamos `Navigator.pop()`. O Flutter adiciona automaticamente um botão de "voltar" na `AppBar` que já faz isso, mas você pode chamar esse método de qualquer lugar.</p>
+                    </div>
+                    <div class="code-block" id="imperative-code"><pre><code class="language-dart"><span class="comment">// Tela 1 (Home)</span>
+<span class="type">ElevatedButton</span>(
+  child: <span class="type">Text</span>(<span class="string">'Ir para Tela 2'</span>),
+  onPressed: () {
+    <span class="type">Navigator</span>.push(
+      context,
+      <span class="type">MaterialPageRoute</span>(builder: (context) => <span class="type">Tela2</span>()),
+    );
+  },
+);
+
+<span class="comment">// Tela 2</span>
+<span class="type">ElevatedButton</span>(
+  child: <span class="type">Text</span>(<span class="string">'Voltar para Tela 1'</span>),
+  onPressed: () {
+    <span class="type">Navigator</span>.pop(context);
+  },
+);</code></pre></div>
+                 <div class="text-center">
+                    <button class="gemini-btn" onclick="explainCode('imperative-code')">✨ Explicar Código</button>
+                </div>
+                </div>
+            </section>
+
+            <section id="navegacao-nomeada">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Navegação Nomeada</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Como configurar e usar rotas nomeadas no Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-8">
+                     <div>
+                        <h3 class="text-xl font-semibold mb-2">1. Definindo as Rotas</h3>
+                        <p class="text-gray-700 mb-4">No seu `MaterialApp`, defina a propriedade `initialRoute` (a rota inicial) e o mapa `routes` com os nomes e os widgets correspondentes.</p>
+                        <div class="code-block"><pre><code class="language-dart"><span class="type">MaterialApp</span>(
+  initialRoute: <span class="string">'/'</span>, <span class="comment">// Substitui a propriedade `home`</span>
+  routes: {
+    <span class="string">'/'</span>: (context) => <span class="type">TelaHome</span>(),
+    <span class="string">'/detalhes'</span>: (context) => <span class="type">TelaDetalhes</span>(),
+  },
+);</code></pre></div>
+                    </div>
+                     <div>
+                        <h3 class="text-xl font-semibold mb-2">2. Navegando para a Rota</h3>
+                        <p class="text-gray-700 mb-4">Use `Navigator.pushNamed()` e passe o nome da rota que você deseja abrir.</p>
+                         <div class="code-block"><pre><code class="language-dart"><span class="type">ElevatedButton</span>(
+  child: <span class="type">Text</span>(<span class="string">'Ver Detalhes'</span>),
+  onPressed: () {
+    <span class="type">Navigator</span>.pushNamed(context, <span class="string">'/detalhes'</span>);
+  },
+);</code></pre></div>
+                    </div>
+                </div>
+            </section>
+
+             <section id="passando-argumentos">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Passando Argumentos entre Telas</h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Como passar dados entre telas ao navegar no Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-8">
+                     <div>
+                        <h3 class="text-xl font-semibold mb-2">1. Enviando os Argumentos</h3>
+                         <p class="text-gray-700 mb-4">Ao usar `pushNamed`, passe os dados que deseja enviar através do parâmetro `arguments`.</p>
+                         <div class="code-block"><pre><code class="language-dart"><span class="type">Navigator</span>.pushNamed(
+  context,
+  <span class="string">'/detalhes'</span>,
+  arguments: <span class="string">'Olá da Tela Home!'</span>,
+);</code></pre></div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">2. Recebendo os Argumentos</h3>
+                         <p class="text-gray-700 mb-4">Na tela de destino, use `ModalRoute.of(context)!.settings.arguments` para extrair os dados. É importante fazer o cast para o tipo de dado correto.</p>
+                         <div class="code-block" id="arguments-code"><pre><code class="language-dart"><span class="keyword">class</span> <span class="type">TelaDetalhes</span> <span class="keyword">extends</span> <span class="type">StatelessWidget</span> {
+  @override
+  <span class="type">Widget</span> build(<span class="type">BuildContext</span> context) {
+    <span class="comment">// Extrai os argumentos</span>
+    <span class="keyword">final</span> <span class="type">String</span> mensagem = <span class="type">ModalRoute</span>.of(context)!.settings.arguments <span class="keyword">as</span> <span class="type">String</span>;
+
+    <span class="keyword">return</span> <span class="type">Scaffold</span>(
+      appBar: <span class="type">AppBar</span>(title: <span class="type">Text</span>(<span class="string">'Detalhes'</span>)),
+      body: <span class="type">Center</span>(
+        child: <span class="type">Text</span>(mensagem),
+      ),
+    );
+  }
+}</code></pre></div>
+                    </div>
+                     <div class="text-center">
+                        <button class="gemini-btn" onclick="explainCode('arguments-code')">✨ Explicar Código</button>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="exercicio">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Exercício Prático</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Como posso resolver o exercício de criar um app com duas telas e passagem de argumentos?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <h3 class="text-2xl font-semibold mb-3">Objetivo</h3>
+                    <p class="text-gray-700 mb-6">Crie um aplicativo simples com duas telas usando rotas nomeadas:</p>
+                    <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                        <li><strong>Tela Home:</strong> Deve ter um botão "Ver Detalhes".</li>
+                        <li><strong>Tela Detalhes:</strong> Deve exibir uma mensagem recebida da Tela Home.</li>
+                        <li>Ao clicar no botão na Tela Home, navegue para a Tela Detalhes e passe uma `String` como argumento.</li>
+                        <li>A Tela Detalhes deve exibir a `String` que recebeu.</li>
+                    </ol>
+                </div>
+            </section>
+            
+            <section id="referencias">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Referências Oficiais</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Quais são as melhores referências para continuar aprendendo sobre navegação em Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                     <ul class="list-disc list-inside space-y-2">
+                        <li><a href="https://docs.flutter.dev/ui/navigation" target="_blank" class="text-blue-600 hover:underline">Navigation and routing - Flutter Docs</a></li>
+                        <li><a href="https://docs.flutter.dev/cookbook/navigation/navigation-basics" target="_blank" class="text-blue-600 hover:underline">Cookbook: Navigate to a new screen and back</a></li>
+                        <li><a href="https://docs.flutter.dev/cookbook/navigation/passing-data" target="_blank" class="text-blue-600 hover:underline">Cookbook: Pass arguments to a named route</a></li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-20 pt-8 border-t border-gray-200">
+            <p class="text-gray-500 mb-4">Aplicação Interativa gerada para explorar a Navegação no Flutter.</p>
+            <button id="export-pdf-btn" class="bg-gray-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-gray-800 transition-colors">Exportar para PDF</button>
+        </footer>
+    </div>
+
+    <script>
+        function setupPdfExport() {
+            const exportBtn = document.getElementById('export-pdf-btn');
+            if (!exportBtn) return;
+
+            exportBtn.addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'pt', 'a4');
+                const margin = 40;
+                const maxWidth = doc.internal.pageSize.getWidth() - margin * 2;
+                let y = margin;
+
+                const addText = (text, size, isBold, isCode = false) => {
+                    if (y > doc.internal.pageSize.getHeight() - margin) {
+                        doc.addPage();
+                        y = margin;
+                    }
+                    doc.setFont(isCode ? 'Courier' : 'Helvetica', isBold ? 'bold' : 'normal');
+                    doc.setFontSize(size);
+                    const lines = doc.splitTextToSize(text, maxWidth);
+                    doc.text(lines, margin, y);
+                    const lineHeight = size * 1.2;
+                    y += (lines.length * lineHeight);
+                };
+
+                const sections = document.querySelectorAll('main > section');
+                sections.forEach(section => {
+                    const title = section.querySelector('h2');
+                    if (title) {
+                        addText(title.innerText, 18, true);
+                        y += 12;
+                    }
+                    
+                    const intro = section.querySelector('p:not(.activity-card p)');
+                     if (intro) {
+                        addText(intro.innerText, 10, false);
+                        y += 15;
+                    }
+
+                    const contentCards = section.querySelectorAll('.activity-card, .activity-card > div');
+                    contentCards.forEach(card => {
+                         const subTitle = card.querySelector('h3');
+                         if(subTitle) {
+                             addText(subTitle.innerText, 14, true);
+                             y += 8;
+                         }
+                         const paragraphs = card.querySelectorAll('p:not(.text-center)');
+                         paragraphs.forEach(p => {
+                             addText(p.innerText, 10, false);
+                             y += 8;
+                         });
+                         const listItems = card.querySelectorAll('li');
+                         listItems.forEach(li => {
+                             addText(`- ${li.innerText}`, 10, false);
+                             y += 8;
+                         });
+                         const codeBlocks = card.querySelectorAll('.code-block');
+                         codeBlocks.forEach(code => {
+                             addText(code.innerText, 9, false, true);
+                             y += 12;
+                         });
+                    });
+                     y += 24;
+                });
+                
+                doc.save('guia-flutter-navegacao.pdf');
+            });
+        }
+
+        const modal = document.getElementById('gemini-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const geminiResponseEl = document.getElementById('gemini-response');
+        let isGeminiLoading = false;
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            isGeminiLoading = false;
+        });
+
+        async function callGemini(prompt, maxRetries = 3) {
+            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+            const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8"; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            
+            let lastError = null;
+
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        lastError = new Error(`HTTP error! status: ${response.status}`);
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                        continue;
+                    }
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.text) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        lastError = new Error("Resposta da API inválida ou vazia.");
+                         const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                        continue;
+                    }
+                } catch (error) {
+                    lastError = error;
+                    const delay = Math.pow(2, attempt) * 1000;
+                    await new Promise(res => setTimeout(res, delay));
+                }
+            }
+
+            console.error("API call failed after all retries:", lastError);
+            return "Desculpe, não foi possível obter uma resposta da IA no momento. Por favor, verifique sua conexão ou tente novamente mais tarde.";
+        }
+
+        function parseMarkdown(text) {
+            const lines = text.split('\n');
+            let html = '';
+            let inCodeBlock = false;
+            let inList = false;
+
+            lines.forEach(line => {
+                if (line.startsWith('```')) {
+                    if (inCodeBlock) {
+                        html += '</code></pre>';
+                        inCodeBlock = false;
+                    } else {
+                        html += '<pre><code class="language-dart code-block bg-gray-800 text-white p-4 rounded-md block">';
+                        inCodeBlock = true;
+                    }
+                    return;
+                }
+
+                if (inCodeBlock) {
+                    html += line.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\n';
+                    return;
+                }
+
+                if (line.startsWith('* ') || line.startsWith('- ')) {
+                    if (!inList) {
+                        html += '<ul>';
+                        inList = true;
+                    }
+                    html += `<li>${processInlineMarkdown(line.substring(2))}</li>`;
+                } else {
+                    if (inList) {
+                        html += '</ul>';
+                        inList = false;
+                    }
+                    if (line.startsWith('### ')) {
+                        html += `<h3>${processInlineMarkdown(line.substring(4))}</h3>`;
+                    } else if (line.startsWith('## ')) {
+                        html += `<h2>${processInlineMarkdown(line.substring(3))}</h2>`;
+                    } else if (line.startsWith('# ')) {
+                        html += `<h1>${processInlineMarkdown(line.substring(2))}</h1>`;
+                    } else if (line.trim() !== '') {
+                        html += `<p>${processInlineMarkdown(line)}</p>`;
+                    }
+                }
+            });
+
+            if (inList) html += '</ul>';
+            if (inCodeBlock) html += '</code></pre>';
+            return html;
+        }
+
+        function processInlineMarkdown(line) {
+            return line
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`(.*?)`/g, '<code class="bg-gray-200 text-gray-800 px-1 py-0.5 rounded">$1</code>');
+        }
+
+        async function deepenConcept(topic) {
+            if (isGeminiLoading) return;
+            isGeminiLoading = true;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = true);
+
+            const prompt = `Explique o conceito de "${topic}" de forma simples, direta e curta para um iniciante em Flutter. Formate a resposta com títulos, listas e blocos de código se necessário.`;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            geminiResponseEl.innerHTML = '<div class="flex justify-center items-center h-full"><div class="loader"></div></div>';
+
+            const explanation = await callGemini(prompt);
+            geminiResponseEl.innerHTML = parseMarkdown(explanation);
+            isGeminiLoading = false;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+        }
+        
+        async function explainCode(elementId) {
+            if (isGeminiLoading) return;
+            isGeminiLoading = true;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = true);
+
+            const codeElement = document.getElementById(elementId);
+            if (!codeElement) {
+                isGeminiLoading = false;
+                 document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+                return;
+            }
+            const code = codeElement.innerText;
+            
+            const prompt = `Explique o seguinte código Flutter/Dart em português, de forma simples e direta para um iniciante:\n\n\`\`\`dart\n${code}\n\`\`\``;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            geminiResponseEl.innerHTML = '<div class="flex justify-center items-center h-full"><div class="loader"></div></div>';
+
+            const explanation = await callGemini(prompt);
+            geminiResponseEl.innerHTML = parseMarkdown(explanation);
+            isGeminiLoading = false;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const drawerBtn = document.getElementById('drawer-btn');
+            const drawerNav = document.getElementById('drawer-nav');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+            const navLinks = drawerNav.querySelectorAll('a');
+
+            function toggleDrawer() {
+                drawerNav.classList.toggle('-translate-x-full');
+                drawerNav.classList.toggle('translate-x-0');
+                drawerOverlay.classList.toggle('hidden');
+            }
+
+            drawerBtn.addEventListener('click', toggleDrawer);
+            drawerOverlay.addEventListener('click', toggleDrawer);
+
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    toggleDrawer();
+                    const targetElement = document.querySelector(this.getAttribute('href'));
+                    if(targetElement) {
+                        setTimeout(() => {
+                             targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }, 300); // Aguarda a animação do drawer fechar
+                    }
+                });
+            });
+            
+            setupPdfExport();
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trabalhando com Theme em Flutter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/dart.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .code-block, #code-editor, #output-display {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 0.9rem;
+        }
+         #code-editor {
+            width: 100%;
+            height: 250px;
+            border: 1px solid #3d424d;
+        }
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            font-weight: 500;
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+        .nav-link:hover {
+            background-color: #e2e8f0; 
+        }
+        .activity-card {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .gemini-btn {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease-in-out;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .gemini-btn:hover {
+            background-color: #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+        }
+        .gemini-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #gemini-response h2 { font-size: 1.5rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
+        #gemini-response h3 { font-size: 1.25rem; font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.5rem; }
+        #gemini-response ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+        #gemini-response strong { font-weight: 600; }
+        #gemini-response code {
+            background-color: #e2e8f0;
+            color: #2d3748;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
+        }
+        #gemini-response pre code {
+            display: block;
+            white-space: pre-wrap;
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .loader {
+            width: 50px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 8px solid #0000;
+            border-right-color: #818cf8;
+            animation: l24 1s infinite linear;
+        }
+        @keyframes l24 {
+            100% {transform: rotate(1turn)}
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Botão para abrir o Drawer -->
+    <button id="drawer-btn" class="fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Overlay -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+    <!-- Drawer Navigation -->
+    <nav id="drawer-nav" class="fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+        <div class="p-4">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Navegação</h3>
+            <a href="#introducao" class="nav-link text-gray-700">Introdução</a>
+            <a href="#conceito" class="nav-link text-gray-700">Conceito de Theme</a>
+            <a href="#estrutura" class="nav-link text-gray-700">Estrutura Básica</a>
+            <a href="#dark-theme" class="nav-link text-gray-700">Dark Theme</a>
+            <a href="#custom-theme" class="nav-link text-gray-700">Tema Customizado</a>
+            <a href="#acessando-tema" class="nav-link text-gray-700">Acessando o Tema</a>
+            <a href="#themes-locais" class="nav-link text-gray-700">Themes Locais</a>
+            <a href="#material3" class="nav-link text-gray-700">Material 3</a>
+            <a href="#estrategias" class="nav-link text-gray-700">Estratégias</a>
+            <a href="#playground" class="nav-link text-gray-700">Playground</a>
+            <a href="#conclusao" class="nav-link text-gray-700">Conclusão</a>
+            <a href="#referencias" class="nav-link text-gray-700">Referências</a>
+        </div>
+    </nav>
+    
+    <!-- Modal Gemini -->
+    <div id="gemini-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
+                <h3 class="text-xl font-bold text-gray-800">✨ Resposta do Gemini</h3>
+                <button id="close-modal-btn" class="p-2 rounded-full hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="gemini-response" class="p-6 overflow-y-auto space-y-4">
+                <!-- Conteúdo gerado pela API será inserido aqui -->
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+
+        <header class="text-center mb-16">
+            <h1 class="text-5xl font-extrabold text-gray-900 tracking-tight">Trabalhando com Theme em Flutter</h1>
+            <p class="mt-4 text-xl text-gray-600">Consistência e Escalabilidade no Design da sua Aplicação</p>
+        </header>
+
+        <main class="space-y-20">
+
+            <section id="introducao">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                        <span class="ml-3">1. Introdução ao Theme</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Qual a diferença entre ThemeData e Theme.of(context) em Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                    <p class="text-lg text-gray-700">O <strong>Theme</strong> é o sistema de estilos do Flutter, responsável por definir a aparência global dos componentes visuais da aplicação. Ele permite configurar cores, tipografia, formas e outros detalhes de design em um só lugar.</p>
+                    <h3 class="text-xl font-semibold text-gray-800 pt-2">Por que usar?</h3>
+                    <ul class="space-y-2 list-disc list-inside text-gray-700">
+                        <li>Mantém consistência visual entre telas.</li>
+                        <li>Facilita mudanças rápidas de identidade visual.</li>
+                        <li>Evita repetição de estilos em cada widget.</li>
+                    </ul>
+                    <pre><code class="language-dart code-block">import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      // Define um tema simples com a cor primária azul.
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: Scaffold(
+        appBar: AppBar(title: Text('Meu App')),
+        body: Center(child: Text('Olá, Flutter!')),
+      ),
+    );
+  }
+}
+</code></pre>
+                </div>
+            </section>
+            
+            <section id="conceito">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                        <span class="ml-3">2. O Conceito de ThemeData</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Explique a diferença entre primaryColor e primarySwatch no ThemeData.')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                    <p class="text-lg text-gray-700">A classe <strong>ThemeData</strong> concentra todas as configurações do tema. Ela afeta todos os widgets que seguem as diretrizes do Material Design (como AppBar, TextButton, FloatingActionButton).</p>
+                    <h3 class="text-xl font-semibold text-gray-800 pt-2">Principais propriedades:</h3>
+                    <ul class="space-y-2 list-disc list-inside text-gray-700">
+                        <li><code>colorScheme</code>: Define o conjunto de cores primárias e secundárias.</li>
+                        <li><code>textTheme</code>: Controla fontes e tamanhos de texto.</li>
+                        <li><code>iconTheme</code>: Controla a aparência dos ícones.</li>
+                        <li><code>elevatedButtonTheme</code>: Define o estilo de botões elevados.</li>
+                    </ul>
+                    <pre><code class="language-dart code-block">MaterialApp(
+  theme: ThemeData(
+    // Define a cor primária e de destaque.
+    primaryColor: Colors.deepPurple,
+    // Define os estilos de texto padrão para a aplicação.
+    textTheme: TextTheme(
+      bodyLarge: TextStyle(fontSize: 18, color: Colors.black87),
+      titleLarge: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+    ),
+    // Define um estilo padrão para todos os FloatingActionButtons.
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: Colors.deepPurple,
+    ),
+  ),
+  // ...
+);
+</code></pre>
+                </div>
+            </section>
+            
+            <section id="estrutura">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                        <span class="ml-3">3. Estrutura Básica</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Qual a função da propriedade `brightness` no ThemeData?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                     <p class="text-lg text-gray-700">O tema é aplicado no widget raiz da aplicação, geralmente o <code>MaterialApp</code>.</p>
+                     <ul class="space-y-2 list-disc list-inside text-gray-700">
+                        <li><code>primarySwatch</code>: Define uma paleta de tons a partir de uma cor principal. É uma forma rápida de ter um esquema de cores coeso.</li>
+                        <li><code>brightness</code>: Controla o contraste geral (claro ou escuro), afetando cores de fundo e de texto padrão.</li>
+                    </ul>
+                    <pre><code class="language-dart code-block">MaterialApp(
+  title: 'Tema Básico',
+  theme: ThemeData(
+    // Gera uma paleta de cores a partir do azul.
+    primarySwatch: Colors.blue,
+    // Define que o tema é claro (fundo branco, texto preto).
+    brightness: Brightness.light, 
+    fontFamily: 'Roboto', // Define uma fonte padrão para o app.
+  ),
+  home: HomeScreen(),
+);
+</code></pre>
+                </div>
+            </section>
+            
+            <section id="dark-theme">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        <span class="ml-3">4. Dark Theme</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Como gerenciar o estado da troca de tema em um aplicativo Flutter real (Provider, Bloc, etc.)?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                     <p class="text-lg text-gray-700">O Flutter facilita a implementação de um modo escuro. Basta definir os temas claro e escuro e o modo de exibição.</p>
+                     <ul class="space-y-2 list-disc list-inside text-gray-700">
+                        <li><code>theme</code>: Define o tema claro (padrão).</li>
+                        <li><code>darkTheme</code>: Define o tema escuro.</li>
+                        <li><code>themeMode</code>: Controla qual tema usar. <code>ThemeMode.system</code> usa a preferência do sistema operacional do usuário.</li>
+                    </ul>
+                    <pre><code class="language-dart code-block">MaterialApp(
+  // Tema para o modo claro.
+  theme: ThemeData(
+    brightness: Brightness.light,
+    primarySwatch: Colors.indigo,
+  ),
+  // Tema para o modo escuro.
+  darkTheme: ThemeData(
+    brightness: Brightness.dark,
+    primarySwatch: Colors.teal,
+  ),
+  // Usa a configuração do sistema para decidir entre claro e escuro.
+  themeMode: ThemeMode.system, 
+  home: HomeScreen(),
+);
+</code></pre>
+                </div>
+            </section>
+            
+             <section id="custom-theme">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                        <span class="ml-3">5. Tema Customizado</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('O que é `ColorScheme.fromSeed` e como ele facilita a criação de temas no Material 3?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                     <p class="text-lg text-gray-700">Você pode personalizar completamente o visual da aplicação configurando as propriedades do <code>ThemeData</code>.</p>
+                     <p class="text-gray-700">Dica: <code>ColorScheme.fromSeed()</code> gera automaticamente um conjunto harmonioso de cores a partir de uma cor base, o que é ideal para o Material 3.</p>
+                    <pre><code class="language-dart code-block">ThemeData customTheme = ThemeData(
+  // Ativa o design do Material 3.
+  useMaterial3: true,
+  
+  // Gera um esquema de cores a partir de uma cor "semente".
+  colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+  
+  // Define um estilo padrão para todos os botões elevados.
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.teal, // Cor de fundo
+      foregroundColor: Colors.white, // Cor do texto
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    ),
+  ),
+  
+  // Personaliza a aparência da AppBar.
+  appBarTheme: AppBarTheme(
+    backgroundColor: Colors.teal,
+    foregroundColor: Colors.white,
+    elevation: 4,
+  ),
+);
+</code></pre>
+                </div>
+            </section>
+            
+            <section id="acessando-tema">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zm-7.518-.267A8.25 8.25 0 1120.25 10.5M8.288 14.212A5.25 5.25 0 1117.25 10.5" /></svg>
+                        <span class="ml-3">6. Acessando o Tema no Código</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Quais as vantagens de usar `Theme.of(context)` em vez de definir cores e estilos manualmente em cada widget?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                     <p class="text-lg text-gray-700">Para usar propriedades do tema global em seus widgets, utilize <code>Theme.of(context)</code>. Isso busca o <code>ThemeData</code> mais próximo na árvore de widgets.</p>
+                     <p class="text-gray-700">Essa abordagem evita "hardcoding" (fixar valores no código), tornando o design mais adaptável a mudanças e ao modo escuro.</p>
+                    <pre><code class="language-dart code-block">class MyWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // Acessa o tema atual.
+    final theme = Theme.of(context);
+
+    return Column(
+      children: [
+        // Usa o estilo de texto 'titleLarge' definido no tema.
+        Text(
+          'Título da Seção',
+          style: theme.textTheme.titleLarge,
+        ),
+        // Usa a cor primária do esquema de cores do tema.
+        Container(
+          width: 100,
+          height: 100,
+          color: theme.colorScheme.primary,
+        ),
+      ],
+    );
+  }
+}
+</code></pre>
+                </div>
+            </section>
+            
+            <section id="themes-locais">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                        <span class="ml-3">7. Themes Locais</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Quando devo usar um `Theme` local em vez de estilizar o widget diretamente?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                     <p class="text-lg text-gray-700">Você pode criar temas específicos para uma parte da tela envolvendo um grupo de widgets com o widget <code>Theme</code>.</p>
+                     <p class="text-gray-700">Isso é útil para destacar uma seção com um estilo exclusivo, sem alterar o tema global da aplicação.</p>
+                    <pre><code class="language-dart code-block">// Widget que usa o tema global.
+Card(
+  child: Text('Card com tema padrão'),
+);
+
+// Envolve um widget com um Theme para aplicar um estilo local.
+Theme(
+  // Pega o tema atual e sobrescreve apenas a cor primária.
+  data: Theme.of(context).copyWith(
+    colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.orange),
+  ),
+  child: ElevatedButton(
+    onPressed: () {},
+    child: Text('Botão Laranja'),
+  ),
+);
+</code></pre>
+                </div>
+            </section>
+            
+            <section id="material3">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                        <span class="ml-3">8. Material 3 e Color Schemes</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Como funciona a cor dinâmica (dynamic color) no Material 3 e como ativá-la no Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                     <p class="text-lg text-gray-700">O Flutter suporta o Material Design 3, que traz um sistema de design mais moderno e adaptativo.</p>
+                     <ul class="space-y-2 list-disc list-inside text-gray-700">
+                        <li><strong>Paletas dinâmicas (dynamic color):</strong> No Android 12+, as cores do app podem se basear no papel de parede do usuário.</li>
+                        <li><strong>Novos componentes:</strong> Widgets com estilos atualizados e mais flexíveis.</li>
+                        <li><strong>Foco em <code>ColorScheme</code>:</strong> A propriedade <code>colorScheme</code> se torna a principal forma de definir cores, garantindo temas mais coerentes e acessíveis.</li>
+                    </ul>
+                    <pre><code class="language-dart code-block">MaterialApp(
+  theme: ThemeData(
+    // Ativa o Material 3.
+    useMaterial3: true,
+    
+    // Define um esquema de cores a partir de uma cor semente e brilho.
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: Colors.indigo,
+      brightness: Brightness.light,
+    ),
+  ),
+  // ...
+);
+</code></pre>
+                </div>
+            </section>
+            
+            <section id="estrategias">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span class="ml-3">9. Estratégias para Projetos Maiores</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Mostre um exemplo de como usar o Provider para gerenciar a troca de tema em Flutter.')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                     <p class="text-lg text-gray-700">Em projetos maiores, recomenda-se modularizar o tema em arquivos separados para melhor organização e manutenção.</p>
+                    <pre><code class="language-shell code-block">lib/
+  ├─ theme/
+  │   ├─ app_theme.dart
+  │   ├─ light_theme.dart
+  │   └─ dark_theme.dart</code></pre>
+                    <pre><code class="language-dart code-block">// lib/theme/app_theme.dart
+
+import 'package:flutter/material.dart';
+
+class AppTheme {
+  static final ThemeData light = ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+    brightness: Brightness.light,
+  );
+
+  static final ThemeData dark = ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.blue, brightness: Brightness.dark),
+    brightness: Brightness.dark,
+  );
+}
+
+// main.dart
+// import 'package:my_app/theme/app_theme.dart';
+
+MaterialApp(
+  theme: AppTheme.light,
+  darkTheme: AppTheme.dark,
+  themeMode: ThemeMode.system, // ou gerenciado por um state manager
+);
+</code></pre>
+                </div>
+            </section>
+            
+            <section id="playground">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                        <span class="ml-3">Playground Interativo</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Me dê um desafio de programação em Flutter para praticar o uso de `ThemeData`.')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <div class="mb-4 flex flex-wrap gap-2">
+                        <button id="btnExemploBasico" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-300 transition-colors">Tema Básico</button>
+                        <button id="btnExemploSwitcher" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-300 transition-colors">Troca de Tema</button>
+                        <button id="btnExemploCustom" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-300 transition-colors">Tema Customizado</button>
+                    </div>
+                    <textarea id="code-editor" class="text-sm"></textarea>
+                    <button id="run-btn" class="mt-4 w-full bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors text-lg">Executar (Simulado)</button>
+                    <div class="mt-6">
+                        <h3 class="font-semibold text-gray-800 mb-2">Saída:</h3>
+                        <pre id="output-display" class="text-sm min-h-[60px]"></pre>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="conclusao">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span class="ml-3">10. Conclusão</span>
+                    </h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Resuma em um parágrafo o impacto de um bom sistema de `Theme` na colaboração entre designers e desenvolvedores.')">✨ Aprofundar</button>
+                </div>
+                 <div class="activity-card space-y-4">
+                     <ul class="space-y-3 list-disc list-inside text-gray-700 text-lg">
+                        <li>O uso de <strong>Theme</strong> é crucial para manter consistência e escalabilidade no design.</li>
+                        <li>O <strong>Material 3</strong> trouxe melhorias significativas no controle de cores e na usabilidade.</li>
+                        <li>Organizar temas em <strong>arquivos separados</strong> aumenta a manutenibilidade em projetos grandes.</li>
+                        <li>Um bom sistema de tema <strong>reduz retrabalho</strong> e acelera ajustes de design futuros.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="referencias">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                        <span class="ml-3">11. Referências</span>
+                    </h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Quais são os melhores recursos da comunidade para aprender sobre design systems em Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <ul class="space-y-3">
+                        <li><a href="https://api.flutter.dev/flutter/material/ThemeData-class.html" target="_blank" class="text-blue-600 hover:underline font-medium">Flutter ThemeData Documentation</a></li>
+                        <li><a href="https://m3.material.io/styles/color/theming/overview" target="_blank" class="text-blue-600 hover:underline font-medium">Material Design 3 – Cores e Temas</a></li>
+                         <li><a href="https://docs.flutter.dev/cookbook/design/themes" target="_blank" class="text-blue-600 hover:underline font-medium">Flutter.dev – Cookbook: Using Themes</a></li>
+                         <li><a href="https://api.flutter.dev/flutter/material/ColorScheme-class.html" target="_blank" class="text-blue-600 hover:underline font-medium">ColorScheme API</a></li>
+                    </ul>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-20 pt-10 border-t border-gray-300">
+             <p class="text-gray-600 mb-4">Apresentação sobre Themes em Flutter.</p>
+            <button id="export-pdf-btn" class="bg-gray-800 text-white px-6 py-2 rounded-md font-semibold hover:bg-gray-900 transition-colors">Exportar para PDF</button>
+        </footer>
+    </div>
+
+    <script>
+        function setupPdfExport() {
+            const exportBtn = document.getElementById('export-pdf-btn');
+            if (!exportBtn) return;
+
+            exportBtn.addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'pt', 'a4');
+                const margin = 40;
+                const maxWidth = doc.internal.pageSize.getWidth() - margin * 2;
+                let y = margin;
+
+                const headerTitle = document.querySelector('header h1');
+                const headerSubtitle = document.querySelector('header p');
+                
+                const addText = (text, size, isBold, isCode = false) => {
+                    if (y > doc.internal.pageSize.getHeight() - margin - 40) {
+                        doc.addPage();
+                        y = margin;
+                    }
+                    doc.setFont(isCode ? 'Courier' : 'Helvetica', isBold ? 'bold' : 'normal');
+                    doc.setFontSize(size);
+                    const lines = doc.splitTextToSize(text, maxWidth);
+                    const lineHeight = size * 1.2;
+                    doc.text(lines, margin, y);
+                    y += (lines.length * lineHeight);
+                };
+                
+                if (headerTitle) { addText(headerTitle.innerText, 24, true); y += 10; }
+                if (headerSubtitle) { addText(headerSubtitle.innerText, 12, false); y += 24; }
+
+                const sections = document.querySelectorAll('main > section');
+                sections.forEach(section => {
+                    const title = section.querySelector('h2');
+                    if (title) {
+                        addText(title.innerText.replace("✨", "").trim(), 18, true);
+                        y += 12;
+                    }
+
+                    const contentCards = section.querySelectorAll('.activity-card');
+                    contentCards.forEach(card => {
+                        const paragraphs = card.querySelectorAll('p');
+                        const listItems = card.querySelectorAll('li');
+                        const code = card.querySelector('.code-block');
+                        paragraphs.forEach(p => { addText(p.innerText, 10, false); y += 8; });
+                        listItems.forEach(li => { addText(`• ${li.innerText}`, 10, false); y += 8; });
+                         if(code) {
+                            addText(code.innerText, 9, false, true);
+                            y+=10;
+                        }
+                    });
+                     y += 24;
+                });
+                
+                doc.save('apresentacao-flutter-theme.pdf');
+            });
+        }
+
+        const modal = document.getElementById('gemini-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const geminiResponseEl = document.getElementById('gemini-response');
+        let isGeminiLoading = false;
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            isGeminiLoading = false;
+        });
+
+        async function callGemini(prompt, maxRetries = 3) {
+            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+            const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8"; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            let lastError = null;
+
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        lastError = new Error(`HTTP error! status: ${response.status}`);
+                        await new Promise(res => setTimeout(res, Math.pow(2, attempt) * 1000));
+                        continue;
+                    }
+
+                    const result = await response.json();
+                    if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.text) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        lastError = new Error("Resposta da API inválida ou vazia.");
+                    }
+                } catch (error) { lastError = error; }
+                await new Promise(res => setTimeout(res, Math.pow(2, attempt) * 1000));
+            }
+            console.error("API call failed:", lastError);
+            return "Desculpe, não foi possível obter uma resposta. Tente novamente mais tarde.";
+        }
+
+       function parseMarkdown(text) {
+            const lines = text.split('\n');
+            let html = '';
+            let inCodeBlock = false;
+            let codeLang = 'dart';
+            let inList = false;
+
+            lines.forEach(line => {
+                if (line.startsWith('```')) {
+                    inCodeBlock = !inCodeBlock;
+                    if(inCodeBlock) {
+                        codeLang = line.substring(3).trim() || 'dart';
+                        html += `<pre><code class="language-${codeLang} code-block">`;
+                    } else {
+                        html += '</code></pre>';
+                    }
+                    return;
+                }
+                if (inCodeBlock) {
+                    html += line.replace(/</g, "&lt;").replace(/>/g, "&gt;") + '\n';
+                    return;
+                }
+                if (line.startsWith('* ')) {
+                    if (!inList) { html += '<ul>'; inList = true; }
+                    html += `<li>${line.substring(2)}</li>`;
+                } else {
+                    if (inList) { html += '</ul>'; inList = false; }
+                    if (line.startsWith('### ')) html += `<h3>${line.substring(4)}</h3>`;
+                    else if (line.startsWith('## ')) html += `<h2>${line.substring(3)}</h2>`;
+                    else if (line.trim()) html += `<p>${line}</p>`;
+                }
+            });
+            if (inList) html += '</ul>';
+            if (inCodeBlock) html += '</code></pre>';
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/`(.*?)`/g, '<code>$1</code>');
+            setTimeout(() => {
+                document.querySelectorAll('#gemini-response pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            }, 0);
+            return html;
+        }
+        
+        async function deepenConcept(topic) {
+            if (isGeminiLoading) return;
+            isGeminiLoading = true;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = true);
+            const prompt = `Explique o conceito de "${topic}" em Flutter para um desenvolvedor júnior. Seja claro, objetivo e use exemplos de código Dart se for relevante. Formate a resposta com títulos, listas e blocos de código.`;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            geminiResponseEl.innerHTML = '<div class="flex justify-center items-center h-full"><div class="loader"></div></div>';
+            const explanation = await callGemini(prompt);
+            geminiResponseEl.innerHTML = parseMarkdown(explanation);
+            isGeminiLoading = false;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            hljs.highlightAll();
+
+            const drawerBtn = document.getElementById('drawer-btn');
+            const drawerNav = document.getElementById('drawer-nav');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+            const navLinks = drawerNav.querySelectorAll('a');
+
+            function toggleDrawer() {
+                drawerNav.classList.toggle('-translate-x-full');
+                drawerNav.classList.toggle('translate-x-0');
+                drawerOverlay.classList.toggle('hidden');
+            }
+
+            drawerBtn.addEventListener('click', toggleDrawer);
+            drawerOverlay.addEventListener('click', toggleDrawer);
+
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    toggleDrawer();
+                    const targetElement = document.querySelector(this.getAttribute('href'));
+                    if(targetElement) {
+                        setTimeout(() => {
+                             targetElement.scrollIntoView({ behavior: 'smooth' });
+                        }, 300);
+                    }
+                });
+            });
+
+            setupPdfExport();
+
+            const codeEditor = document.getElementById('code-editor');
+            const outputDisplay = document.getElementById('output-display');
+            const runBtn = document.getElementById('run-btn');
+
+            if(codeEditor && outputDisplay && runBtn) {
+                 const codeSamples = {
+                    basico: `// main.dart
+import 'package:flutter/material.dart';
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+        fontFamily: 'Georgia',
+      ),
+      home: Scaffold(
+        appBar: AppBar(title: Text('Tema Básico')),
+        body: Center(
+          child: Text('Este texto usa a fonte Georgia.'),
+        ),
+      ),
+    );
+  }
+}`,
+                    switcher: `// lib/theme_switcher.dart
+import 'package:flutter/material.dart';
+
+class ThemeSwitcher extends StatefulWidget {
+  @override
+  _ThemeSwitcherState createState() => _ThemeSwitcherState();
+}
+
+class _ThemeSwitcherState extends State<ThemeSwitcher> {
+  bool isDark = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      home: Scaffold(
+        appBar: AppBar(title: Text('Troca de Tema')),
+        body: Center(
+          child: ElevatedButton(
+            onPressed: () => setState(() => isDark = !isDark),
+            child: Text(isDark ? 'Ativar Modo Claro' : 'Ativar Modo Escuro'),
+          ),
+        ),
+      ),
+    );
+  }
+}`,
+                    custom: `// main.dart
+import 'package:flutter/material.dart';
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple),
+        textTheme: TextTheme(
+          bodyLarge: TextStyle(color: Colors.purple, fontSize: 20),
+        ),
+      ),
+      home: Scaffold(
+        appBar: AppBar(title: Text('Tema Customizado')),
+        body: Center(
+          child: Text(
+            'Texto com estilo customizado!',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ),
+      ),
+    );
+  }
+}`
+                };
+
+                const codeOutputs = {
+                    basico: "Simulação: AppBar verde, texto central com fonte Georgia.",
+                    switcher: "Simulação: Botão central troca o tema entre claro e escuro.",
+                    custom: "Simulação: AppBar roxa, texto central roxo e com fonte tamanho 20."
+                };
+                
+                function displayCode(type) {
+                    codeEditor.value = codeSamples[type];
+                    outputDisplay.textContent = '';
+                }
+
+                document.getElementById('btnExemploBasico').addEventListener('click', () => displayCode('basico'));
+                document.getElementById('btnExemploSwitcher').addEventListener('click', () => displayCode('switcher'));
+                document.getElementById('btnExemploCustom').addEventListener('click', () => displayCode('custom'));
+
+                runBtn.addEventListener('click', () => {
+                    const userCode = codeEditor.value.trim().replace(/\s+/g, '');
+                    let matchedKey = null;
+
+                    for (const key in codeSamples) {
+                        if (codeSamples[key].trim().replace(/\s+/g, '') === userCode) {
+                            matchedKey = key;
+                            break;
+                        }
+                    }
+
+                    if (matchedKey) {
+                        outputDisplay.textContent = `> Executando...\n\n${codeOutputs[matchedKey]}`;
+                    } else {
+                        outputDisplay.textContent = `> Executando código personalizado...\n\n(A execução de código personalizado não é suportada nesta simulação.)`;
+                    }
+                });
+
+                displayCode('basico');
+            }
+        });
+    </script>
+</body>
+</html>
+
+

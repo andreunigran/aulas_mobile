@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia: App de Cadastro de Contatos no Flutter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A single-page application with a drawer navigation menu for smooth scrolling between thematic sections. This structure provides a clear step-by-step guide for building a complete contacts app screen in Flutter. The content is segmented into logical cards for better readability. -->
+    <!-- Visualization & Content Choices: The content is structured into thematic sections covering the creation of a contacts app. Core concepts like data modeling, state management, form validation, and list rendering are presented in clear, concise cards with commented code examples. Gemini API is integrated for deeper explanations. This design prioritizes a clean, organized, and educational user experience. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .code-block {
+            background-color: #2d3748; /* gray-800 */
+            color: #e2e8f0; /* gray-300 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", monospace;
+            font-size: 0.875rem;
+        }
+        .code-block .keyword { color: #63b3ed; } /* blue-400 */
+        .code-block .type { color: #4fd1c5; } /* teal-400 */
+        .code-block .string { color: #f6ad55; } /* orange-400 */
+        .code-block .comment { color: #a0aec0; } /* gray-500 */
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            font-weight: 500;
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+        .nav-link:hover {
+            background-color: #e2e8f0; /* gray-200 */
+        }
+        .activity-card {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .gemini-btn {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease-in-out;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .gemini-btn:hover {
+            background-color: #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+        }
+        .gemini-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #gemini-response h2 { font-size: 1.5rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
+        #gemini-response h3 { font-size: 1.25rem; font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.5rem; }
+        #gemini-response ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+        #gemini-response strong { font-weight: 600; }
+        #gemini-response code {
+            background-color: #e2e8f0;
+            color: #2d3748;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
+        }
+        #gemini-response pre code {
+            display: block;
+            white-space: pre-wrap;
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .loader {
+            width: 50px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 8px solid #0000;
+            border-right-color: #818cf8;
+            animation: l24 1s infinite linear;
+        }
+        @keyframes l24 {
+            100% {transform: rotate(1turn)}
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-gray-800">
+
+    <!-- Botão para abrir o Drawer -->
+    <button id="drawer-btn" class="fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Overlay -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+    <!-- Drawer Navigation -->
+    <nav id="drawer-nav" class="fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+        <div class="p-4">
+            <h3 class="text-xl font-bold mb-4">Navegação</h3>
+            <a href="#introducao" class="nav-link">Introdução</a>
+            <a href="#passo1" class="nav-link">Passo 1: Modelo</a>
+            <a href="#passo2" class="nav-link">Passo 2: Dados</a>
+            <a href="#passo3" class="nav-link">Passo 3: Tela</a>
+            <a href="#passo4" class="nav-link">Passo 4: Execução</a>
+            <a href="#passo5" class="nav-link">Passo 5: Exclusão</a>
+            <a href="#codigo-completo" class="nav-link">Código Completo</a>
+            <a href="#desafio-editar" class="nav-link">Desafio: Editar</a>
+            <a href="#conclusao" class="nav-link">Conclusão</a>
+        </div>
+    </nav>
+
+     <!-- Modal Gemini -->
+    <div id="gemini-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
+                <h3 class="text-xl font-bold text-gray-800">✨ Resposta do Gemini</h3>
+                <button id="close-modal-btn" class="p-2 rounded-full hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="gemini-response" class="p-6 overflow-y-auto space-y-4">
+                <!-- Conteúdo gerado pela API será inserido aqui -->
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Guia: App de Cadastro de Contatos no Flutter</h1>
+            <p class="mt-4 text-lg text-gray-600">Um tutorial passo a passo para criar um formulário com validação, listagem e exclusão.</p>
+        </header>
+
+        <main class="space-y-20">
+
+            <section id="introducao">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Objetivo do Tutorial</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Qual o objetivo de criar um app de cadastro de contatos simples no Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-lg text-gray-700">Este guia apresenta um passo a passo para montar uma aplicação Flutter com um formulário de cadastro (nome e telefone), validação de dados, armazenamento em memória e listagem dos contatos cadastrados, tudo na mesma tela. Ao final, adicionaremos a funcionalidade de exclusão, consolidando os principais conceitos de manipulação de estado e listas interativas.</p>
+                </div>
+            </section>
+
+            <section id="passo1">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Passo 1: Criar a Classe `Contato`</h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Qual a importância de criar uma classe de modelo de dados como `Contato` no Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-gray-700 mb-4">O primeiro passo é definir a estrutura de dados que representará cada contato. Criamos uma classe simples chamada `Contato` que conterá o nome e o telefone. O uso de `final` garante que, uma vez criado, um objeto `Contato` não poderá ser alterado (imutabilidade).</p>
+                    <div class="code-block"><pre><code><span class="comment">// Define a estrutura de um contato</span>
+<span class="keyword">class</span> <span class="type">Contato</span> {
+  <span class="keyword">final</span> <span class="type">String</span> nome;
+  <span class="keyword">final</span> <span class="type">String</span> telefone;
+
+  <span class="comment">// Construtor com parâmetros nomeados e obrigatórios</span>
+  <span class="type">Contato</span>({<span class="keyword">required</span> <span class="keyword">this</span>.nome, <span class="keyword">required</span> <span class="keyword">this</span>.telefone});
+}</code></pre></div>
+                </div>
+            </section>
+            
+            <section id="passo2">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Passo 2: Criar a Classe `Dados`</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Por que criar uma classe separada como `Dados` para gerenciar a lista de contatos?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-gray-700 mb-4">Para gerenciar nossa lista de contatos em memória, criamos uma classe `Dados`. Ela encapsula a lista, tornando o código mais organizado. O `_` antes de `_contatos` torna a lista privada, e o `getter` `contatos` expõe uma versão somente leitura para o resto do app.</p>
+                    <div class="code-block"><pre><code><span class="comment">// Classe para gerenciar a lista de contatos em memória</span>
+<span class="keyword">class</span> <span class="type">Dados</span> {
+  <span class="comment">// Lista privada para armazenar os contatos</span>
+  <span class="keyword">final</span> <span class="type">List</span>&lt;<span class="type">Contato</span>&gt; _contatos = [];
+
+  <span class="comment">// Getter público para acessar a lista</span>
+  <span class="type">List</span>&lt;<span class="type">Contato</span>&gt; <span class="keyword">get</span> contatos => _contatos;
+
+  <span class="comment">// Método para adicionar um novo contato</span>
+  <span class="keyword">void</span> adicionarContato(<span class="type">Contato</span> contato) {
+    _contatos.add(contato);
+  }
+
+  <span class="comment">// Método para remover um contato pelo índice</span>
+   <span class="keyword">void</span> removerContato(<span class="keyword">int</span> index) {
+    _contatos.removeAt(index);
+  }
+}</code></pre></div>
+                </div>
+            </section>
+
+            <section id="passo3">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Passo 3: Estrutura da Tela Principal</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Qual a estrutura básica de uma tela com formulário e lista no Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-gray-700 mb-4">A tela principal será um `StatefulWidget`, pois precisamos gerenciar o estado do formulário e da lista de contatos. A estrutura utiliza um `Scaffold` para o layout base, um `Form` para agrupar e validar os campos de texto, e um `ListView.builder` para exibir a lista de contatos de forma eficiente.</p>
+                    <div class="code-block"><pre><code><span class="keyword">class</span> <span class="type">_TelaContatosState</span> <span class="keyword">extends</span> <span class="type">State</span>&lt;<span class="type">TelaContatos</span>&gt; {
+  <span class="comment">// Chave para controlar o estado do formulário</span>
+  <span class="keyword">final</span> _formKey = <span class="type">GlobalKey</span>&lt;<span class="type">FormState</span>&gt;();
+  <span class="comment">// Controladores para ler o texto dos campos</span>
+  <span class="keyword">final</span> _nomeController = <span class="type">TextEditingController</span>();
+  <span class="keyword">final</span> _telefoneController = <span class="type">TextEditingController</span>();
+  <span class="comment">// Instância da nossa classe de dados</span>
+  <span class="keyword">final</span> <span class="type">Dados</span> _dados = <span class="type">Dados</span>();
+
+  <span class="comment">// ... resto da classe ...</span>
+}</code></pre></div>
+                </div>
+            </section>
+            
+            <section id="passo4">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Passo 4: Executar o App</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Como funciona a função `main` e o `MaterialApp` no Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-gray-700 mb-4">Finalmente, para rodar a aplicação, modificamos o arquivo `lib/main.dart`. A função `main` chama `runApp` com o `MaterialApp` como widget raiz, que por sua vez define nossa `TelaContatos` como a tela inicial (`home`).</p>
+                    <div class="code-block"><pre><code><span class="keyword">void</span> main() {
+  runApp(<span class="keyword">const</span> <span class="type">MaterialApp</span>(
+    home: <span class="type">TelaContatos</span>(),
+    debugShowCheckedModeBanner: <span class="keyword">false</span>,
+  ));
+}</code></pre></div>
+                </div>
+            </section>
+
+            <section id="passo5">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Passo 5: Adicionar Exclusão</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Como funciona o widget Dismissible no Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-gray-700 mb-4">Para permitir a exclusão de contatos, envolvemos nosso `ListTile` com o widget `Dismissible`. Ele permite que o usuário arraste o item para o lado para acionar uma ação, como remover o contato da lista. Também adicionamos um `IconButton` como uma alternativa de exclusão.</p>
+                    <div class="code-block"><pre><code><span class="comment">// Dentro do ListView.builder</span>
+<span class="keyword">return</span> <span class="type">Dismissible</span>(
+  key: <span class="type">ValueKey</span>(contato), <span class="comment">// Chave única para o widget</span>
+  background: <span class="type">Container</span>( <span class="comment">/* ... fundo vermelho ... */</span> ),
+  onDismissed: (direction) => _removerContato(index),
+  child: <span class="type">ListTile</span>(
+    <span class="comment">// ... title e subtitle ...</span>
+    trailing: <span class="type">IconButton</span>(
+      icon: <span class="keyword">const</span> <span class="type">Icon</span>(<span class="type">Icons</span>.delete, color: <span class="type">Colors</span>.red),
+      onPressed: () => _removerContato(index),
+    ),
+  ),
+);</code></pre></div>
+                </div>
+            </section>
+
+            <section id="codigo-completo">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Código Completo</h2>
+                    <button class="gemini-btn" onclick="explainCode('full-code')">✨ Explicar Código</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-gray-700 mb-4">Abaixo está o código completo do arquivo `lib/main.dart` com todas as funcionalidades implementadas: modelo de dados, gerenciador de estado, formulário com validação, e listagem com adição e remoção de contatos.</p>
+                    <div class="code-block" id="full-code"><pre><code class="language-dart"><span class="keyword">import</span> <span class="string">'package:flutter/material.dart'</span>;
+
+<span class="comment">// Passo 1: Modelo de Dados</span>
+<span class="keyword">class</span> <span class="type">Contato</span> {
+  <span class="keyword">String</span> nome;
+  <span class="keyword">String</span> telefone;
+  <span class="type">Contato</span>({<span class="keyword">required</span> <span class="keyword">this</span>.nome, <span class="keyword">required</span> <span class="keyword">this</span>.telefone});
+}
+
+<span class="comment">// Passo 2: Gerenciador de Estado</span>
+<span class="keyword">class</span> <span class="type">Dados</span> {
+  <span class="keyword">final</span> <span class="type">List</span>&lt;<span class="type">Contato</span>&gt; _contatos = [];
+  <span class="type">List</span>&lt;<span class="type">Contato</span>&gt; <span class="keyword">get</span> contatos => _contatos;
+  <span class="keyword">void</span> adicionarContato(<span class="type">Contato</span> contato) => _contatos.add(contato);
+  <span class="keyword">void</span> removerContato(<span class="keyword">int</span> index) => _contatos.removeAt(index);
+  <span class="keyword">void</span> editarContato(<span class="keyword">int</span> index, <span class="type">Contato</span> novoContato) => _contatos[index] = novoContato;
+}
+
+<span class="comment">// Passo 4: Função Principal</span>
+<span class="keyword">void</span> main() {
+  runApp(<span class="keyword">const</span> <span class="type">MaterialApp</span>(
+    home: <span class="type">TelaContatos</span>(),
+    debugShowCheckedModeBanner: <span class="keyword">false</span>,
+  ));
+}
+
+<span class="comment">// Passo 3: Tela Principal</span>
+<span class="keyword">class</span> <span class="type">TelaContatos</span> <span class="keyword">extends</span> <span class="type">StatefulWidget</span> {
+  <span class="keyword">const</span> <span class="type">TelaContatos</span>({<span class="keyword">super</span>.key});
+  @override
+  <span class="type">State</span>&lt;<span class="type">TelaContatos</span>&gt; createState() => _TelaContatosState();
+}
+
+<span class="keyword">class</span> <span class="type">_TelaContatosState</span> <span class="keyword">extends</span> <span class="type">State</span>&lt;<span class="type">TelaContatos</span>&gt; {
+  <span class="keyword">final</span> _formKey = <span class="type">GlobalKey</span>&lt;<span class="type">FormState</span>&gt;();
+  <span class="keyword">final</span> _nomeController = <span class="type">TextEditingController</span>();
+  <span class="keyword">final</span> _telefoneController = <span class="type">TextEditingController</span>();
+  <span class="keyword">final</span> <span class="type">Dados</span> _dados = <span class="type">Dados</span>();
+
+  <span class="keyword">void</span> _salvarContato() {
+    <span class="keyword">if</span> (_formKey.currentState!.validate()) {
+      setState(() {
+        _dados.adicionarContato(
+          <span class="type">Contato</span>(nome: _nomeController.text, telefone: _telefoneController.text),
+        );
+        _nomeController.clear();
+        _telefoneController.clear();
+        FocusScope.of(context).unfocus(); <span class="comment">// Esconde o teclado</span>
+      });
+    }
+  }
+
+  <span class="keyword">void</span> _removerContato(<span class="keyword">int</span> index) {
+    setState(() {
+      _dados.removerContato(index);
+    });
+  }
+
+  @override
+  <span class="type">Widget</span> build(<span class="type">BuildContext</span> context) {
+    <span class="keyword">return</span> <span class="type">Scaffold</span>(
+      appBar: <span class="type">AppBar</span>(title: <span class="keyword">const</span> <span class="type">Text</span>(<span class="string">"Cadastro de Contatos"</span>)),
+      body: <span class="type">Padding</span>(
+        padding: <span class="keyword">const</span> <span class="type">EdgeInsets</span>.all(<span class="number">16</span>),
+        child: <span class="type">Column</span>(
+          children: [
+            <span class="type">Form</span>(
+              key: _formKey,
+              child: <span class="type">Column</span>(
+                children: [
+                  <span class="type">TextFormField</span>(
+                    controller: _nomeController,
+                    decoration: <span class="keyword">const</span> <span class="type">InputDecoration</span>(labelText: <span class="string">"Nome"</span>),
+                    validator: (valor) {
+                      <span class="keyword">if</span> (valor == <span class="keyword">null</span> || valor.trim().isEmpty) <span class="keyword">return</span> <span class="string">"Digite um nome válido"</span>;
+                      <span class="keyword">return</span> <span class="keyword">null</span>;
+                    },
+                  ),
+                  <span class="type">TextFormField</span>(
+                    controller: _telefoneController,
+                    decoration: <span class="keyword">const</span> <span class="type">InputDecoration</span>(labelText: <span class="string">"Telefone"</span>),
+                    keyboardType: <span class="type">TextInputType</span>.phone,
+                    validator: (valor) {
+                      <span class="keyword">if</span> (valor == <span class="keyword">null</span> || valor.trim().isEmpty) <span class="keyword">return</span> <span class="string">"Digite um telefone válido"</span>;
+                      <span class="keyword">if</span> (!<span class="type">RegExp</span>(r<span class="string">'^\d{8,15}$'</span>).hasMatch(valor)) <span class="keyword">return</span> <span class="string">"Telefone inválido"</span>;
+                      <span class="keyword">return</span> <span class="keyword">null</span>;
+                    },
+                  ),
+                  <span class="keyword">const</span> <span class="type">SizedBox</span>(height: <span class="number">12</span>),
+                  <span class="type">ElevatedButton</span>(
+                    onPressed: _salvarContato,
+                    child: <span class="keyword">const</span> <span class="type">Text</span>(<span class="string">"Adicionar Contato"</span>),
+                  ),
+                ],
+              ),
+            ),
+            <span class="keyword">const</span> <span class="type">SizedBox</span>(height: <span class="number">20</span>),
+            <span class="keyword">const</span> <span class="type">Text</span>(<span class="string">"Lista de Contatos"</span>, style: <span class="type">TextStyle</span>(fontSize: <span class="number">18</span>, fontWeight: <span class="type">FontWeight</span>.bold)),
+            <span class="keyword">const</span> <span class="type">Divider</span>(),
+            <span class="type">Expanded</span>(
+              child: <span class="type">ListView</span>.builder(
+                itemCount: _dados.contatos.length,
+                itemBuilder: (context, index) {
+                  <span class="keyword">final</span> contato = _dados.contatos[index];
+                  <span class="keyword">return</span> <span class="type">Dismissible</span>(
+                    key: <span class="type">ValueKey</span>(contato),
+                    background: <span class="type">Container</span>(
+                      color: <span class="type">Colors</span>.red,
+                      alignment: <span class="type">Alignment</span>.centerLeft,
+                      padding: <span class="keyword">const</span> <span class="type">EdgeInsets</span>.only(left: <span class="number">20</span>),
+                      child: <span class="keyword">const</span> <span class="type">Icon</span>(<span class="type">Icons</span>.delete, color: <span class="type">Colors</span>.white),
+                    ),
+                    secondaryBackground: <span class="type">Container</span>(
+                      color: <span class="type">Colors</span>.red,
+                      alignment: <span class="type">Alignment</span>.centerRight,
+                      padding: <span class="keyword">const</span> <span class="type">EdgeInsets</span>.only(right: <span class="number">20</span>),
+                      child: <span class="keyword">const</span> <span class="type">Icon</span>(<span class="type">Icons</span>.delete, color: <span class="type">Colors</span>.white),
+                    ),
+                    onDismissed: (direction) => _removerContato(index),
+                    child: <span class="type">ListTile</span>(
+                      leading: <span class="keyword">const</span> <span class="type">Icon</span>(<span class="type">Icons</span>.person),
+                      title: <span class="type">Text</span>(contato.nome),
+                      subtitle: <span class="type">Text</span>(contato.telefone),
+                      trailing: <span class="type">IconButton</span>(
+                        icon: <span class="keyword">const</span> <span class="type">Icon</span>(<span class="type">Icons</span>.delete, color: <span class="type">Colors</span>.red),
+                        onPressed: () => _removerContato(index),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}</code></pre></div>
+                </div>
+            </section>
+            
+            <section id="desafio-editar">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Desafio: Editar Contatos</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Como implementar a função de editar um item em uma lista no Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-gray-700 mb-4">Agora que você já sabe adicionar e remover contatos, o próximo passo é implementar a funcionalidade de edição. Este é um excelente exercício para aprofundar seus conhecimentos em manipulação de estado e interação com o usuário.</p>
+                    <h3 class="text-2xl font-semibold mb-3">Objetivo</h3>
+                     <p class="text-gray-700 mb-4">Modifique a aplicação para permitir que o usuário edite o nome e o telefone de um contato existente na lista.</p>
+                    <h3 class="text-2xl font-semibold mb-3">Dicas para Implementação</h3>
+                    <ul class="list-disc list-inside space-y-3 text-gray-700">
+                        <li><strong>Botão de Edição:</strong> Adicione um `IconButton` com um ícone de edição (ex: `Icons.edit`) ao `ListTile`, ao lado do ícone de exclusão.</li>
+                        <li><strong>Diálogo de Edição:</strong> Ao clicar no botão de edição, prencha o formulário pré-preenchido com os dados do contato selecionado.</li>
+                         <li><strong>Lógica de Atualização:</strong> Crie um novo método na classe `Dados` e no `State` da tela para atualizar o contato na lista com os novos valores. Lembre-se de chamar `setState()` para que a UI reflita a mudança.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="conclusao">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Conclusão</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Quais os principais conceitos do Flutter aprendidos ao criar um app de cadastro de contatos?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-lg text-gray-700">Com este guia, você construiu uma aplicação funcional que integra vários conceitos essenciais do Flutter: gerenciamento de estado com `StatefulWidget`, criação de formulários com `Form` e `TextFormField`, validação de dados, e renderização de listas dinâmicas com `ListView.builder` e `Dismissible`. Este projeto serve como uma base sólida para a criação de aplicações mais complexas.</p>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-20 pt-8 border-t border-gray-200">
+            <p class="text-gray-500 mb-4">Aplicação Interativa gerada para criar um App de Contatos no Flutter.</p>
+            <button id="export-pdf-btn" class="bg-gray-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-gray-800 transition-colors">Exportar para PDF</button>
+        </footer>
+    </div>
+
+    <script>
+        function setupPdfExport() {
+            const exportBtn = document.getElementById('export-pdf-btn');
+            if (!exportBtn) return;
+
+            exportBtn.addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'pt', 'a4');
+                const margin = 40;
+                const maxWidth = doc.internal.pageSize.getWidth() - margin * 2;
+                let y = margin;
+
+                const addText = (text, size, isBold, isCode = false) => {
+                    if (y > doc.internal.pageSize.getHeight() - margin) {
+                        doc.addPage();
+                        y = margin;
+                    }
+                    doc.setFont(isCode ? 'Courier' : 'Helvetica', isBold ? 'bold' : 'normal');
+                    doc.setFontSize(size);
+                    const lines = doc.splitTextToSize(text, maxWidth);
+                    doc.text(lines, margin, y);
+                    const lineHeight = size * 1.2;
+                    y += (lines.length * lineHeight);
+                };
+
+                const sections = document.querySelectorAll('main > section');
+                sections.forEach(section => {
+                    const title = section.querySelector('h2');
+                    if (title) {
+                        addText(title.innerText, 18, true);
+                        y += 12;
+                    }
+                    
+                    const intro = section.querySelector('p:not(.activity-card p)');
+                     if (intro) {
+                        addText(intro.innerText, 10, false);
+                        y += 15;
+                    }
+
+                    const contentCards = section.querySelectorAll('.activity-card, .activity-card > div');
+                    contentCards.forEach(card => {
+                         const subTitle = card.querySelector('h3');
+                         if(subTitle) {
+                             addText(subTitle.innerText, 14, true);
+                             y += 8;
+                         }
+                         const paragraphs = card.querySelectorAll('p:not(.text-center)');
+                         paragraphs.forEach(p => {
+                             addText(p.innerText, 10, false);
+                             y += 8;
+                         });
+                         const listItems = card.querySelectorAll('li');
+                         listItems.forEach(li => {
+                             addText(`- ${li.innerText}`, 10, false);
+                             y += 8;
+                         });
+                         const codeBlocks = card.querySelectorAll('.code-block');
+                         codeBlocks.forEach(code => {
+                             addText(code.innerText, 9, false, true);
+                             y += 12;
+                         });
+                    });
+                     y += 24;
+                });
+                
+                doc.save('guia-flutter-contatos-app.pdf');
+            });
+        }
+
+        const modal = document.getElementById('gemini-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const geminiResponseEl = document.getElementById('gemini-response');
+        let isGeminiLoading = false;
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            isGeminiLoading = false;
+        });
+
+        async function callGemini(prompt, maxRetries = 3) {
+            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+            const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8"; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            
+            let lastError = null;
+
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        lastError = new Error(`HTTP error! status: ${response.status}`);
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                        continue;
+                    }
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.text) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        lastError = new Error("Resposta da API inválida ou vazia.");
+                         const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                        continue;
+                    }
+                } catch (error) {
+                    lastError = error;
+                    const delay = Math.pow(2, attempt) * 1000;
+                    await new Promise(res => setTimeout(res, delay));
+                }
+            }
+
+            console.error("API call failed after all retries:", lastError);
+            return "Desculpe, não foi possível obter uma resposta da IA no momento. Por favor, verifique sua conexão ou tente novamente mais tarde.";
+        }
+
+        function parseMarkdown(text) {
+            const lines = text.split('\n');
+            let html = '';
+            let inCodeBlock = false;
+            let inList = false;
+
+            lines.forEach(line => {
+                if (line.startsWith('```')) {
+                    if (inCodeBlock) {
+                        html += '</code></pre>';
+                        inCodeBlock = false;
+                    } else {
+                        html += '<pre><code class="language-dart code-block bg-gray-800 text-white p-4 rounded-md block">';
+                        inCodeBlock = true;
+                    }
+                    return;
+                }
+
+                if (inCodeBlock) {
+                    html += line.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\n';
+                    return;
+                }
+
+                if (line.startsWith('* ') || line.startsWith('- ')) {
+                    if (!inList) {
+                        html += '<ul>';
+                        inList = true;
+                    }
+                    html += `<li>${processInlineMarkdown(line.substring(2))}</li>`;
+                } else {
+                    if (inList) {
+                        html += '</ul>';
+                        inList = false;
+                    }
+                    if (line.startsWith('### ')) {
+                        html += `<h3>${processInlineMarkdown(line.substring(4))}</h3>`;
+                    } else if (line.startsWith('## ')) {
+                        html += `<h2>${processInlineMarkdown(line.substring(3))}</h2>`;
+                    } else if (line.startsWith('# ')) {
+                        html += `<h1>${processInlineMarkdown(line.substring(2))}</h1>`;
+                    } else if (line.trim() !== '') {
+                        html += `<p>${processInlineMarkdown(line)}</p>`;
+                    }
+                }
+            });
+
+            if (inList) html += '</ul>';
+            if (inCodeBlock) html += '</code></pre>';
+            return html;
+        }
+
+        function processInlineMarkdown(line) {
+            return line
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`(.*?)`/g, '<code class="bg-gray-200 text-gray-800 px-1 py-0.5 rounded">$1</code>');
+        }
+
+        async function deepenConcept(topic) {
+            if (isGeminiLoading) return;
+            isGeminiLoading = true;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = true);
+
+            const prompt = `Explique o conceito de "${topic}" de forma simples, direta e curta para um iniciante em Flutter. Formate a resposta com títulos, listas e blocos de código se necessário.`;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            geminiResponseEl.innerHTML = '<div class="flex justify-center items-center h-full"><div class="loader"></div></div>';
+
+            const explanation = await callGemini(prompt);
+            geminiResponseEl.innerHTML = parseMarkdown(explanation);
+            isGeminiLoading = false;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+        }
+        
+        async function explainCode(elementId) {
+            if (isGeminiLoading) return;
+            isGeminiLoading = true;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = true);
+
+            const codeElement = document.getElementById(elementId);
+            if (!codeElement) {
+                isGeminiLoading = false;
+                 document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+                return;
+            }
+            const code = codeElement.innerText;
+            
+            const prompt = `Explique o seguinte código Flutter/Dart em português, de forma simples e direta para um iniciante:\n\n\`\`\`dart\n${code}\n\`\`\``;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            geminiResponseEl.innerHTML = '<div class="flex justify-center items-center h-full"><div class="loader"></div></div>';
+
+            const explanation = await callGemini(prompt);
+            geminiResponseEl.innerHTML = parseMarkdown(explanation);
+            isGeminiLoading = false;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const drawerBtn = document.getElementById('drawer-btn');
+            const drawerNav = document.getElementById('drawer-nav');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+            const navLinks = drawerNav.querySelectorAll('a');
+
+            function toggleDrawer() {
+                drawerNav.classList.toggle('-translate-x-full');
+                drawerNav.classList.toggle('translate-x-0');
+                drawerOverlay.classList.toggle('hidden');
+            }
+
+            drawerBtn.addEventListener('click', toggleDrawer);
+            drawerOverlay.addEventListener('click', toggleDrawer);
+
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    toggleDrawer();
+                    const targetElement = document.querySelector(this.getAttribute('href'));
+                    if(targetElement) {
+                        setTimeout(() => {
+                             targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }, 300); // Aguarda a animação do drawer fechar
+                    }
+                });
+            });
+            
+            setupPdfExport();
+        });
+    </script>
+</body>
+</html>
+

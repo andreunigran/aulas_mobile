@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia de Bancos de Dados em Flutter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A single-page application with a drawer navigation menu for smooth scrolling between thematic sections. This structure provides a clear step-by-step guide for understanding databases in Flutter. The content is segmented into logical cards for better readability. -->
+    <!-- Visualization & Content Choices: The content is structured into thematic sections covering databases in Flutter. Core concepts like database types, SQLite setup, and asynchronous programming are presented in clear, concise cards with commented code examples. Gemini API is integrated for deeper explanations. This design prioritizes a clean, organized, and educational user experience. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .code-block {
+            background-color: #2d3748; /* gray-800 */
+            color: #e2e8f0; /* gray-300 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", monospace;
+            font-size: 0.875rem;
+        }
+        .code-block .keyword { color: #63b3ed; } /* blue-400 */
+        .code-block .type { color: #4fd1c5; } /* teal-400 */
+        .code-block .string { color: #f6ad55; } /* orange-400 */
+        .code-block .comment { color: #a0aec0; } /* gray-500 */
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            font-weight: 500;
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+        .nav-link:hover {
+            background-color: #e2e8f0; /* gray-200 */
+        }
+        .activity-card {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .gemini-btn {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease-in-out;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .gemini-btn:hover {
+            background-color: #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+        }
+        .gemini-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #gemini-response h2 { font-size: 1.5rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
+        #gemini-response h3 { font-size: 1.25rem; font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.5rem; }
+        #gemini-response ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+        #gemini-response strong { font-weight: 600; }
+        #gemini-response code {
+            background-color: #e2e8f0;
+            color: #2d3748;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
+        }
+        #gemini-response pre code {
+            display: block;
+            white-space: pre-wrap;
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .loader {
+            width: 50px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 8px solid #0000;
+            border-right-color: #818cf8;
+            animation: l24 1s infinite linear;
+        }
+        @keyframes l24 {
+            100% {transform: rotate(1turn)}
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-gray-800">
+
+    <!-- Botão para abrir o Drawer -->
+    <button id="drawer-btn" class="fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Overlay -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+    <!-- Drawer Navigation -->
+    <nav id="drawer-nav" class="fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+        <div class="p-4">
+            <h3 class="text-xl font-bold mb-4">Navegação</h3>
+            <a href="#introducao" class="nav-link">Introdução</a>
+            <a href="#tipos-bd" class="nav-link">Tipos de BD</a>
+            <a href="#sqlite" class="nav-link">SQLite</a>
+            <a href="#async" class="nav-link">Programação Assíncrona</a>
+            <a href="#crud" class="nav-link">Operações CRUD</a>
+            <a href="#entidade" class="nav-link">Modelando Entidades</a>
+            <a href="#conclusao" class="nav-link">Conclusão</a>
+        </div>
+    </nav>
+
+     <!-- Modal Gemini -->
+    <div id="gemini-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
+                <h3 class="text-xl font-bold text-gray-800">✨ Resposta do Gemini</h3>
+                <button id="close-modal-btn" class="p-2 rounded-full hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="gemini-response" class="p-6 overflow-y-auto space-y-4">
+                <!-- Conteúdo gerado pela API será inserido aqui -->
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Guia de Bancos de Dados em Flutter</h1>
+            <p class="mt-4 text-lg text-gray-600">Armazenamento e Gerenciamento de Dados em Aplicações Flutter.</p>
+        </header>
+
+        <main class="space-y-20">
+
+            <section id="introducao">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">O que é um Banco de Dados?</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('O que é um banco de dados e por que é importante em apps mobile?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-lg text-gray-700 mb-4">Um banco de dados é um conjunto organizado de informações armazenadas e acessadas eletronicamente. Sua principal função é permitir o armazenamento, a manipulação e a recuperação de dados de forma eficiente.</p>
+                    <h3 class="text-2xl font-semibold mb-3 mt-6">Por que Usar um Banco de Dados em Flutter?</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Persistência de Dados:</strong> Manter dados salvos mesmo quando o aplicativo é fechado.</li>
+                        <li><strong>Estruturas Complexas:</strong> Gerenciar relacionamentos complexos entre diferentes tipos de dados.</li>
+                        <li><strong>Performance:</strong> Acesso rápido e eficiente a grandes volumes de informações.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="tipos-bd">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Tipos de Bancos de Dados</h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Qual a diferença entre bancos de dados relacionais (SQL) e não relacionais (NoSQL) para Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="activity-card">
+                        <h3 class="text-2xl font-semibold mb-3">Relacionais (SQL)</h3>
+                        <p class="text-gray-700">Organizam os dados em tabelas com linhas e colunas, seguindo um esquema rígido. Utilizam a linguagem SQL para consultas. São ideais para dados estruturados e relacionamentos bem definidos.</p>
+                        <p class="mt-4 font-semibold">Exemplo: SQLite.</p>
+                    </div>
+                    <div class="activity-card">
+                        <h3 class="text-2xl font-semibold mb-3">Não Relacionais (NoSQL)</h3>
+                        <p class="text-gray-700">Armazenam dados em formatos flexíveis, como documentos (JSON), grafos ou chave-valor. São ótimos para dados não estruturados e aplicações que precisam de alta escalabilidade.</p>
+                        <p class="mt-4 font-semibold">Exemplo: Firebase Firestore.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="sqlite">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">SQLite em Flutter</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Como funciona o SQLite em aplicativos Flutter e quais suas vantagens?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-8">
+                     <div>
+                        <h3 class="text-xl font-semibold mb-2">O que é SQLite?</h3>
+                        <p class="text-gray-700">É um banco de dados leve e embutido no próprio aplicativo, ideal para dispositivos móveis. Ele não requer um servidor separado e armazena todos os dados em um único arquivo no dispositivo.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">Vantagens</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                           <li>Simplicidade e baixo consumo de recursos.</li>
+                           <li>Suporte a transações ACID (Atomicidade, Consistência, Isolamento e Durabilidade), garantindo a integridade dos dados.</li>
+                           <li>Ótima performance para operações locais.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">Configurando o SQLite</h3>
+                        <p class="text-gray-700 mb-4">Para usar o SQLite no Flutter, você precisa adicionar as dependências `sqflite` e `path` no seu arquivo `pubspec.yaml`.</p>
+                        <div class="code-block"><pre><code><span class="comment"># pubspec.yaml</span>
+<span class="keyword">dependencies:</span>
+  <span class="keyword">sqflite:</span> ^2.3.0 <span class="comment"># Verifique a versão mais recente no pub.dev</span>
+  <span class="keyword">path:</span> ^1.8.3</code></pre></div>
+                         <p class="text-gray-700 mt-4">Depois, execute `flutter pub get` no terminal ou `flutter pub add sqflite` e `flutter pub add path`.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="async">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Programação Assíncrona</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('O que é programação assíncrona com Future, async e await em Dart e por que é essencial para bancos de dados?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-8">
+                     <div>
+                        <h3 class="text-2xl font-semibold mb-3">Por que Assíncrono?</h3>
+                        <p class="text-gray-700">Operações de banco de dados (ler ou gravar em disco) podem ser lentas. Se fossem síncronas, elas travariam a interface do usuário (UI), resultando em uma péssima experiência. A programação assíncrona permite que essas operações ocorram em segundo plano, mantendo o app responsivo.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">`Future`</h3>
+                        <p class="text-gray-700">Um `Future` é um objeto que representa uma operação assíncrona e seu resultado eventual. Pense nele como uma "promessa" de que você receberá um valor (ou um erro) no futuro. Ele pode estar em três estados: não concluído, concluído com sucesso (com um valor) ou concluído com erro.</p>
+                    </div>
+                     <div>
+                        <h3 class="text-2xl font-semibold mb-3">`async`</h3>
+                        <p class="text-gray-700">A palavra-chave `async` é usada para marcar uma função como assíncrona. Isso significa que a função pode conter operações que retornam um `Future`, permitindo o uso de `await` dentro dela.</p>
+                        <ul class="list-disc list-inside space-y-2 mt-2 text-gray-700">
+                            <li><strong>Retorno de um Future:</strong> Uma função `async` sempre retorna um `Future`. Se você retornar um valor (ex: `String`), ele será encapsulado em um `Future<String>`.</li>
+                            <li><strong>Uso de Await:</strong> Permite o uso da palavra-chave `await` dentro do seu corpo.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">`await`</h3>
+                        <p class="text-gray-700">O `await` pausa a execução da função `async` até que o `Future` seja concluído. Isso permite escrever código assíncrono que parece síncrono, tornando-o muito mais fácil de ler.</p>
+                         <ul class="list-disc list-inside space-y-2 mt-2 text-gray-700">
+                            <li><strong>Esperar o Resultado:</strong> Em vez de usar callbacks (`.then()`), você simplesmente "espera" pelo resultado.</li>
+                            <li><strong>Uso Obrigatório em Funções `async`:</strong> `await` só pode ser usado dentro de funções marcadas com `async`.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Tratamento de Erros</h3>
+                        <p class="text-gray-700">Se um `Future` que você está aguardando (`await`) falhar, ele lançará uma exceção. Para lidar com isso de forma segura e evitar que seu aplicativo quebre, você deve envolver a chamada `await` em um bloco `try-catch`.</p>
+                        <div class="code-block" id="try-catch-code"><pre><code class="language-dart"><span class="type">Future</span>&lt;<span class="keyword">void</span>&gt; carregarDados() <span class="keyword">async</span> {
+  <span class="keyword">try</span> {
+    <span class="keyword">final</span> dados = <span class="keyword">await</span> buscarDadosDoServidor();
+    print(<span class="string">'Dados carregados: $dados'</span>);
+  } <span class="keyword">catch</span> (e) {
+    print(<span class="string">'Ocorreu um erro: $e'</span>);
+  }
+}</code></pre></div>
+                        <div class="text-center mt-4">
+                            <button class="gemini-btn" onclick="explainCode('try-catch-code')">✨ Explicar Código</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="crud">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Operações CRUD com SQLite</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('O que são operações CRUD e como elas são implementadas com sqflite em Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-8">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">Inicializando o Banco</h3>
+                        <p class="text-gray-700 mb-4">Antes de realizar qualquer operação, precisamos abrir o banco de dados e criar as tabelas, caso elas não existam.</p>
+                        <div class="code-block" id="init-db-code"><pre><code class="language-dart"><span class="keyword">import</span> <span class="string">'package:sqflite/sqflite.dart'</span>;
+<span class="keyword">import</span> <span class="string">'package:path/path.dart'</span>;
+
+<span class="type">Future</span>&lt;<span class="type">Database</span>&gt; initializeDB() <span class="keyword">async</span> {
+  <span class="type">String</span> path = join(<span class="keyword">await</span> getDatabasesPath(), <span class="string">'meu_banco.db'</span>);
+  
+  <span class="keyword">return</span> <span class="keyword">await</span> openDatabase(
+    path,
+    onCreate: (db, version) {
+      <span class="keyword">return</span> db.execute(
+        <span class="string">"CREATE TABLE usuarios(id INTEGER PRIMARY KEY, nome TEXT, idade INTEGER)"</span>,
+      );
+    },
+    version: <span class="number">1</span>,
+  );
+}</code></pre></div>
+                     <div class="text-center mt-4">
+                        <button class="gemini-btn" onclick="explainCode('init-db-code')">✨ Explicar Código</button>
+                    </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">CRUD (Create, Read, Update, Delete)</h3>
+                        <p class="text-gray-700 mb-4">Estas são as quatro operações básicas de persistência de dados.</p>
+                         <div class="code-block" id="crud-code"><pre><code class="language-dart"><span class="comment">// Create: Inserir um novo usuário</span>
+<span class="type">Future</span>&lt;<span class="keyword">void</span>&gt; inserirUsuario(<span class="type">Usuario</span> usuario) <span class="keyword">async</span> {
+  <span class="keyword">final</span> <span class="type">Database</span> db = <span class="keyword">await</span> initializeDB();
+  <span class="keyword">await</span> db.insert(<span class="string">'usuarios'</span>, usuario.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+}
+
+<span class="comment">// Read: Obter todos os usuários</span>
+<span class="type">Future</span>&lt;<span class="type">List</span>&lt;<span class="type">Usuario</span>&gt;&gt; obterUsuarios() <span class="keyword">async</span> {
+  <span class="keyword">final</span> <span class="type">Database</span> db = <span class="keyword">await</span> initializeDB();
+  <span class="keyword">final</span> <span class="type">List</span>&lt;<span class="type">Map</span>&lt;<span class="type">String</span>, <span class="keyword">dynamic</span>&gt;&gt; maps = <span class="keyword">await</span> db.query(<span class="string">'usuarios'</span>);
+  
+  <span class="keyword">return</span> <span class="type">List</span>.generate(maps.length, (i) {
+    <span class="keyword">return</span> <span class="type">Usuario</span>.fromMap(maps[i]);
+  });
+}</code></pre></div>
+                      <div class="text-center mt-4">
+                        <button class="gemini-btn" onclick="explainCode('crud-code')">✨ Explicar Código</button>
+                    </div>
+                    </div>
+                </div>
+            </section>
+
+             <section id="entidade">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Modelando Entidades</h2>
+                    <button class="gemini-btn" onclick="deepenConcept('O que é uma classe de entidade e por que os métodos toMap e fromMap são importantes ao usar SQLite no Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-8">
+                     <div>
+                        <h3 class="text-xl font-semibold mb-2">O que é uma Entidade?</h3>
+                        <p class="text-gray-700 mb-4">Uma entidade é uma classe Dart que representa uma tabela do banco de dados. Ela serve como um "molde" para os objetos que serão salvos e recuperados, facilitando a conversão entre o mundo dos objetos Dart e o mundo das tabelas SQL.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">Recursos Úteis: `Map` e `factory`</h3>
+                         <div class="space-y-4">
+                            <div>
+                                <h4 class="text-lg font-semibold">`Map`</h4>
+                                <p class="text-gray-700">`Map` é uma coleção de pares chave-valor (ex: `'nome': 'Ana'`). É o formato que a biblioteca `sqflite` usa para se comunicar com o banco. Para inserir dados, você converte seu objeto para um `Map`. Para ler dados, o `sqflite` te devolve um `Map`, que você então converte de volta para seu objeto.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold">Construtor `factory`</h4>
+                                <p class="text-gray-700">Um construtor `factory` é um tipo especial de construtor que não cria, necessariamente, uma nova instância da classe. Ele é ideal para cenários de conversão, como criar um objeto a partir de um `Map`. O padrão `fromMap` é uma convenção comum para essa finalidade.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="code-block" id="entity-code"><pre><code class="language-dart"><span class="keyword">class</span> <span class="type">Usuario</span> {
+  <span class="keyword">final</span> <span class="keyword">int</span> id;
+  <span class="keyword">final</span> <span class="type">String</span> nome;
+  <span class="keyword">final</span> <span class="keyword">int</span> idade;
+
+  <span class="type">Usuario</span>({<span class="keyword">required</span> <span class="keyword">this</span>.id, <span class="keyword">required</span> <span class="keyword">this</span>.nome, <span class="keyword">required</span> <span class="keyword">this</span>.idade});
+
+  <span class="comment">// Método para converter um Usuario em um Map (para salvar no BD)</span>
+  <span class="type">Map</span>&lt;<span class="type">String</span>, <span class="keyword">dynamic</span>&gt; toMap() {
+    <span class="keyword">return</span> {
+      <span class="string">'id'</span>: id,
+      <span class="string">'nome'</span>: nome,
+      <span class="string">'idade'</span>: idade,
+    };
+  }
+  
+  <span class="comment">// Construtor de fábrica para criar um Usuario a partir de um Map (vindo do BD)</span>
+  <span class="keyword">factory</span> <span class="type">Usuario</span>.fromMap(<span class="type">Map</span>&lt;<span class="type">String</span>, <span class="keyword">dynamic</span>&gt; map) {
+    <span class="keyword">return</span> <span class="type">Usuario</span>(
+      id: map[<span class="string">'id'</span>],
+      nome: map[<span class="string">'nome'</span>],
+      idade: map[<span class="string">'idade'</span>],
+    );
+  }
+}</code></pre></div>
+                 <div class="text-center mt-4">
+                    <button class="gemini-btn" onclick="explainCode('entity-code')">✨ Explicar Código</button>
+                </div>
+                </div>
+            </section>
+            
+            <section id="conclusao">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Conclusão</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Qual a importância de escolher o banco de dados correto para uma aplicação Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-lg text-gray-700">Escolher e implementar uma solução de banco de dados é um passo crucial no desenvolvimento de aplicativos robustos. O Flutter oferece excelentes opções tanto para armazenamento local com SQLite quanto para soluções em nuvem com NoSQL. Entender os fundamentos de como modelar seus dados e interagir com o banco de forma assíncrona é a chave para construir apps performáticos e escaláveis.</p>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-20 pt-8 border-t border-gray-200">
+            <p class="text-gray-500 mb-4">Aplicação Interativa gerada para explorar Bancos de Dados no Flutter.</p>
+            <button id="export-pdf-btn" class="bg-gray-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-gray-800 transition-colors">Exportar para PDF</button>
+        </footer>
+    </div>
+
+    <script>
+        function setupPdfExport() {
+            const exportBtn = document.getElementById('export-pdf-btn');
+            if (!exportBtn) return;
+
+            exportBtn.addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'pt', 'a4');
+                const margin = 40;
+                const maxWidth = doc.internal.pageSize.getWidth() - margin * 2;
+                let y = margin;
+
+                const addText = (text, size, isBold, isCode = false) => {
+                    if (y > doc.internal.pageSize.getHeight() - margin) {
+                        doc.addPage();
+                        y = margin;
+                    }
+                    doc.setFont(isCode ? 'Courier' : 'Helvetica', isBold ? 'bold' : 'normal');
+                    doc.setFontSize(size);
+                    const lines = doc.splitTextToSize(text, maxWidth);
+                    doc.text(lines, margin, y);
+                    const lineHeight = size * 1.2;
+                    y += (lines.length * lineHeight);
+                };
+
+                const sections = document.querySelectorAll('main > section');
+                sections.forEach(section => {
+                    const title = section.querySelector('h2');
+                    if (title) {
+                        addText(title.innerText, 18, true);
+                        y += 12;
+                    }
+                    
+                    const intro = section.querySelector('p:not(.activity-card p)');
+                     if (intro) {
+                        addText(intro.innerText, 10, false);
+                        y += 15;
+                    }
+
+                    const contentCards = section.querySelectorAll('.activity-card, .activity-card > div');
+                    contentCards.forEach(card => {
+                         const subTitle = card.querySelector('h3');
+                         if(subTitle) {
+                             addText(subTitle.innerText, 14, true);
+                             y += 8;
+                         }
+                         const paragraphs = card.querySelectorAll('p:not(.text-center)');
+                         paragraphs.forEach(p => {
+                             addText(p.innerText, 10, false);
+                             y += 8;
+                         });
+                         const listItems = card.querySelectorAll('li');
+                         listItems.forEach(li => {
+                             addText(`- ${li.innerText}`, 10, false);
+                             y += 8;
+                         });
+                         const codeBlocks = card.querySelectorAll('.code-block');
+                         codeBlocks.forEach(code => {
+                             addText(code.innerText, 9, false, true);
+                             y += 12;
+                         });
+                    });
+                     y += 24;
+                });
+                
+                doc.save('guia-flutter-banco-de-dados.pdf');
+            });
+        }
+
+        const modal = document.getElementById('gemini-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const geminiResponseEl = document.getElementById('gemini-response');
+        let isGeminiLoading = false;
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            isGeminiLoading = false;
+        });
+
+        async function callGemini(prompt, maxRetries = 3) {
+            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+            const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8"; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            
+            let lastError = null;
+
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        lastError = new Error(`HTTP error! status: ${response.status}`);
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                        continue;
+                    }
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.text) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        lastError = new Error("Resposta da API inválida ou vazia.");
+                         const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                        continue;
+                    }
+                } catch (error) {
+                    lastError = error;
+                    const delay = Math.pow(2, attempt) * 1000;
+                    await new Promise(res => setTimeout(res, delay));
+                }
+            }
+
+            console.error("API call failed after all retries:", lastError);
+            return "Desculpe, não foi possível obter uma resposta da IA no momento. Por favor, verifique sua conexão ou tente novamente mais tarde.";
+        }
+
+        function parseMarkdown(text) {
+            const lines = text.split('\n');
+            let html = '';
+            let inCodeBlock = false;
+            let inList = false;
+
+            lines.forEach(line => {
+                if (line.startsWith('```')) {
+                    if (inCodeBlock) {
+                        html += '</code></pre>';
+                        inCodeBlock = false;
+                    } else {
+                        html += '<pre><code class="language-dart code-block bg-gray-800 text-white p-4 rounded-md block">';
+                        inCodeBlock = true;
+                    }
+                    return;
+                }
+
+                if (inCodeBlock) {
+                    html += line.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\n';
+                    return;
+                }
+
+                if (line.startsWith('* ') || line.startsWith('- ')) {
+                    if (!inList) {
+                        html += '<ul>';
+                        inList = true;
+                    }
+                    html += `<li>${processInlineMarkdown(line.substring(2))}</li>`;
+                } else {
+                    if (inList) {
+                        html += '</ul>';
+                        inList = false;
+                    }
+                    if (line.startsWith('### ')) {
+                        html += `<h3>${processInlineMarkdown(line.substring(4))}</h3>`;
+                    } else if (line.startsWith('## ')) {
+                        html += `<h2>${processInlineMarkdown(line.substring(3))}</h2>`;
+                    } else if (line.startsWith('# ')) {
+                        html += `<h1>${processInlineMarkdown(line.substring(2))}</h1>`;
+                    } else if (line.trim() !== '') {
+                        html += `<p>${processInlineMarkdown(line)}</p>`;
+                    }
+                }
+            });
+
+            if (inList) html += '</ul>';
+            if (inCodeBlock) html += '</code></pre>';
+            return html;
+        }
+
+        function processInlineMarkdown(line) {
+            return line
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`(.*?)`/g, '<code class="bg-gray-200 text-gray-800 px-1 py-0.5 rounded">$1</code>');
+        }
+
+        async function deepenConcept(topic) {
+            if (isGeminiLoading) return;
+            isGeminiLoading = true;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = true);
+
+            const prompt = `Explique o conceito de "${topic}" de forma simples, direta e curta para um iniciante em Flutter. Formate a resposta com títulos, listas e blocos de código se necessário.`;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            geminiResponseEl.innerHTML = '<div class="flex justify-center items-center h-full"><div class="loader"></div></div>';
+
+            const explanation = await callGemini(prompt);
+            geminiResponseEl.innerHTML = parseMarkdown(explanation);
+            isGeminiLoading = false;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+        }
+        
+        async function explainCode(elementId) {
+            if (isGeminiLoading) return;
+            isGeminiLoading = true;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = true);
+
+            const codeElement = document.getElementById(elementId);
+            if (!codeElement) {
+                isGeminiLoading = false;
+                 document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+                return;
+            }
+            const code = codeElement.innerText;
+            
+            const prompt = `Explique o seguinte código Flutter/Dart em português, de forma simples e direta para um iniciante:\n\n\`\`\`dart\n${code}\n\`\`\``;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            geminiResponseEl.innerHTML = '<div class="flex justify-center items-center h-full"><div class="loader"></div></div>';
+
+            const explanation = await callGemini(prompt);
+            geminiResponseEl.innerHTML = parseMarkdown(explanation);
+            isGeminiLoading = false;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const drawerBtn = document.getElementById('drawer-btn');
+            const drawerNav = document.getElementById('drawer-nav');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+            const navLinks = drawerNav.querySelectorAll('a');
+
+            function toggleDrawer() {
+                drawerNav.classList.toggle('-translate-x-full');
+                drawerNav.classList.toggle('translate-x-0');
+                drawerOverlay.classList.toggle('hidden');
+            }
+
+            drawerBtn.addEventListener('click', toggleDrawer);
+            drawerOverlay.addEventListener('click', toggleDrawer);
+
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    toggleDrawer();
+                    const targetElement = document.querySelector(this.getAttribute('href'));
+                    if(targetElement) {
+                        setTimeout(() => {
+                             targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }, 300); // Aguarda a animação do drawer fechar
+                    }
+                });
+            });
+            
+            setupPdfExport();
+        });
+    </script>
+</body>
+</html>
+

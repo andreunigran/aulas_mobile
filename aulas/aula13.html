@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia do Hive para Flutter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .code-block, #code-editor, #output-display {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 0.9rem;
+        }
+         #code-editor {
+            width: 100%;
+            height: 250px;
+            border: 1px solid #3d424d;
+        }
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            font-weight: 500;
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+        .nav-link:hover {
+            background-color: #e2e8f0; 
+        }
+        .activity-card {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .gemini-btn {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease-in-out;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .gemini-btn:hover {
+            background-color: #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+        }
+        .gemini-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #gemini-response h2 { font-size: 1.5rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
+        #gemini-response h3 { font-size: 1.25rem; font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.5rem; }
+        #gemini-response ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+        #gemini-response strong { font-weight: 600; }
+        #gemini-response code {
+            background-color: #e2e8f0;
+            color: #2d3748;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
+        }
+        #gemini-response pre code {
+            display: block;
+            white-space: pre-wrap;
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .loader {
+            width: 50px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 8px solid #0000;
+            border-right-color: #818cf8;
+            animation: l24 1s infinite linear;
+        }
+        @keyframes l24 {
+            100% {transform: rotate(1turn)}
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Botão para abrir o Drawer -->
+    <button id="drawer-btn" class="fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Overlay -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+    <!-- Drawer Navigation -->
+    <nav id="drawer-nav" class="fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+        <div class="p-4">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Navegação</h3>
+            <a href="#o-que-e" class="nav-link text-gray-700">O que é Hive?</a>
+            <a href="#por-que-usar" class="nav-link text-gray-700">Por que usar?</a>
+            <a href="#instalacao" class="nav-link text-gray-700">Instalação</a>
+            <a href="#plataformas" class="nav-link text-gray-700">Android & iOS</a>
+            <a href="#box" class="nav-link text-gray-700">Conceito de Box</a>
+            <a href="#crud" class="nav-link text-gray-700">CRUD com Hive</a>
+            <a href="#objetos" class="nav-link text-gray-700">Armazenando Objetos</a>
+            <a href="#integracao" class="nav-link text-gray-700">Integração com Flutter</a>
+            <a href="#comparacao" class="nav-link text-gray-700">Comparação com SQLite</a>
+            <a href="#casos-de-uso" class="nav-link text-gray-700">Casos de Uso</a>
+            <a href="#boas-praticas" class="nav-link text-gray-700">Boas Práticas</a>
+            <a href="#conclusao" class="nav-link text-gray-700">Conclusão</a>
+        </div>
+    </nav>
+    
+    <!-- Modal Gemini -->
+    <div id="gemini-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
+                <h3 class="text-xl font-bold text-gray-800">✨ Resposta do Gemini</h3>
+                <button id="close-modal-btn" class="p-2 rounded-full hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="gemini-response" class="p-6 overflow-y-auto space-y-4">
+                <!-- Conteúdo gerado pela API será inserido aqui -->
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+
+        <header class="text-center mb-16">
+            <h1 class="text-5xl font-extrabold text-gray-900 tracking-tight">Guia do Hive para Flutter</h1>
+            <p class="mt-4 text-xl text-gray-600">Dominando a persistência de dados local de forma rápida e eficiente.</p>
+        </header>
+
+        <main class="space-y-20">
+
+            <section id="o-que-e">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                        <span class="ml-3">O que é Hive?</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Qual a diferença entre um banco de dados SQL e NoSQL como o Hive?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-lg text-gray-700 leading-relaxed text-justify">Hive é um banco de dados NoSQL inovador, rápido e leve, escrito inteiramente em Dart e otimizado para o ecossistema Flutter. Sua arquitetura "offline-first" garante que o aplicativo funcione perfeitamente sem conexão com a internet. Diferente de soluções tradicionais como o SQLite, Hive opera com um sistema de chave/valor, eliminando a necessidade de queries SQL complexas e simplificando a manipulação de dados.</p>
+                </div>
+            </section>
+
+            <section id="por-que-usar">
+                 <div class="flex justify-between items-center mb-6">
+                     <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                         <span class="ml-3">Por que usar Hive?</span>
+                     </h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Como o desempenho do Hive se compara a outras soluções de banco de dados locais em Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                     <div class="grid md:grid-cols-2 gap-8">
+                        <div class="p-6 rounded-lg border border-gray-200 shadow-sm">
+                            <h3 class="font-bold text-xl mb-2 text-gray-800">Desempenho</h3>
+                            <p class="text-gray-700">Oferece operações de leitura e escrita extremamente rápidas, superando muitas outras soluções de armazenamento local.</p>
+                        </div>
+                        <div class="p-6 rounded-lg border border-gray-200 shadow-sm">
+                            <h3 class="font-bold text-xl mb-2 text-gray-800">Facilidade</h3>
+                            <p class="text-gray-700">Possui uma API simples e intuitiva, com configuração mínima, permitindo que você comece a usá-lo em minutos.</p>
+                        </div>
+                        <div class="p-6 rounded-lg border border-gray-200 shadow-sm">
+                            <h3 class="font-bold text-xl mb-2 text-gray-800">Flexibilidade</h3>
+                            <p class="text-gray-700">Armazena desde tipos de dados primitivos (int, String) até objetos Dart complexos, através de TypeAdapters.</p>
+                        </div>
+                        <div class="p-6 rounded-lg border border-gray-200 shadow-sm">
+                            <h3 class="font-bold text-xl mb-2 text-gray-800">Compatibilidade</h3>
+                            <p class="text-gray-700">Funciona perfeitamente em todas as plataformas suportadas pelo Flutter: Android, iOS, Web, Windows, macOS e Linux.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="instalacao">
+                 <div class="flex justify-between items-center mb-6">
+                     <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                         <span class="ml-3">Instalação no Flutter</span>
+                     </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Para que servem os pacotes `hive_generator` e `build_runner`?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-6">
+                    <div>
+                        <h3 class="font-semibold text-xl mb-2">1. Adicionar dependências</h3>
+                        <p class="text-gray-700 mb-4">Adicione as seguintes linhas ao seu arquivo `pubspec.yaml`:</p>
+                        <div class="code-block"><pre><code>dependencies:
+  hive: ^2.2.3 # Use a versão mais recente
+  hive_flutter: ^1.1.0 # Use a versão mais recente
+
+dev_dependencies:
+  hive_generator: ^1.1.3 # Use a versão mais recente
+  build_runner: ^2.1.11 # Use a versão mais recente</code></pre></div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-xl mb-2">2. Inicializar no main()</h3>
+                        <p class="text-gray-700 mb-4">Antes de rodar o seu app, inicialize o Hive. O `hive_flutter` simplifica isso.</p>
+                        <div class="code-block"><pre><code>import 'package:hive_flutter/hive_flutter.dart';
+
+void main() async {
+  await Hive.initFlutter();
+  runApp(MyApp());
+}</code></pre></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="plataformas">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                        <span class="ml-3">Hive no Android e iOS</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Onde exatamente os arquivos do Hive são armazenados em cada plataforma?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-lg text-gray-700 text-justify mb-4">A grande vantagem do Hive é que o mesmo código Dart funciona nativamente em ambas as plataformas sem a necessidade de configurações adicionais ou escrita de código nativo.</p>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start"><span class="text-green-500 font-bold mr-2">✓</span><strong>Android:</strong> O Hive salva os dados em arquivos dentro do diretório interno do aplicativo, que é seguro e não requer permissões extras.</li>
+                        <li class="flex items-start"><span class="text-green-500 font-bold mr-2">✓</span><strong>iOS:</strong> De forma similar, os dados são armazenados no diretório de documentos da aplicação, seguindo as diretrizes da Apple.</li>
+                    </ul>
+                </div>
+            </section>
+
+             <section id="box">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7" /></svg>
+                        <span class="ml-3">Conceito de Box</span>
+                    </h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Posso ter vários boxes abertos ao mesmo tempo? Qual o impacto disso?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-lg text-gray-700 text-justify mb-4">Um <strong>Box</strong> é a unidade fundamental de armazenamento no Hive. Pense nele como uma "tabela" em um banco de dados tradicional ou, mais precisamente, como um `Map` persistente que armazena pares de chave/valor. Você pode criar quantos boxes precisar para organizar os dados da sua aplicação.</p>
+                     <div class="code-block"><pre><code>// 1. Abrir um box (será criado se não existir)
+var box = await Hive.openBox('configuracoes');
+
+// 2. Escrever dados
+box.put('theme', 'dark');
+box.put('notificationsEnabled', true);
+
+// 3. Ler dados
+var theme = box.get('theme'); // Retorna 'dark'
+print(theme);</code></pre></div>
+                </div>
+            </section>
+
+             <section id="crud">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        <span class="ml-3">CRUD com Hive</span>
+                    </h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Qual a diferença entre `put()` e `add()` em um box do Hive?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                    <p class="text-lg text-gray-700 text-justify">As operações básicas de banco de dados (Criar, Ler, Atualizar, Deletar) são extremamente simples com a API do Hive.</p>
+                    <div>
+                        <h3 class="font-semibold text-xl mb-2">Create (Inserir) / Update (Atualizar)</h3>
+                        <p class="text-gray-700 mb-2">O método `put()` insere um novo valor se a chave não existir, ou atualiza o valor existente se a chave já estiver no box.</p>
+                        <div class="code-block"><pre><code>var box = Hive.box('users');
+// Inserindo
+await box.put('user1', {'name': 'Ana', 'age': 25});
+// Atualizando
+await box.put('user1', {'name': 'Ana Clara', 'age': 26});</code></pre></div>
+                    </div>
+                     <div>
+                        <h3 class="font-semibold text-xl mb-2">Read (Ler)</h3>
+                        <div class="code-block"><pre><code>var user = box.get('user1');
+print(user['name']); // Saída: Ana Clara</code></pre></div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-xl mb-2">Delete (Remover)</h3>
+                        <div class="code-block"><pre><code>await box.delete('user1');</code></pre></div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="objetos">
+                 <div class="flex justify-between items-center mb-6">
+                     <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                         <span class="ml-3">Armazenando Objetos</span>
+                     </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('O que acontece se eu mudar a estrutura de uma classe que já tem um TypeAdapter gerado?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                     <p class="text-lg text-gray-700 text-justify mb-4">Para armazenar objetos de classes personalizadas, você precisa criar um `TypeAdapter`, que ensina o Hive a converter seu objeto de/para um formato binário. A forma mais fácil é usando anotações e o `hive_generator`.</p>
+                     <div class="code-block"><pre><code>// 1. Anote sua classe
+part 'user.g.dart'; // O build_runner irá gerar este arquivo
+
+@HiveType(typeId: 1) // typeId deve ser único por classe
+class User {
+  @HiveField(0) // Índices devem ser únicos dentro da classe
+  String name;
+
+  @HiveField(1)
+  int age;
+
+  User({required this.name, required this.age});
+}
+
+// 2. Registre o adapter antes de usar o box
+Hive.registerAdapter(UserAdapter());
+
+// 3. Use normalmente
+var userBox = await Hive.openBox<User>('userBox');
+await userBox.put('currentUser', User(name: 'Bia', age: 30));</code></pre></div>
+                </div>
+            </section>
+            
+             <section id="integracao">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        <span class="ml-3">Integração com Flutter</span>
+                    </h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Explique como o ValueListenableBuilder funciona para reatividade.')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                     <p class="text-lg text-gray-700 text-justify mb-4">O pacote `hive_flutter` oferece integração perfeita com os widgets do Flutter, permitindo a criação de UIs reativas que se atualizam automaticamente quando os dados no box mudam, usando o `ValueListenableBuilder`.</p>
+                     <div class="code-block"><pre><code>ValueListenableBuilder(
+  valueListenable: Hive.box('users').listenable(),
+  builder: (context, box, _) {
+    // Este builder será re-executado sempre que
+    // o box 'users' for modificado.
+    var user = box.get('currentUser');
+    if (user == null) {
+        return Text('Nenhum usuário logado.');
+    }
+    return Text('Usuário: ${user.name}');
+  },
+);</code></pre></div>
+                </div>
+            </section>
+            
+             <section id="comparacao">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                        <span class="ml-3">Comparação com SQLite</span>
+                    </h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Em que cenário seria melhor escolher SQLite em vez de Hive?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                     <div class="grid md:grid-cols-2 gap-8">
+                        <div class="p-6 rounded-lg border border-gray-200 shadow-sm">
+                            <h3 class="font-bold text-xl mb-2 text-gray-800">Hive</h3>
+                            <p class="text-gray-700">Simples, extremamente rápido, ideal para armazenamento de chave/valor e objetos Dart serializados. Perfeito para apps que não precisam de relações complexas.</p>
+                        </div>
+                        <div class="p-6 rounded-lg border border-gray-200 shadow-sm">
+                            <h3 class="font-bold text-xl mb-2 text-gray-800">SQLite (via `sqflite`)</h3>
+                            <p class="text-gray-700">Banco de dados relacional robusto. Melhor para dados complexos que exigem queries, junções (`JOINs`) e transações ACID.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+             <section id="casos-de-uso">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75.75l.75 4.5m0 0l4.5.75m-4.5-.75L1.5 19.5m1.409-9.092l4.242 4.242m-4.242 0L19.5 1.5m-9.092 1.408l2.121 2.121m-2.121 0l-2.121 2.121" /></svg>
+                        <span class="ml-3">Casos de Uso</span>
+                    </h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Como eu usaria o Hive para fazer cache de dados de uma API?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <ul class="list-disc list-inside space-y-3 text-gray-700">
+                        <li><strong>Configurações do usuário:</strong> Salvar preferências como tema (claro/escuro), idioma, etc.</li>
+                        <li><strong>Cache local:</strong> Armazenar temporariamente dados vindos de uma API para uso offline e carregamento mais rápido.</li>
+                        <li><strong>Persistência de listas:</strong> Guardar listas de tarefas, notas, ou itens de um carrinho de compras.</li>
+                        <li><strong>Aplicativos offline-first:</strong> Essencial para apps que devem funcionar integralmente sem internet.</li>
+                    </ul>
+                </div>
+            </section>
+            
+             <section id="boas-praticas">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        <span class="ml-3">Boas Práticas</span>
+                    </h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Por que é importante fechar os boxes do Hive?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                     <ul class="list-disc list-inside space-y-3 text-gray-700">
+                        <li><strong>Fechar Boxes:</strong> Sempre feche os boxes que não estão mais em uso para liberar memória (`Hive.close()` ou `box.close()`).</li>
+                        <li><strong>`typeId` únicos:</strong> Garanta que cada `TypeAdapter` registrado tenha um `typeId` único em toda a aplicação.</li>
+                        <li><strong>Evite dados grandes:</strong> O Hive é otimizado para dados pequenos e médios. Evite armazenar arquivos grandes diretamente; prefira salvar o caminho do arquivo.</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="conclusao">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span class="ml-3">Conclusão</span>
+                    </h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Faça um resumo dos principais benefícios do Hive para um desenvolvedor Flutter.')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-lg text-gray-700 text-justify">Hive se estabelece como uma solução de persistência local exclusiva, rápida e extremamente prática para desenvolvedores Flutter. Sua simplicidade, combinada com alto desempenho e compatibilidade multiplataforma nativa, o torna a escolha ideal para uma vasta gama de aplicativos que precisam salvar dados de forma simples e eficiente, funcionando perfeitamente tanto no Android quanto no iOS sem qualquer ajuste de código.</p>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-20 pt-10 border-t border-gray-300">
+             <p class="text-gray-600 mb-4">Guia interativo sobre o banco de dados Hive para Flutter.</p>
+            <button id="export-pdf-btn" class="bg-gray-800 text-white px-6 py-2 rounded-md font-semibold hover:bg-gray-900 transition-colors">Exportar para PDF</button>
+        </footer>
+    </div>
+
+    <script>
+        function setupPdfExport() {
+            const exportBtn = document.getElementById('export-pdf-btn');
+            if (!exportBtn) return;
+
+            exportBtn.addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'pt', 'a4');
+                const margin = 40;
+                const maxWidth = doc.internal.pageSize.getWidth() - margin * 2;
+                let y = margin;
+
+                const addText = (text, size, isBold, isCode = false) => {
+                    if (y > doc.internal.pageSize.getHeight() - margin) {
+                        doc.addPage();
+                        y = margin;
+                    }
+                    doc.setFont(isCode ? 'Courier' : 'Helvetica', isBold ? 'bold' : 'normal');
+                    doc.setFontSize(size);
+                    const lines = doc.splitTextToSize(text, maxWidth);
+                    doc.text(lines, margin, y);
+                    const lineHeight = size * 1.2;
+                    y += (lines.length * lineHeight);
+                };
+
+                const sections = document.querySelectorAll('main > section');
+                sections.forEach(section => {
+                    const title = section.querySelector('h2');
+                    if (title) {
+                        addText(title.innerText, 18, true);
+                        y += 12;
+                    }
+                    
+                    const intro = section.querySelector('p:not(.activity-card p)');
+                     if (intro) {
+                        addText(intro.innerText, 10, false);
+                        y += 15;
+                    }
+
+                    const contentCards = section.querySelectorAll('.activity-card, .activity-card > div');
+                    contentCards.forEach(card => {
+                         const subTitle = card.querySelector('h3');
+                         if(subTitle) {
+                             addText(subTitle.innerText, 14, true);
+                             y += 8;
+                         }
+                         const paragraphs = card.querySelectorAll('p:not(.text-center)');
+                         paragraphs.forEach(p => {
+                             addText(p.innerText, 10, false);
+                             y += 8;
+                         });
+                         const listItems = card.querySelectorAll('li');
+                         listItems.forEach(li => {
+                             addText(`- ${li.innerText}`, 10, false);
+                             y += 8;
+                         });
+                         const codeBlocks = card.querySelectorAll('.code-block');
+                         codeBlocks.forEach(code => {
+                             addText(code.innerText, 9, false, true);
+                             y += 12;
+                         });
+                    });
+                     y += 24;
+                });
+                
+                doc.save('guia-hive-flutter.pdf');
+            });
+        }
+
+        const modal = document.getElementById('gemini-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const geminiResponseEl = document.getElementById('gemini-response');
+        let isGeminiLoading = false;
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            isGeminiLoading = false;
+        });
+
+        async function callGemini(prompt, maxRetries = 3) {
+            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+            const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8"; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            
+            let lastError = null;
+
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        lastError = new Error(`HTTP error! status: ${response.status}`);
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                        continue;
+                    }
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.text) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        lastError = new Error("Resposta da API inválida ou vazia.");
+                         const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                        continue;
+                    }
+                } catch (error) {
+                    lastError = error;
+                    const delay = Math.pow(2, attempt) * 1000;
+                    await new Promise(res => setTimeout(res, delay));
+                }
+            }
+
+            console.error("API call failed after all retries:", lastError);
+            return "Desculpe, não foi possível obter uma resposta da IA no momento. Por favor, verifique sua conexão ou tente novamente mais tarde.";
+        }
+
+        function parseMarkdown(text) {
+            const lines = text.split('\n');
+            let html = '';
+            let inCodeBlock = false;
+            let inList = false;
+
+            lines.forEach(line => {
+                if (line.startsWith('```')) {
+                    if (inCodeBlock) {
+                        html += '</code></pre>';
+                        inCodeCodeBlock = false;
+                    } else {
+                        html += '<pre><code class="language-dart code-block">';
+                        inCodeBlock = true;
+                    }
+                    return;
+                }
+
+                if (inCodeBlock) {
+                    html += line.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\n';
+                    return;
+                }
+
+                if (line.startsWith('* ') || line.startsWith('- ')) {
+                    if (!inList) {
+                        html += '<ul>';
+                        inList = true;
+                    }
+                    html += `<li>${processInlineMarkdown(line.substring(2))}</li>`;
+                } else {
+                    if (inList) {
+                        html += '</ul>';
+                        inList = false;
+                    }
+                    if (line.startsWith('### ')) {
+                        html += `<h3>${processInlineMarkdown(line.substring(4))}</h3>`;
+                    } else if (line.startsWith('## ')) {
+                        html += `<h2>${processInlineMarkdown(line.substring(3))}</h2>`;
+                    } else if (line.startsWith('# ')) {
+                        html += `<h1>${processInlineMarkdown(line.substring(2))}</h1>`;
+                    } else if (line.trim() !== '') {
+                        html += `<p>${processInlineMarkdown(line)}</p>`;
+                    }
+                }
+            });
+
+            if (inList) html += '</ul>';
+            if (inCodeBlock) html += '</code></pre>';
+            return html;
+        }
+
+        function processInlineMarkdown(line) {
+            return line
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`(.*?)`/g, '<code>$1</code>');
+        }
+
+        async function deepenConcept(topic) {
+            if (isGeminiLoading) return;
+            isGeminiLoading = true;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = true);
+
+            const prompt = `No contexto de Flutter e Dart, explique o conceito de "${topic}" para um iniciante. Formate a resposta de forma simples e direta, com títulos, listas e exemplos de código se necessário.`;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            geminiResponseEl.innerHTML = '<div class="flex justify-center items-center h-full"><div class="loader"></div></div>';
+
+            const explanation = await callGemini(prompt);
+            geminiResponseEl.innerHTML = parseMarkdown(explanation);
+            isGeminiLoading = false;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const drawerBtn = document.getElementById('drawer-btn');
+            const drawerNav = document.getElementById('drawer-nav');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+            const navLinks = drawerNav.querySelectorAll('a');
+
+            function toggleDrawer() {
+                drawerNav.classList.toggle('-translate-x-full');
+                drawerNav.classList.toggle('translate-x-0');
+                drawerOverlay.classList.toggle('hidden');
+            }
+
+            drawerBtn.addEventListener('click', toggleDrawer);
+            drawerOverlay.addEventListener('click', toggleDrawer);
+
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    toggleDrawer();
+                    const targetElement = document.querySelector(this.getAttribute('href'));
+                    if(targetElement) {
+                        setTimeout(() => {
+                             targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }, 300); // Aguarda a animação do drawer fechar
+                    }
+                });
+            });
+            
+            setupPdfExport();
+        });
+    </script>
+</body>
+</html>

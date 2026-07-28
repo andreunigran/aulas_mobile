@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia do Widget Dismissible no Flutter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .code-block {
+            background-color: #0d1117; 
+            color: #c9d1d9;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 0.875rem;
+        }
+        .code-block .keyword { color: #ff7b72; } 
+        .code-block .type { color: #d2a8ff; } 
+        .code-block .string { color: #a5d6ff; }
+        .code-block .comment { color: #8b949e; }
+        .code-block .property { color: #79c0ff; }
+        .code-block .number { color: #f6ad55; }
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            font-weight: 500;
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+        .nav-link:hover {
+            background-color: #e2e8f0; 
+        }
+        .activity-card {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .gemini-btn {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease-in-out;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .gemini-btn:hover {
+            background-color: #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+        }
+        .gemini-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #gemini-response h2 { font-size: 1.5rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
+        #gemini-response h3 { font-size: 1.25rem; font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.5rem; }
+        #gemini-response ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+        #gemini-response strong { font-weight: 600; }
+        #gemini-response code {
+            background-color: #e2e8f0;
+            color: #2d3748;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
+        }
+        #gemini-response pre code {
+            display: block;
+            white-space: pre-wrap;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .loader {
+            width: 50px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 8px solid #0000;
+            border-right-color: #818cf8;
+            animation: l24 1s infinite linear;
+        }
+        @keyframes l24 {
+            100% {transform: rotate(1turn)}
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-gray-800">
+
+    <!-- Botão para abrir o Drawer -->
+    <button id="drawer-btn" class="fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Overlay -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+    <!-- Drawer Navigation -->
+    <nav id="drawer-nav" class="fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+        <div class="p-4">
+            <h3 class="text-xl font-bold mb-4">Navegação</h3>
+            <a href="#o-que-e" class="nav-link">O que é?</a>
+            <a href="#estrutura" class="nav-link">Estrutura Básica</a>
+            <a href="#direcoes" class="nav-link">Direções de Deslize</a>
+            <a href="#exemplo-pratico" class="nav-link">Exemplo Prático</a>
+            <a href="#vantagens" class="nav-link">Vantagens</a>
+        </div>
+    </nav>
+    
+    <!-- Modal Gemini -->
+    <div id="gemini-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
+                <h3 class="text-xl font-bold text-gray-800">✨ Resposta do Gemini</h3>
+                <button id="close-modal-btn" class="p-2 rounded-full hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="gemini-response" class="p-6 overflow-y-auto space-y-4">
+                <!-- Conteúdo gerado pela API será inserido aqui -->
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Guia do Widget Dismissible no Flutter</h1>
+            <p class="mt-4 text-lg text-gray-600">Dominando interações de deslize em suas listas.</p>
+        </header>
+
+        <main class="space-y-20">
+
+            <section id="o-que-e">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">1. O que é o Dismissible?</h2>
+                    <button class="gemini-btn" onclick="deepenConcept('O que é o widget Dismissible no Flutter e quais seus casos de uso?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-lg text-gray-700">Um widget inovador que permite remover ou interagir com itens por gestos de deslize. Suas principais características são:</p>
+                    <ul class="list-disc list-inside space-y-2 mt-4 text-gray-700">
+                        <li>Muito usado em listas dinâmicas, como caixas de e-mail, listas de tarefas e apps de mensagens.</li>
+                        <li>Permite customização completa do comportamento e visual durante o deslize.</li>
+                        <li>Trabalha junto com <code>ListView</code>, <code>GridView</code> ou qualquer widget que gere múltiplos elementos.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="estrutura">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">2. Estrutura básica</h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Descreva em detalhes as propriedades essenciais do widget Dismissible: key, onDismissed, background e child.')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <div class="code-block" id="estrutura-code"><pre><code class="language-dart"><span class="type">Dismissible</span>(
+  <span class="property">key:</span> <span class="type">Key</span>(item.id), <span class="comment">// Identificador único, obrigatório</span>
+  <span class="property">onDismissed:</span> (direction) { 
+    <span class="comment">// Função chamada quando o item é removido</span>
+  },
+  <span class="property">background:</span> <span class="type">Container</span>(<span class="property">color:</span> <span class="type">Colors</span>.red), <span class="comment">// Área exibida ao deslizar</span>
+  <span class="property">child:</span> <span class="type">ListTile</span>(<span class="property">title:</span> <span class="type">Text</span>(item.nome)),  <span class="comment">// Conteúdo principal</span>
+)</code></pre></div>
+                    <div class="text-center mt-4">
+                        <button class="gemini-btn" onclick="explainCode('estrutura-code')">✨ Explicar Código</button>
+                    </div>
+                    <p class="mt-4 font-semibold text-gray-800">Comentários importantes:</p>
+                    <ul class="list-disc list-inside space-y-2 mt-2 text-gray-700">
+                        <li><strong><code>key</code></strong>: É crucial, pois identifica cada item da lista. Sem isso, o Flutter não sabe qual item foi removido.</li>
+                        <li><strong><code>onDismissed</code></strong>: Executa a lógica (ex: deletar da lista, banco de dados, mostrar aviso).</li>
+                        <li><strong><code>background</code></strong>: Mostra o que aparece quando o usuário arrasta (ícone de lixeira, cor, etc.).</li>
+                        <li><strong><code>child</code></strong>: O item em si (normalmente <code>ListTile</code>, mas pode ser qualquer widget).</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="direcoes">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">3. Direções de deslize</h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Quais são as diferentes DismissDirection no Flutter e como usar direções diferentes para ações distintas?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                     <p class="text-gray-700 mb-4">Você pode controlar para qual lado o item pode ser deslizado:</p>
+                     <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><code>DismissDirection.startToEnd</code>: Da esquerda para a direita.</li>
+                        <li><code>DismissDirection.endToStart</code>: Da direita para a esquerda.</li>
+                        <li><code>DismissDirection.horizontal</code>: Aceita os dois lados.</li>
+                        <li><code>DismissDirection.vertical</code>: Aceita deslizar para cima ou para baixo.</li>
+                        <li><code>DismissDirection.up</code> e <code>DismissDirection.down</code>: Direção única vertical.</li>
+                     </ul>
+                     <p class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">💡 <strong>Estratégia:</strong> Usar direções diferentes para ações distintas (ex: arrastar para direita = arquivar, esquerda = deletar).</p>
+                </div>
+            </section>
+
+             <section id="exemplo-pratico">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">4. Exemplo prático em lista</h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Como funciona a integração do Dismissible com o ListView.builder?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <div class="code-block" id="exemplo-pratico-code"><pre><code class="language-dart"><span class="type">ListView</span>.<span class="keyword">builder</span>(
+  <span class="property">itemCount:</span> items.length, <span class="comment">// quantidade de elementos</span>
+  <span class="property">itemBuilder:</span> (context, index) {
+    <span class="keyword">final</span> item = items[index]; <span class="comment">// item atual da lista</span>
+
+    <span class="keyword">return</span> <span class="type">Dismissible</span>(
+      <span class="property">key:</span> <span class="type">Key</span>(item), <span class="comment">// chave única para o item</span>
+      <span class="property">direction:</span> <span class="type">DismissDirection</span>.endToStart, 
+      <span class="comment">// só permite deslizar da direita para a esquerda</span>
+
+      <span class="property">onDismissed:</span> (direction) {
+        items.removeAt(index); <span class="comment">// remove da lista</span>
+        <span class="type">ScaffoldMessenger</span>.of(context).showSnackBar(
+          <span class="type">SnackBar</span>(<span class="property">content:</span> <span class="type">Text</span>(<span class="string">'$item removido'</span>)), 
+          <span class="comment">// mostra aviso na tela</span>
+        );
+      },
+
+      <span class="property">background:</span> <span class="type">Container</span>(
+        <span class="property">color:</span> <span class="type">Colors</span>.red, <span class="comment">// cor de fundo</span>
+        <span class="property">alignment:</span> <span class="type">Alignment</span>.centerRight, 
+        <span class="property">padding:</span> <span class="type">EdgeInsets</span>.symmetric(<span class="property">horizontal:</span> <span class="number">20</span>),
+        <span class="property">child:</span> <span class="type">Icon</span>(<span class="type">Icons</span>.delete, <span class="property">color:</span> <span class="type">Colors</span>.white), 
+      ),
+
+      <span class="property">child:</span> <span class="type">ListTile</span>(<span class="property">title:</span> <span class="type">Text</span>(item)), 
+    );
+  },
+);</code></pre></div>
+                    <div class="text-center mt-4">
+                        <button class="gemini-btn" onclick="explainCode('exemplo-pratico-code')">✨ Explicar Código</button>
+                    </div>
+                     <p class="mt-4 font-semibold text-gray-800">Comentários do exemplo:</p>
+                     <ul class="list-disc list-inside space-y-2 mt-2 text-gray-700">
+                         <li><strong><code>ListView.builder</code></strong>: Gera a lista dinamicamente para otimizar a performance.</li>
+                         <li><strong><code>Dismissible</code></strong>: Envolve cada <code>ListTile</code>, tornando-o "deslizável".</li>
+                         <li><strong><code>onDismissed</code></strong>: Remove o item da fonte de dados (a lista `items`) e mostra um <code>SnackBar</code> de confirmação.</li>
+                         <li><strong><code>background</code></strong>: Cria uma área vermelha com um ícone de lixeira que aparece conforme o usuário desliza o item.</li>
+                     </ul>
+                </div>
+            </section>
+            
+            <section id="vantagens">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">5. Vantagens</h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Resuma as principais vantagens de usar o widget Dismissible na UI de um app Flutter.')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Experiência intuitiva:</strong> O usuário entende o gesto sem precisar de instruções.</li>
+                        <li><strong>Feedback visual imediato:</strong> Cores e ícones ajudam a confirmar a ação.</li>
+                        <li><strong>Menos botões na tela:</strong> Economiza espaço na interface, resultando em um design mais limpo.</li>
+                        <li><strong>Altamente customizável:</strong> Pode mudar o comportamento dependendo da direção do deslize.</li>
+                    </ul>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-20 pt-8 border-t border-gray-200">
+             <p class="text-gray-500 mb-4">Guia interativo sobre o widget Dismissible no Flutter.</p>
+            <button id="export-pdf-btn" class="bg-gray-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-gray-800 transition-colors">Exportar para PDF</button>
+        </footer>
+    </div>
+
+    <script>
+        function setupPdfExport() {
+            const exportBtn = document.getElementById('export-pdf-btn');
+            if (!exportBtn) return;
+
+            exportBtn.addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'pt', 'a4');
+                const margin = 40;
+                const maxWidth = doc.internal.pageSize.getWidth() - margin * 2;
+                let y = margin;
+
+                const addText = (text, size, isBold, isCode = false) => {
+                    if (y > doc.internal.pageSize.getHeight() - margin) {
+                        doc.addPage();
+                        y = margin;
+                    }
+                    doc.setFont(isCode ? 'Courier' : 'Helvetica', isBold ? 'bold' : 'normal');
+                    doc.setFontSize(size);
+                    const lines = doc.splitTextToSize(text, maxWidth);
+                    doc.text(lines, margin, y);
+                    const lineHeight = size * 1.2;
+                    y += (lines.length * lineHeight);
+                };
+
+                const sections = document.querySelectorAll('main > section');
+                sections.forEach(section => {
+                    const title = section.querySelector('h2');
+                    if (title) {
+                        addText(title.innerText, 18, true);
+                        y += 12;
+                    }
+                    
+                    const intro = section.querySelector('p:not(.activity-card p)');
+                     if (intro) {
+                        addText(intro.innerText, 10, false);
+                        y += 15;
+                    }
+
+                    const contentCards = section.querySelectorAll('.activity-card, .activity-card > div');
+                    contentCards.forEach(card => {
+                         const subTitle = card.querySelector('h3');
+                         if(subTitle) {
+                             addText(subTitle.innerText, 14, true);
+                             y += 8;
+                         }
+                         const paragraphs = card.querySelectorAll('p:not(.text-center)');
+                         paragraphs.forEach(p => {
+                             addText(p.innerText, 10, false);
+                             y += 8;
+                         });
+                         const listItems = card.querySelectorAll('li');
+                         listItems.forEach(li => {
+                             addText(`- ${li.innerText}`, 10, false);
+                             y += 8;
+                         });
+                         const codeBlocks = card.querySelectorAll('.code-block');
+                         codeBlocks.forEach(code => {
+                             addText(code.innerText, 9, false, true);
+                             y += 12;
+                         });
+                    });
+                     y += 24;
+                });
+                
+                doc.save('guia-flutter-dismissible.pdf');
+            });
+        }
+
+        const modal = document.getElementById('gemini-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const geminiResponseEl = document.getElementById('gemini-response');
+        let isGeminiLoading = false;
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            isGeminiLoading = false;
+        });
+
+        async function callGemini(prompt, maxRetries = 3) {
+            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+            const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8"; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            
+            let lastError = null;
+
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        lastError = new Error(`HTTP error! status: ${response.status}`);
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                        continue;
+                    }
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.text) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        lastError = new Error("Resposta da API inválida ou vazia.");
+                         const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                        continue;
+                    }
+                } catch (error) {
+                    lastError = error;
+                    const delay = Math.pow(2, attempt) * 1000;
+                    await new Promise(res => setTimeout(res, delay));
+                }
+            }
+
+            console.error("API call failed after all retries:", lastError);
+            return "Desculpe, não foi possível obter uma resposta da IA no momento. Por favor, verifique sua conexão ou tente novamente mais tarde.";
+        }
+
+        function parseMarkdown(text) {
+            const lines = text.split('\n');
+            let html = '';
+            let inCodeBlock = false;
+            let inList = false;
+
+            lines.forEach(line => {
+                if (line.startsWith('```')) {
+                    if (inCodeBlock) {
+                        html += '</code></pre>';
+                        inCodeBlock = false;
+                    } else {
+                        html += '<pre><code class="language-dart code-block bg-gray-800 text-white p-4 rounded-md block">';
+                        inCodeBlock = true;
+                    }
+                    return;
+                }
+
+                if (inCodeBlock) {
+                    html += line.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\n';
+                    return;
+                }
+
+                if (line.startsWith('* ') || line.startsWith('- ')) {
+                    if (!inList) {
+                        html += '<ul>';
+                        inList = true;
+                    }
+                    html += `<li>${processInlineMarkdown(line.substring(2))}</li>`;
+                } else {
+                    if (inList) {
+                        html += '</ul>';
+                        inList = false;
+                    }
+                    if (line.startsWith('### ')) {
+                        html += `<h3>${processInlineMarkdown(line.substring(4))}</h3>`;
+                    } else if (line.startsWith('## ')) {
+                        html += `<h2>${processInlineMarkdown(line.substring(3))}</h2>`;
+                    } else if (line.startsWith('# ')) {
+                        html += `<h1>${processInlineMarkdown(line.substring(2))}</h1>`;
+                    } else if (line.trim() !== '') {
+                        html += `<p>${processInlineMarkdown(line)}</p>`;
+                    }
+                }
+            });
+
+            if (inList) html += '</ul>';
+            if (inCodeBlock) html += '</code></pre>';
+            return html;
+        }
+
+
+
+        function processInlineMarkdown(line) {
+            return line
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`(.*?)`/g, '<code class="bg-gray-200 text-gray-800 px-1 py-0.5 rounded">$1</code>');
+        }
+
+        async function deepenConcept(topic) {
+            if (isGeminiLoading) return;
+            isGeminiLoading = true;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = true);
+
+            const prompt = `Explique o conceito de "${topic}" no contexto do Flutter de forma simples, direta e curta para um iniciante. Formate a resposta com títulos, listas e blocos de código se necessário.`;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            geminiResponseEl.innerHTML = '<div class="flex justify-center items-center h-full"><div class="loader"></div></div>';
+
+            const explanation = await callGemini(prompt);
+            geminiResponseEl.innerHTML = parseMarkdown(explanation);
+            isGeminiLoading = false;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+        }
+        
+        async function explainCode(elementId) {
+            if (isGeminiLoading) return;
+            isGeminiLoading = true;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = true);
+
+            const codeElement = document.getElementById(elementId);
+            if (!codeElement) {
+                isGeminiLoading = false;
+                 document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+                return;
+            }
+            const code = codeElement.innerText;
+            
+            const prompt = `Explique o seguinte código Flutter/Dart em português, de forma simples e direta para um iniciante:\n\n\`\`\`dart\n${code}\n\`\`\``;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            geminiResponseEl.innerHTML = '<div class="flex justify-center items-center h-full"><div class="loader"></div></div>';
+
+            const explanation = await callGemini(prompt);
+            geminiResponseEl.innerHTML = parseMarkdown(explanation);
+            isGeminiLoading = false;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const drawerBtn = document.getElementById('drawer-btn');
+            const drawerNav = document.getElementById('drawer-nav');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+            const navLinks = drawerNav.querySelectorAll('a');
+
+            function toggleDrawer() {
+                drawerNav.classList.toggle('-translate-x-full');
+                drawerNav.classList.toggle('translate-x-0');
+                drawerOverlay.classList.toggle('hidden');
+            }
+
+            drawerBtn.addEventListener('click', toggleDrawer);
+            drawerOverlay.addEventListener('click', toggleDrawer);
+
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    toggleDrawer();
+                    const targetElement = document.querySelector(this.getAttribute('href'));
+                    if(targetElement) {
+                        setTimeout(() => {
+                             targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }, 300); // Aguarda a animação do drawer fechar
+                    }
+                });
+            });
+            
+            setupPdfExport();
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia de SharedPreferences no Flutter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A single-page application with a drawer navigation menu for smooth scrolling between thematic sections. This structure provides a clear and organized learning path for SharedPreferences in Flutter. The content is segmented into logical cards for better readability. -->
+    <!-- Visualization & Content Choices: The content is structured into thematic sections covering the SharedPreferences package. Core concepts, installation, and usage are presented in clear, concise cards with commented code examples. This design prioritizes a clean, organized, and educational user experience. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .code-block {
+            background-color: #2d3748; /* gray-800 */
+            color: #e2e8f0; /* gray-300 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", monospace;
+            font-size: 0.875rem;
+        }
+        .code-block .keyword { color: #63b3ed; } /* blue-400 */
+        .code-block .type { color: #4fd1c5; } /* teal-400 */
+        .code-block .string { color: #f6ad55; } /* orange-400 */
+        .code-block .comment { color: #a0aec0; } /* gray-500 */
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            font-weight: 500;
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+        .nav-link:hover {
+            background-color: #e2e8f0; /* gray-200 */
+        }
+        .activity-card {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-gray-800">
+
+    <!-- Botão para abrir o Drawer -->
+    <button id="drawer-btn" class="fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Overlay -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+    <!-- Drawer Navigation -->
+    <nav id="drawer-nav" class="fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+        <div class="p-4">
+            <h3 class="text-xl font-bold mb-4">Navegação</h3>
+            <a href="#introducao" class="nav-link">Introdução</a>
+            <a href="#instalacao" class="nav-link">Instalação</a>
+            <a href="#plataformas" class="nav-link">Funcionamento</a>
+            <a href="#uso-basico" class="nav-link">Uso Básico</a>
+            <a href="#operacoes" class="nav-link">Operações Suportadas</a>
+            <a href="#conclusao" class="nav-link">Conclusão</a>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Guia de SharedPreferences no Flutter</h1>
+            <p class="mt-4 text-lg text-gray-600">Armazenando dados simples de forma persistente.</p>
+        </header>
+
+        <main class="space-y-20">
+
+            <section id="introducao">
+                <h2 class="text-3xl font-bold mb-6 text-center">O que é SharedPreferences?</h2>
+                <div class="activity-card">
+                    <p class="text-lg text-gray-700 mb-4">`SharedPreferences` é uma API usada para armazenar pequenas quantidades de dados simples em formato chave-valor. Esses dados são persistidos no armazenamento interno do dispositivo e podem ser acessados mesmo após o aplicativo ser fechado e reaberto, sendo ideal para salvar configurações do usuário ou o estado do aplicativo.</p>
+                    <h3 class="text-2xl font-semibold mb-3">Características Principais</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Dados Simples:</strong> Permite salvar tipos de dados primitivos como `int`, `double`, `bool`, `String` e listas de `String`.</li>
+                        <li><strong>Leve e Simples:</strong> Ideal para armazenar preferências, como tema escuro, status de login, ou a última tela visitada.</li>
+                        <li><strong>Chave-Valor:</strong> Os dados são armazenados como pares, onde cada valor é associado a uma chave única.</li>
+                        <li><strong>Persistente:</strong> Os dados salvos permanecem até que sejam explicitamente removidos ou o aplicativo seja desinstalado.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="instalacao">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Instalação</h2>
+                </div>
+                <div class="activity-card">
+                    <p class="text-gray-700 mb-4">Para adicionar o pacote `shared_preferences` ao seu projeto Flutter, execute o seguinte comando no terminal:</p>
+                    <div class="code-block"><pre><code>flutter pub add shared_preferences</code></pre></div>
+                    <p class="text-gray-700 my-4">Isso adicionará a dependência ao seu arquivo `pubspec.yaml`:</p>
+                     <div class="code-block"><pre><code><span class="keyword">dependencies:</span>
+  shared_preferences: ^2.2.2</code></pre></div>
+                </div>
+            </section>
+            
+            <section id="plataformas">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Como Funciona em Cada Plataforma</h2>
+                </div>
+                <div class="activity-card">
+                     <p class="text-gray-700 mb-4">O pacote `shared_preferences` abstrai a implementação nativa de cada sistema operacional, fornecendo uma API única em Dart.</p>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><strong>Android:</strong> Utiliza a API nativa `SharedPreferences` do Android para salvar os dados localmente.</li>
+                        <li><strong>iOS:</strong> Utiliza o `NSUserDefaults`, que é o equivalente ao `SharedPreferences` no ecossistema da Apple, para persistir os dados.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="uso-basico">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Uso Básico</h2>
+                </div>
+                <div class="activity-card">
+                    <p class="text-gray-700 mb-4">A utilização do pacote envolve obter uma instância do `SharedPreferences` e, a partir dela, chamar os métodos para salvar, ler ou remover dados de forma assíncrona.</p>
+                    <div class="code-block"><pre><code class="language-dart"><span class="keyword">import</span> <span class="string">'package:shared_preferences/shared_preferences.dart'</span>;
+
+<span class="comment">// Função para salvar um dado (ex: nome do usuário)</span>
+<span class="keyword">Future</span>&lt;<span class="keyword">void</span>&gt; salvarNome(<span class="type">String</span> nome) <span class="keyword">async</span> {
+  <span class="keyword">final</span> prefs = <span class="keyword">await</span> <span class="type">SharedPreferences</span>.getInstance();
+  <span class="keyword">await</span> prefs.setString(<span class="string">'username'</span>, nome);
+}
+
+<span class="comment">// Função para carregar um dado</span>
+<span class="keyword">Future</span>&lt;<span class="type">String?</span>&gt; carregarNome() <span class="keyword">async</span> {
+  <span class="keyword">final</span> prefs = <span class="keyword">await</span> <span class="type">SharedPreferences</span>.getInstance();
+  <span class="comment">// Retorna o nome salvo, ou null se a chave não existir</span>
+  <span class="keyword">return</span> prefs.getString(<span class="string">'username'</span>);
+}
+
+<span class="comment">// Função para remover um dado</span>
+<span class="keyword">Future</span>&lt;<span class="keyword">void</span>&gt; removerNome() <span class="keyword">async</span> {
+  <span class="keyword">final</span> prefs = <span class="keyword">await</span> <span class="type">SharedPreferences</span>.getInstance();
+  <span class="keyword">await</span> prefs.remove(<span class="string">'username'</span>);
+}
+</code></pre></div>
+                </div>
+            </section>
+
+            <section id="operacoes">
+                <h2 class="text-3xl font-bold mb-6 text-center">Operações Suportadas</h2>
+                <p class="text-center text-gray-600 mb-10 max-w-3xl mx-auto">
+                    O `SharedPreferences` suporta os tipos de dados primitivos mais comuns, além de listas de strings.
+                </p>
+                <div class="activity-card overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="p-3 font-semibold">Operação</th>
+                                <th class="p-3 font-semibold">Descrição</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b"><td class="p-3 font-mono">setString(key, value)</td><td class="p-3">Armazena uma `String`.</td></tr>
+                            <tr class="border-b"><td class="p-3 font-mono">setInt(key, value)</td><td class="p-3">Armazena um `int`.</td></tr>
+                            <tr class="border-b"><td class="p-3 font-mono">setBool(key, value)</td><td class="p-3">Armazena um `bool`.</td></tr>
+                            <tr class="border-b"><td class="p-3 font-mono">setDouble(key, value)</td><td class="p-3">Armazena um `double`.</td></tr>
+                            <tr class="border-b"><td class="p-3 font-mono">setStringList(key, value)</td><td class="p-3">Armazena uma `List<String>`.</td></tr>
+                            <tr class="border-b"><td class="p-3 font-mono">getString(key)</td><td class="p-3">Recupera uma `String`.</td></tr>
+                            <tr class="border-b"><td class="p-3 font-mono">getInt(key)</td><td class="p-3">Recupera um `int`.</td></tr>
+                            <tr class="border-b"><td class="p-3 font-mono">getBool(key)</td><td class="p-3">Recupera um `bool`.</td></tr>
+                            <tr class="border-b"><td class="p-3 font-mono">getDouble(key)</td><td class="p-3">Recupera um `double`.</td></tr>
+                            <tr class="border-b"><td class="p-3 font-mono">getStringList(key)</td><td class="p-3">Recupera uma `List<String>`.</td></tr>
+                             <tr class="border-b"><td class="p-3 font-mono">remove(key)</td><td class="p-3">Remove o dado armazenado na chave especificada.</td></tr>
+                            <tr><td class="p-3 font-mono">clear()</td><td class="p-3">Remove todos os dados armazenados.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <section id="conclusao">
+                <h2 class="text-3xl font-bold mb-6 text-center">Conclusão e Boas Práticas</h2>
+                <div class="activity-card">
+                     <p class="text-gray-700 mb-4">`SharedPreferences` é uma ferramenta excelente para persistência de dados simples e não sensíveis. Para informações críticas como tokens de autenticação ou senhas, prefira sempre o `flutter_secure_storage`.</p>
+                    <ul class="list-disc list-inside space-y-3 text-gray-700">
+                        <li><strong>Use para dados não sensíveis:</strong> Configurações de UI (tema, idioma), flags de controle (ex: "já viu o tutorial?"), etc.</li>
+                        <li><strong>Seja consistente com as chaves:</strong> Crie constantes para as chaves para evitar erros de digitação.</li>
+                        <li><strong>Cuidado com dados grandes:</strong> Evite armazenar grandes volumes de dados, pois isso pode impactar a performance.</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-20 pt-8 border-t border-gray-200">
+            <p class="text-gray-500 mb-4">Aplicação Interativa gerada para explorar SharedPreferences no Flutter.</p>
+            <button id="export-pdf-btn" class="bg-gray-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-gray-800 transition-colors">Exportar para PDF</button>
+        </footer>
+    </div>
+
+    <script>
+        function setupPdfExport() {
+            const exportBtn = document.getElementById('export-pdf-btn');
+            if (!exportBtn) return;
+
+            exportBtn.addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'pt', 'a4');
+                const margin = 40;
+                const maxWidth = doc.internal.pageSize.getWidth() - margin * 2;
+                let y = margin;
+
+                const addText = (text, size, isBold, isCode = false) => {
+                    if (y > doc.internal.pageSize.getHeight() - margin) {
+                        doc.addPage();
+                        y = margin;
+                    }
+                    doc.setFont(isCode ? 'Courier' : 'Helvetica', isBold ? 'bold' : 'normal');
+                    doc.setFontSize(size);
+                    const lines = doc.splitTextToSize(text, maxWidth);
+                    doc.text(lines, margin, y);
+                    const lineHeight = size * 1.2;
+                    y += (lines.length * lineHeight);
+                };
+
+                const sections = document.querySelectorAll('main > section');
+                sections.forEach(section => {
+                    const title = section.querySelector('h2');
+                    if (title) {
+                        addText(title.innerText, 18, true);
+                        y += 12;
+                    }
+                    
+                    const intro = section.querySelector('p.text-center');
+                     if (intro) {
+                        addText(intro.innerText, 10, false);
+                        y += 15;
+                    }
+
+                    const contentCards = section.querySelectorAll('.activity-card, .activity-card > div');
+                    contentCards.forEach(card => {
+                         const subTitle = card.querySelector('h3');
+                         if(subTitle) {
+                             addText(subTitle.innerText, 14, true);
+                             y += 8;
+                         }
+                         const paragraphs = card.querySelectorAll('p:not(.text-center)');
+                         paragraphs.forEach(p => {
+                             addText(p.innerText, 10, false);
+                             y += 8;
+                         });
+                         const listItems = card.querySelectorAll('li');
+                         listItems.forEach(li => {
+                             addText(`- ${li.innerText}`, 10, false);
+                             y += 8;
+                         });
+                         const codeBlocks = card.querySelectorAll('.code-block');
+                         codeBlocks.forEach(code => {
+                             addText(code.innerText, 9, false, true);
+                             y += 12;
+                         });
+                    });
+                     y += 24;
+                });
+                
+                doc.save('guia-flutter-shared-preferences.pdf');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const drawerBtn = document.getElementById('drawer-btn');
+            const drawerNav = document.getElementById('drawer-nav');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+            const navLinks = drawerNav.querySelectorAll('a');
+
+            function toggleDrawer() {
+                drawerNav.classList.toggle('-translate-x-full');
+                drawerNav.classList.toggle('translate-x-0');
+                drawerOverlay.classList.toggle('hidden');
+            }
+
+            drawerBtn.addEventListener('click', toggleDrawer);
+            drawerOverlay.addEventListener('click', toggleDrawer);
+
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    toggleDrawer();
+                    const targetElement = document.querySelector(this.getAttribute('href'));
+                    if(targetElement) {
+                        setTimeout(() => {
+                             targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }, 300); // Aguarda a animação do drawer fechar
+                    }
+                });
+            });
+            
+            setupPdfExport();
+        });
+    </script>
+</body>
+</html>

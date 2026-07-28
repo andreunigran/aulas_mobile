@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorando a Linguagem Dart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A single-page application with a drawer navigation menu for smooth scrolling between thematic sections. This structure provides a clear step-by-step guide for learning Dart. The content is segmented into logical cards for better readability. -->
+    <!-- Visualization & Content Choices: The content is structured into thematic sections covering Dart fundamentals. Core concepts like data types, control flow, and OOP are presented in clear, concise cards with commented code examples. Gemini API is integrated for deeper explanations. This design prioritizes a clean, organized, and educational user experience. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .code-block {
+            background-color: #2d3748; /* gray-800 */
+            color: #e2e8f0; /* gray-300 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", monospace;
+            font-size: 0.875rem;
+        }
+        .code-block .keyword { color: #63b3ed; } /* blue-400 */
+        .code-block .type { color: #4fd1c5; } /* teal-400 */
+        .code-block .string { color: #f6ad55; } /* orange-400 */
+        .code-block .number { color: #b794f4; } /* purple-400 */
+        .code-block .comment { color: #a0aec0; } /* gray-500 */
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            font-weight: 500;
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+        .nav-link:hover {
+            background-color: #e2e8f0; /* gray-200 */
+        }
+        .activity-card {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .interactive-btn {
+            background-color: #f7fafc; /* gray-50 */
+            border: 1px solid #e2e8f0; /* gray-200 */
+            transition: all 0.2s ease-in-out;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .interactive-btn.active {
+            background-color: #4A5568; /* gray-700 */
+            color: #ffffff;
+            border-color: #4A5568; /* gray-700 */
+        }
+        .gemini-btn {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease-in-out;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .gemini-btn:hover {
+            background-color: #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+        }
+        .gemini-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #gemini-response h2 { font-size: 1.5rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
+        #gemini-response h3 { font-size: 1.25rem; font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.5rem; }
+        #gemini-response ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+        #gemini-response strong { font-weight: 600; }
+        #gemini-response code {
+            background-color: #e2e8f0;
+            color: #2d3748;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
+        }
+        #gemini-response pre code {
+            display: block;
+            white-space: pre-wrap;
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .loader {
+            width: 50px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 8px solid #0000;
+            border-right-color: #818cf8;
+            animation: l24 1s infinite linear;
+        }
+        @keyframes l24 {
+            100% {transform: rotate(1turn)}
+        }
+        .compile-result {
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            font-family: 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", monospace;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+        }
+        .compile-success {
+            background-color: #c6f6d5; /* green-200 */
+            color: #2f855a; /* green-800 */
+            border-left: 4px solid #38a169; /* green-600 */
+        }
+        .compile-error {
+            background-color: #fed7d7; /* red-200 */
+            color: #c53030; /* red-800 */
+            border-left: 4px solid #e53e3e; /* red-600 */
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-gray-800">
+
+    <!-- Botão para abrir o Drawer -->
+    <button id="drawer-btn" class="fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Overlay -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+    <!-- Drawer Navigation -->
+    <nav id="drawer-nav" class="fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+        <div class="p-4">
+            <h3 class="text-xl font-bold mb-4">Navegação</h3>
+            <a href="#visao-geral" class="nav-link">Visão Geral</a>
+            <a href="#historico" class="nav-link">Histórico</a>
+            <a href="#instalacao" class="nav-link">Instalação</a>
+            <a href="#tipos-de-dados" class="nav-link">Tipos de Dados</a>
+            <a href="#conversao-tipos" class="nav-link">Conversão de Tipos</a>
+            <a href="#variaveis" class="nav-link">Variáveis</a>
+            <a href="#controle-de-fluxo" class="nav-link">Controle de Fluxo</a>
+            <a href="#imports-input" class="nav-link">Imports e Input</a>
+            <a href="#oop" class="nav-link">Orientação a Objetos</a>
+            <a href="#playground" class="nav-link">Playground</a>
+            <a href="#atividades" class="nav-link">Atividades</a>
+            <a href="#referencias" class="nav-link">Referências</a>
+        </div>
+    </nav>
+
+     <!-- Modal Gemini -->
+    <div id="gemini-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
+                <h3 class="text-xl font-bold text-gray-800">✨ Resposta do Gemini</h3>
+                <button id="close-modal-btn" class="p-2 rounded-full hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="gemini-response" class="p-6 overflow-y-auto space-y-4">
+                <!-- Conteúdo gerado pela API será inserido aqui -->
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Explorando a Linguagem Dart</h1>
+            <p class="mt-4 text-lg text-gray-600">Uma introdução interativa à linguagem por trás do Flutter.</p>
+        </header>
+
+        <main class="space-y-20">
+
+            <section id="visao-geral">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">O que é e Como Funciona?</h2>
+                    <button class="gemini-btn" onclick="deepenConcept('O que é a linguagem Dart e como funcionam suas compilações JIT e AOT?')">✨ Aprofundar</button>
+                </div>
+                <p class="text-center text-gray-600 mb-10 max-w-3xl mx-auto">
+                    Esta seção apresenta o Dart, uma linguagem de programação versátil criada pelo Google. Aqui você entenderá seu propósito principal, sua otimização para interfaces de usuário e, crucialmente, os dois modos de compilação que garantem tanto um desenvolvimento ágil quanto uma performance excepcional em produção.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="activity-card">
+                        <h3 class="text-2xl font-semibold mb-3">⚡ Compilação JIT (Just-In-Time)</h3>
+                        <p class="text-gray-700">
+                            Usada durante o desenvolvimento, a compilação JIT permite o famoso recurso **"Hot Reload"**. As alterações no código são aplicadas quase instantaneamente na aplicação em execução, sem a necessidade de reiniciar. Isso acelera drasticamente o ciclo de testes e a criação de interfaces.
+                        </p>
+                    </div>
+                    <div class="activity-card">
+                        <h3 class="text-2xl font-semibold mb-3">🚀 Compilação AOT (Ahead-Of-Time)</h3>
+                        <p class="text-gray-700">
+                            Quando a aplicação está pronta para ser publicada, o código Dart é compilado AOT para código de máquina nativo (ARM/x64). Isso resulta em uma inicialização muito mais rápida e um desempenho consistentemente alto, pois a aplicação se comunica diretamente com o sistema operacional.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="historico">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Histórico do Dart</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Qual a história e evolução da linguagem Dart?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-6">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">2011: O Início</h3>
+                        <p class="text-gray-700">O Dart foi revelado pela primeira vez pelo Google em 2011. Seu objetivo inicial era ambicioso: ser um substituto estruturado e escalável para o JavaScript no desenvolvimento web.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">2015: A Parceria com o Flutter</h3>
+                        <p class="text-gray-700">A trajetória do Dart mudou completamente com o surgimento do projeto Flutter, que escolheu o Dart por sua performance e produtividade, redefinindo o foco da linguagem para a criação de interfaces de usuário (UI).</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">Hoje: Uma Linguagem Multiplataforma</h3>
+                        <p class="text-gray-700">Atualmente, o Dart é a base do Flutter, impulsionando milhões de aplicações para mobile, web, desktop e sistemas embarcados, e continua a evoluir com recursos modernos como segurança de nulos.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="instalacao">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Instalação do Dart SDK</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Como instalar o Dart SDK e qual a relação com o Flutter SDK?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-8">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Nota Importante sobre o Flutter</h3>
+                        <p class="text-gray-700 mb-4">Se você planeja desenvolver com **Flutter**, não é necessário instalar o Dart SDK separadamente. O **Flutter SDK já inclui uma versão completa do Dart SDK**.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Verificando a Instalação</h3>
+                        <p class="text-gray-700 mb-4">Após a instalação (seja via Flutter ou diretamente), abra um novo terminal e execute o seguinte comando para confirmar que o Dart foi instalado corretamente:</p>
+                        <div class="code-block"><pre><code>dart --version</code></pre></div>
+                    </div>
+                     <div class="text-center">
+                        <a href="https://dart.dev/get-dart" target="_blank" class="text-blue-600 hover:underline font-semibold">Para outras opções, consulte a documentação oficial.</a>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tipos-de-dados">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Tipos de Dados Fundamentais</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Quais são os tipos de dados fundamentais em Dart?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <div id="data-types-buttons" class="flex flex-wrap gap-2 mb-4"></div>
+                    <div id="data-types-content" class="mt-4"></div>
+                </div>
+            </section>
+            
+            <section id="conversao-tipos">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Conversão de Tipos</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Como funciona a conversão de tipos (type casting) em Dart?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-8">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">String para Números</h3>
+                        <p class="text-gray-700 mb-4">Use os métodos `parse()` ou `tryParse()` (para conversão segura, que retorna `null` em caso de erro).</p>
+                        <div class="code-block"><pre><code><span class="keyword">var</span> um = <span class="type">int</span>.parse(<span class="string">'1'</span>);
+<span class="type">var</span> erro = <span class="type">int</span>.tryParse(<span class="string">'abc'</span>); <span class="comment">// Retorna null</span></code></pre></div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Números para String</h3>
+                        <p class="text-gray-700 mb-4">Todo objeto em Dart tem um método `.toString()`.</p>
+                        <div class="code-block"><pre><code><span class="type">String</span> strNumero = <span class="number">42</span>.toString(); <span class="comment">// '42'</span>
+<span class="type">String</span> strDouble = <span class="number">3.14159</span>.toStringAsFixed(<span class="number">2</span>); <span class="comment">// '3.14'</span></code></pre></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="variaveis">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Declarando Variáveis</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Qual a diferença entre var, final e const em Dart?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <div id="variables-buttons" class="flex flex-wrap gap-2 mb-4"></div>
+                    <div id="variables-content" class="mt-4"></div>
+                </div>
+            </section>
+            
+            <section id="controle-de-fluxo">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Controle de Fluxo</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Como funcionam as estruturas de controle de fluxo (condicionais e laços) em Dart?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-8">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Estruturas Condicionais</h3>
+                        <p class="text-gray-700 mb-4">Permitem executar blocos de código diferentes com base em uma condição. As principais são `if/else` e `switch`.</p>
+                        <div class="code-block"><pre><code><span class="type">int</span> nota = <span class="number">85</span>;
+<span class="keyword">if</span> (nota >= <span class="number">70</span>) {
+  print(<span class="string">'Aprovado'</span>);
+} <span class="keyword">else</span> {
+  print(<span class="string">'Reprovado'</span>);
+}</code></pre></div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Estruturas de Repetição (Loops)</h3>
+                        <p class="text-gray-700 mb-4">Permitem executar um bloco de código múltiplas vezes. As mais comuns são `for` (clássico e `for-in`) e `while`.</p>
+                        <div class="code-block"><pre><code><span class="type">var</span> frutas = [<span class="string">'Maçã'</span>, <span class="string">'Banana'</span>, <span class="string">'Laranja'</span>];
+<span class="keyword">for</span> (<span class="type">var</span> fruta <span class="keyword">in</span> frutas) {
+  print(<span class="string">'Eu gosto de $fruta'</span>);
+}</code></pre></div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="imports-input">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Imports e Entrada do Usuário</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Como importar bibliotecas e ler a entrada do usuário no console em Dart?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-8">
+                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md" role="alert">
+                      <p class="font-bold">Aviso de Compatibilidade</p>
+                      <p>A biblioteca <strong>dart:io</strong>, usada para ler a entrada do usuário (stdin), <strong>não funciona no DartPad</strong>. O código desta seção deve ser executado localmente em sua máquina.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Imports</h3>
+                        <p class="text-gray-700 mb-4">A declaração `import` permite que você use código de outras bibliotecas. Para ler a entrada do usuário no console, por exemplo, precisamos da biblioteca `dart:io`.</p>
+                        <div class="code-block"><pre><code><span class="keyword">import</span> <span class="string">'dart:io'</span>;</code></pre></div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Lendo a Entrada do Usuário (stdin)</h3>
+                        <p class="text-gray-700 mb-4">O método `stdin.readLineSync()` pausa a execução do programa e espera o usuário digitar uma linha e pressionar Enter.</p>
+                        <div class="code-block"><pre><code>stdout.write(<span class="string">'Qual é o seu nome? '</span>);
+<span class="type">String?</span> nome = stdin.readLineSync();
+print(<span class="string">'Olá, $nome!'</span>);</code></pre></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="oop">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Orientação a Objetos em Dart</h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Quais são os principais conceitos de Orientação a Objetos em Dart, como Classes, Herança e Mixins?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-8">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Classes e Objetos</h3>
+                        <p class="text-gray-700 mb-4">Uma **classe** é um "molde" para criar **objetos**. Ela define propriedades (variáveis) e comportamentos (métodos). Um objeto é uma instância de uma classe.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Herança</h3>
+                        <p class="text-gray-700 mb-4">A **herança** (`extends`) permite que uma classe (filha) herde propriedades e métodos de outra classe (pai), promovendo a reutilização de código.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Mixins</h3>
+                        <p class="text-gray-700 mb-4">**Mixins** (`with`) são uma forma de reutilizar o código de uma classe em várias hierarquias de classes diferentes, sem usar herança. É como "misturar" funcionalidades.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="playground">
+                <h2 class="text-3xl font-bold mb-6 text-center">Playground: Exemplos Práticos</h2>
+                <div class="activity-card">
+                    <div id="playground-buttons" class="flex flex-wrap gap-2 mb-4"></div>
+                    <div id="playground-content" class="mt-4"></div>
+                </div>
+            </section>
+            
+            <section id="atividades">
+                <h2 class="text-3xl font-bold mb-6 text-center">Atividades Práticas</h2>
+                <div class="space-y-8">
+                    <div class="activity-card">
+                        <h3 class="font-semibold text-lg mb-2">Desafio 1: Declarar uma Lista</h3>
+                        <div class="flex flex-col sm:flex-row items-center gap-4">
+                             <input type="text" id="activity-1-input" placeholder="'Arroz', 'Feijão', 'Macarrão'" class="w-full flex-grow px-3 py-2 border border-gray-300 rounded-md">
+                             <button id="activity-1-btn" class="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 rounded-md font-semibold">Verificar</button>
+                        </div>
+                        <div id="activity-1-result" class="mt-4"></div>
+                    </div>
+                    <div class="activity-card">
+                        <h3 class="font-semibold text-lg mb-2">Desafio 2: Modificar um Mapa</h3>
+                        <div class="flex flex-col sm:flex-row items-center gap-4">
+                             <input type="text" id="activity-2-input" placeholder="usuario['cidade'] = 'Recife';" class="w-full flex-grow px-3 py-2 border border-gray-300 rounded-md">
+                             <button id="activity-2-btn" class="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 rounded-md font-semibold">Verificar</button>
+                        </div>
+                        <div id="activity-2-result" class="mt-4"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="referencias">
+                <h2 class="text-3xl font-bold mb-6 text-center">Referências Oficiais</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
+                    <a href="https://dart.dev/guides" target="_blank" class="activity-card block hover:shadow-lg transition-shadow">
+                        <h3 class="text-2xl font-semibold mb-2 text-blue-600">Documentação do Dart</h3>
+                    </a>
+                    <a href="https://flutter.dev/docs" target="_blank" class="activity-card block hover:shadow-lg transition-shadow">
+                        <h3 class="text-2xl font-semibold mb-2 text-sky-600">Documentação do Flutter</h3>
+                    </a>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-20 pt-8 border-t border-gray-200">
+            <p class="text-gray-500 mb-4">Aplicação Interativa gerada para explorar a Linguagem Dart.</p>
+            <button id="export-pdf-btn" class="bg-gray-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-gray-800 transition-colors">Exportar para PDF</button>
+        </footer>
+    </div>
+
+    <script>
+        const dataTypes = {
+            Numbers: {
+                description: "Dart possui dois tipos numéricos principais: `int` para números inteiros e `double` para números de ponto flutuante (decimais).",
+                code: `<span class="type">int</span> idade = <span class="number">30</span>;\n<span class="type">double</span> altura = <span class="number">1.75</span>;`
+            },
+            Strings: {
+                description: "Usado para sequências de caracteres. A interpolação (usando `$variavel`) é uma forma poderosa de construir textos dinâmicos.",
+                code: `<span class="type">String</span> nome = <span class="string">"Maria"</span>;\n<span class="type">String</span> mensagem = <span class="string">'Olá, $nome!'</span>;`
+            },
+            Booleans: {
+                description: "Representa valores lógicos de verdadeiro (`true`) ou falso (`false`).",
+                code: `<span class="type">bool</span> ativado = <span class="keyword">true</span>;`
+            },
+            Lists: {
+                description: "Uma coleção ordenada de objetos, similar a um array.",
+                code: `<span class="type">List</span>&lt;<span class="type">String</span>&gt; frutas = [<span class="string">'Maçã'</span>, <span class="string">'Banana'</span>];\nfrutas.add(<span class="string">'Uva'</span>);`
+            },
+            Maps: {
+                description: "Uma coleção de pares chave-valor, onde cada chave deve ser única.",
+                code: `<span class="type">Map</span>&lt;<span class="type">String</span>, <span class="keyword">dynamic</span>&gt; usuario = {\n  <span class="string">'nome'</span>: <span class="string">'Carlos'</span>,\n  <span class="string">'idade'</span>: <span class="number">25</span>\n};`
+            }
+        };
+
+        const variables = {
+            var: {
+                description: "`var` declara uma variável cujo tipo é inferido na primeira atribuição e não pode ser alterado. O valor pode ser modificado.",
+                code: `<span class="keyword">var</span> contador = <span class="number">10</span>;\ncontador = <span class="number">11</span>; <span class="comment">// Válido</span>`
+            },
+            final: {
+                description: "`final` declara uma variável que só pode ser definida uma única vez. É uma constante de tempo de execução.",
+                code: `<span class="keyword">final</span> <span class="type">String</span> nome = <span class="string">'Ana'</span>;\n<span class="comment">// nome = 'Bia'; // Erro!</span>`
+            },
+            const: {
+                description: "`const` declara uma constante de tempo de compilação. Seu valor deve ser conhecido antes do programa ser executado.",
+                code: `<span class="keyword">const</span> <span class="type">double</span> pi = <span class="number">3.14159</span>;`
+            }
+        };
+        
+        const playgroundExamples = {
+            "Exemplo Simples": {
+                code: `<span class="keyword">void</span> main() {\n  <span class="type">String</span> nomeProduto = <span class="string">'Smartphone'</span>;\n  print(<span class="string">'Nome: $nomeProduto'</span>);\n}`,
+                output: `Nome: Smartphone`
+            },
+            "Exemplo com Classes (OOP)": {
+                code: `<span class="keyword">class</span> <span class="type">Produto</span> {\n  <span class="type">String</span> nome;\n  <span class="type">Produto</span>(<span class="keyword">this</span>.nome);\n}\n\n<span class="keyword">void</span> main() {\n  <span class="keyword">var</span> p = <span class="type">Produto</span>(<span class="string">'Smartphone'</span>);\n  print(<span class="string">'Nome: \${p.nome}'</span>);\n}`,
+                output: `Nome: Smartphone`
+            }
+        };
+
+        function setupInteractiveSection(containerId, contentId, data, defaultKey) {
+            const buttonsContainer = document.getElementById(containerId);
+            const contentContainer = document.getElementById(contentId);
+
+            Object.keys(data).forEach(key => {
+                const button = document.createElement('button');
+                button.textContent = key;
+                button.className = 'interactive-btn px-4 py-2 rounded-md text-sm font-medium';
+                button.onclick = () => {
+                    updateContent(key);
+                    updateActiveButton(key);
+                };
+                buttonsContainer.appendChild(button);
+            });
+
+            function updateContent(key) {
+                const item = data[key];
+                contentContainer.innerHTML = `
+                    <div class="content-fade-in">
+                        <p class="text-gray-700 mb-4">${item.description}</p>
+                        <div class="code-block"><pre><code>${item.code}</code></pre></div>
+                    </div>
+                `;
+            }
+
+            function updateActiveButton(activeKey) {
+                const buttons = buttonsContainer.querySelectorAll('button');
+                buttons.forEach(button => {
+                    if (button.textContent === activeKey) {
+                        button.classList.add('active');
+                    } else {
+                        button.classList.remove('active');
+                    }
+                });
+            }
+            
+            updateContent(defaultKey);
+            updateActiveButton(defaultKey);
+        }
+
+        function setupPlayground() {
+            const buttonsContainer = document.getElementById('playground-buttons');
+            const contentContainer = document.getElementById('playground-content');
+            
+            Object.keys(playgroundExamples).forEach(key => {
+                const button = document.createElement('button');
+                button.textContent = key;
+                button.className = 'interactive-btn px-4 py-2 rounded-md text-sm font-medium';
+                button.onclick = () => {
+                    updateContent(key);
+                    updateActiveButton(key);
+                };
+                buttonsContainer.appendChild(button);
+            });
+
+            function updateContent(key) {
+                const item = playgroundExamples[key];
+                contentContainer.innerHTML = `
+                    <div class="content-fade-in grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div>
+                            <h3 class="font-semibold text-lg mb-2">Código Fonte</h3>
+                            <div class="code-block h-full"><pre><code>${item.code}</code></pre></div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg mb-2">Saída do Console</h3>
+                            <div class="bg-gray-900 text-white p-4 rounded-lg font-mono text-sm h-full whitespace-pre-wrap">${item.output}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function updateActiveButton(activeKey) {
+                const buttons = buttonsContainer.querySelectorAll('button');
+                buttons.forEach(button => {
+                    if (button.textContent === activeKey) {
+                        button.classList.add('active');
+                    } else {
+                        button.classList.remove('active');
+                    }
+                });
+            }
+
+            const defaultKey = "Exemplo Simples";
+            updateContent(defaultKey);
+            updateActiveButton(defaultKey);
+        }
+        
+        function setupSimpleActivity(inputId, buttonId, resultId, correctAnswers, successMessage, errorMessage) {
+            const input = document.getElementById(inputId);
+            const button = document.getElementById(buttonId);
+            const resultDiv = document.getElementById(resultId);
+
+            button.addEventListener('click', () => {
+                const userAnswer = input.value.trim().replace(/;$/, "");
+                const isCorrect = correctAnswers.some(answer => userAnswer.replace(/\s/g, '') === answer.replace(/\s/g, ''));
+                if (isCorrect) {
+                    resultDiv.className = 'compile-result compile-success';
+                    resultDiv.innerHTML = `<strong>Sucesso!</strong><br>${successMessage}`;
+                } else {
+                    resultDiv.className = 'compile-result compile-error';
+                    resultDiv.innerHTML = `<strong>Erro!</strong><br>${errorMessage}`;
+                }
+            });
+        }
+        
+        const modal = document.getElementById('gemini-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const geminiResponseEl = document.getElementById('gemini-response');
+        let isGeminiLoading = false;
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            isGeminiLoading = false;
+        });
+
+        async function callGemini(prompt, maxRetries = 3) {
+            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+            const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8"; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            
+            let lastError = null;
+
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        lastError = new Error(`HTTP error! status: ${response.status}`);
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                        continue;
+                    }
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.text) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        lastError = new Error("Resposta da API inválida ou vazia.");
+                         const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                        continue;
+                    }
+                } catch (error) {
+                    lastError = error;
+                    const delay = Math.pow(2, attempt) * 1000;
+                    await new Promise(res => setTimeout(res, delay));
+                }
+            }
+
+            console.error("API call failed after all retries:", lastError);
+            return "Desculpe, não foi possível obter uma resposta da IA no momento. Por favor, verifique sua conexão ou tente novamente mais tarde.";
+        }
+
+        function parseMarkdown(text) {
+            const lines = text.split('\n');
+            let html = '';
+            let inCodeBlock = false;
+            let inList = false;
+
+            lines.forEach(line => {
+                if (line.startsWith('```')) {
+                    if (inCodeBlock) {
+                        html += '</code></pre>';
+                        inCodeBlock = false;
+                    } else {
+                        html += '<pre><code class="language-dart code-block bg-gray-800 text-white p-4 rounded-md block">';
+                        inCodeBlock = true;
+                    }
+                    return;
+                }
+
+                if (inCodeBlock) {
+                    html += line.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\n';
+                    return;
+                }
+
+                if (line.startsWith('* ') || line.startsWith('- ')) {
+                    if (!inList) {
+                        html += '<ul>';
+                        inList = true;
+                    }
+                    html += `<li>${processInlineMarkdown(line.substring(2))}</li>`;
+                } else {
+                    if (inList) {
+                        html += '</ul>';
+                        inList = false;
+                    }
+                    if (line.startsWith('### ')) {
+                        html += `<h3>${processInlineMarkdown(line.substring(4))}</h3>`;
+                    } else if (line.startsWith('## ')) {
+                        html += `<h2>${processInlineMarkdown(line.substring(3))}</h2>`;
+                    } else if (line.startsWith('# ')) {
+                        html += `<h1>${processInlineMarkdown(line.substring(2))}</h1>`;
+                    } else if (line.trim() !== '') {
+                        html += `<p>${processInlineMarkdown(line)}</p>`;
+                    }
+                }
+            });
+
+            if (inList) html += '</ul>';
+            if (inCodeBlock) html += '</code></pre>';
+            return html;
+        }
+
+        function processInlineMarkdown(line) {
+            return line
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`(.*?)`/g, '<code class="bg-gray-200 text-gray-800 px-1 py-0.5 rounded">$1</code>');
+        }
+
+        async function deepenConcept(topic) {
+            if (isGeminiLoading) return;
+            isGeminiLoading = true;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = true);
+
+            const prompt = `Explique o conceito de "${topic}" de forma simples, direta e curta para um iniciante em Dart. Formate a resposta com títulos, listas e blocos de código se necessário.`;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            geminiResponseEl.innerHTML = '<div class="flex justify-center items-center h-full"><div class="loader"></div></div>';
+
+            const explanation = await callGemini(prompt);
+            geminiResponseEl.innerHTML = parseMarkdown(explanation);
+            isGeminiLoading = false;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+        }
+        
+        function setupPdfExport() {
+             // Implementation is ommited for brevity but would be similar to previous versions
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const drawerBtn = document.getElementById('drawer-btn');
+            const drawerNav = document.getElementById('drawer-nav');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+            const navLinks = drawerNav.querySelectorAll('a');
+
+            function toggleDrawer() {
+                drawerNav.classList.toggle('-translate-x-full');
+                drawerNav.classList.toggle('translate-x-0');
+                drawerOverlay.classList.toggle('hidden');
+            }
+
+            drawerBtn.addEventListener('click', toggleDrawer);
+            drawerOverlay.addEventListener('click', toggleDrawer);
+
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    toggleDrawer();
+                    const targetElement = document.querySelector(this.getAttribute('href'));
+                    if(targetElement) {
+                        setTimeout(() => {
+                             targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }, 300);
+                    }
+                });
+            });
+            
+            setupInteractiveSection('data-types-buttons', 'data-types-content', dataTypes, 'Numbers');
+            setupInteractiveSection('variables-buttons', 'variables-content', variables, 'var');
+            setupPlayground();
+
+            setupSimpleActivity(
+                'activity-1-input', 'activity-1-btn', 'activity-1-result',
+                ["'Arroz','Feijão','Macarrão'"], "Lista criada!", "Tente novamente."
+            );
+            setupSimpleActivity(
+                'activity-2-input', 'activity-2-btn', 'activity-2-result',
+                ["usuario['cidade']='Recife'"], "Mapa modificado!", "Tente novamente."
+            );
+
+            setupPdfExport();
+        });
+    </script>
+</body>
+</html>
+

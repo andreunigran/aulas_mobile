@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flutter AI Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+        
+        /* Markdown */
+        .markdown-body h3 { color: #60a5fa; font-weight: 700; margin-top: 1em; }
+        .markdown-body p { margin-bottom: 0.8em; line-height: 1.6; color: #d1d5db; }
+        .markdown-body code { background: #374151; padding: 2px 4px; border-radius: 4px; font-family: 'JetBrains Mono'; font-size: 0.9em; }
+        .markdown-body pre { background: #1f2937; padding: 1em; border-radius: 8px; overflow-x: auto; margin-bottom: 1em; }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-200 h-screen flex flex-col overflow-hidden">
+
+    <header class="bg-[#0f111a] border-b border-gray-800 px-4 py-3 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+            <span class="text-blue-500 font-bold text-lg">Flutter</span><span class="text-white font-light text-lg">AI</span>
+        </div>
+        <div class="flex bg-gray-900 rounded-lg p-1 border border-gray-800">
+            <button onclick="setView('edit')" id="btn-view-edit" class="px-3 py-1 text-sm rounded bg-gray-700 text-white">Editor</button>
+            <button onclick="setView('run')" id="btn-view-run" class="px-3 py-1 text-sm rounded text-gray-400">Preview</button>
+        </div>
+    </header>
+
+    <div class="flex-grow flex lg:flex-row flex-col overflow-hidden relative">
+        
+        <div class="flex-grow flex flex-col lg:w-3/5 h-full relative">
+            
+            <div id="container-editor" class="flex flex-col h-full absolute inset-0 z-20 bg-[#0d1117]">
+                <textarea id="flutter-code" class="flex-grow w-full bg-[#0d1117] text-[#e6edf3] p-6 font-mono text-[13px] leading-6 resize-none focus:outline-none" spellcheck="false">
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark(),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Teste Google Sites')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.check_circle, size: 80, color: Colors.green),
+              const SizedBox(height: 20),
+              const Text('Funciona!', style: TextStyle(fontSize: 24)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+                </textarea>
+                <div class="absolute bottom-6 right-6 flex gap-2">
+                    <button onclick="handleAction('comment')" class="bg-teal-700 hover:bg-teal-600 text-white px-3 py-2 rounded shadow text-sm">📝 Comentar</button>
+                    <button onclick="handleAction('refactor')" class="bg-purple-700 hover:bg-purple-600 text-white px-3 py-2 rounded shadow text-sm">✨ Refatorar</button>
+                    <button onclick="handleAction('run')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded shadow font-bold text-sm transform hover:scale-105 transition-transform">🚀 Executar</button>
+                </div>
+            </div>
+
+            <div id="container-preview" class="flex flex-col h-full absolute inset-0 z-10 bg-[#1e1e1e] invisible opacity-0">
+                
+                <div id="dartpad-slot" class="w-full h-full bg-[#1e1e1e] flex items-center justify-center">
+                    <span class="text-gray-500">Carregando DartPad...</span>
+                </div>
+
+                <button onclick="setView('edit')" class="absolute top-4 right-4 bg-gray-800 text-white px-3 py-2 rounded text-xs border border-gray-600 z-50 hover:bg-gray-700">✏️ Voltar</button>
+                
+                <a id="btn-fallback" href="#" target="_blank" class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 bg-gray-800 text-blue-400 border border-blue-500/30 px-4 py-2 rounded-full text-xs shadow-lg z-50 hover:bg-gray-700">
+                    🔗 Abrir em Nova Aba (Se não carregar)
+                </a>
+            </div>
+        </div>
+
+        <div class="lg:w-2/5 w-full h-1/3 lg:h-full bg-[#111827] border-l border-gray-800 flex flex-col shadow-2xl z-30">
+            <div id="gemini-output" class="flex-grow overflow-y-auto p-6 markdown-body text-sm relative">
+                <p class="text-gray-500 text-center mt-10">Clique em <strong>Executar</strong> para ver a mágica.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading-overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="bg-gray-900 border border-gray-700 p-6 rounded-xl flex flex-col items-center gap-3">
+            <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+            <div class="text-blue-400 font-bold text-sm animate-pulse">Processando...</div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIG
+        const API_KEY = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8"; 
+
+        // ELEMENTOS
+        const elCode = document.getElementById('flutter-code');
+        const elOutput = document.getElementById('gemini-output');
+        const elDartPadSlot = document.getElementById('dartpad-slot'); // Onde o iframe entra
+        const loader = document.getElementById('loading-overlay');
+        const btnFallback = document.getElementById('btn-fallback');
+
+        // VIEWS
+        function setView(view) {
+            const edit = document.getElementById('container-editor');
+            const preview = document.getElementById('container-preview');
+            const btnE = document.getElementById('btn-view-edit');
+            const btnR = document.getElementById('btn-view-run');
+
+            if (view === 'edit') {
+                edit.classList.remove('invisible', 'opacity-0');
+                preview.classList.add('invisible', 'opacity-0');
+                // Estilos dos botões do topo
+                btnE.classList.replace('text-gray-400', 'bg-gray-700');
+                btnE.classList.add('text-white');
+                btnR.classList.replace('bg-gray-700', 'text-gray-400');
+                btnR.classList.remove('text-white');
+            } else {
+                edit.classList.add('invisible', 'opacity-0');
+                preview.classList.remove('invisible', 'opacity-0');
+                btnR.classList.replace('text-gray-400', 'bg-gray-700');
+                btnR.classList.add('text-white');
+                btnE.classList.replace('bg-gray-700', 'text-gray-400');
+                btnE.classList.remove('text-white');
+            }
+        }
+
+        // LÓGICA PRINCIPAL
+        async function handleAction(type) {
+            // 1. Pega o código ATUAL do editor
+            const currentCode = elCode.value.trim();
+            if (!currentCode) return;
+
+            // --- AÇÃO: EXECUTAR (Copiar e Rodar) ---
+            if (type === 'run') {
+                loader.classList.remove('hidden');
+
+                // Prepara a URL com o código injetado
+                const encodedCode = encodeURIComponent(currentCode);
+                const iframeUrl = `https://dartpad.dev/embed-flutter.html?theme=dark&run=true&split=0&source=${encodedCode}`;
+
+                // Configura o link de emergência
+                btnFallback.href = iframeUrl;
+                btnFallback.classList.remove('hidden');
+
+                // TRUQUE PARA GOOGLE SITES: Destrói e recria o iframe com o novo código
+                elDartPadSlot.innerHTML = ''; // Limpa anterior
+                
+                // Pequeno delay para garantir limpeza do DOM
+                setTimeout(() => {
+                    const iframe = document.createElement('iframe');
+                    iframe.setAttribute('src', iframeUrl);
+                    iframe.setAttribute('class', 'w-full h-full border-0');
+                    iframe.setAttribute('allow', 'clipboard-write');
+                    // Sandbox permissivo para garantir execução
+                    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms allow-modals');
+                    
+                    elDartPadSlot.appendChild(iframe);
+                    
+                    loader.classList.add('hidden');
+                    setView('run'); // Troca a tela
+                }, 300);
+
+                // Chama a IA em paralelo (sem travar a UI)
+                callGeminiAnalysis(currentCode);
+            }
+            
+            // --- AÇÃO: MODIFICAR TEXTO (Refatorar/Comentar) ---
+            else {
+                loader.classList.remove('hidden');
+                let prompt = "";
+                if(type === 'comment') prompt = "Adicione comentários (//) didáticos explicando o código. Retorne APENAS o código Dart puro.";
+                if(type === 'refactor') prompt = "Refatore este código para boas práticas Flutter. Retorne APENAS o código Dart puro.";
+
+                try {
+                    const response = await callGeminiAPI(currentCode, prompt);
+                    const cleanCode = extractCode(response);
+                    if(cleanCode) {
+                        elCode.value = cleanCode; // Atualiza o editor
+                        renderMarkdown(`### Sucesso!\nO código foi atualizado. Clique em **Executar** para testar.`);
+                    }
+                } catch (e) {
+                    elOutput.innerHTML = `<p style="color:red">Erro: ${e.message}</p>`;
+                } finally {
+                    loader.classList.add('hidden');
+                }
+            }
+        }
+
+        // CHAMADA IA PARA ANÁLISE (SEPARADA)
+        async function callGeminiAnalysis(code) {
+            try {
+                const prompt = "Analise este código Flutter. Seja breve: 1. O que faz? 2. Pontos positivos? 3. Erros potenciais?";
+                const response = await callGeminiAPI(code, prompt);
+                renderMarkdown(response);
+            } catch (e) {
+                elOutput.innerHTML = `<p style="color:#ef4444">Erro na análise IA: ${e.message}</p>`;
+            }
+        }
+
+        // API GEMINI GENÉRICA
+        async function callGeminiAPI(code, prompt) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: `Code:\n${code}` }] }],
+                    systemInstruction: { parts: [{ text: prompt }] }
+                })
+            });
+            const data = await res.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "Erro na resposta";
+        }
+
+        // UTILS
+        const converter = new showdown.Converter();
+        function renderMarkdown(text) { elOutput.innerHTML = converter.makeHtml(text); }
+        function extractCode(text) {
+            const match = text.match(/```dart([\s\S]*?)```/) || text.match(/```([\s\S]*?)```/);
+            return match ? match[1].trim() : text.trim();
+        }
+    </script>
+</body>
+</html>

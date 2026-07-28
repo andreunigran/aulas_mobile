@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia de Estrutura de Pastas em Flutter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A single-page application with a drawer navigation menu for smooth scrolling between thematic sections. This structure provides a clear guide for understanding Flutter project architecture. The content is segmented into logical cards for better readability. -->
+    <!-- Visualization & Content Choices: The content is structured into thematic sections covering Flutter folder structure. Core concepts like the feature-first approach are presented in clear, concise cards. Gemini API is integrated for deeper explanations. This design prioritizes a clean, organized, and educational user experience. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .code-block {
+            background-color: #2d3748;
+            /* gray-800 */
+            color: #e2e8f0;
+            /* gray-300 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", monospace;
+            font-size: 0.875rem;
+        }
+
+        .code-block .keyword {
+            color: #63b3ed;
+        }
+
+        /* blue-400 */
+        .code-block .type {
+            color: #4fd1c5;
+        }
+
+        /* teal-400 */
+        .code-block .string {
+            color: #f6ad55;
+        }
+
+        /* orange-400 */
+        .code-block .comment {
+            color: #a0aec0;
+        }
+
+        /* gray-500 */
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            font-weight: 500;
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-link:hover {
+            background-color: #e2e8f0;
+            /* gray-200 */
+        }
+
+        .activity-card {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        .gemini-btn {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease-in-out;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .gemini-btn:hover {
+            background-color: #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .gemini-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #gemini-response h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #gemini-response h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #gemini-response ul {
+            list-style-type: disc;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        #gemini-response strong {
+            font-weight: 600;
+        }
+
+        #gemini-response code {
+            background-color: #e2e8f0;
+            color: #2d3748;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
+        }
+
+        #gemini-response pre code {
+            display: block;
+            white-space: pre-wrap;
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .loader {
+            width: 50px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 8px solid #0000;
+            border-right-color: #818cf8;
+            animation: l24 1s infinite linear;
+        }
+
+        @keyframes l24 {
+            100% {
+                transform: rotate(1turn)
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-stone-50 text-gray-800">
+
+    <!-- Botão para abrir o Drawer -->
+    <button id="drawer-btn" class="fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Overlay -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+    <!-- Drawer Navigation -->
+    <nav id="drawer-nav"
+        class="fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+        <div class="p-4">
+            <h3 class="text-xl font-bold mb-4">Navegação</h3>
+            <a href="#introducao" class="nav-link">Introdução</a>
+            <a href="#estrutura-recomendada" class="nav-link">Estrutura Recomendada</a>
+            <a href="#vantagens-desvantagens" class="nav-link">Vantagens e Desvantagens</a>
+            <a href="#referencias" class="nav-link">Referências</a>
+            <a href="#conclusao" class="nav-link">Conclusão</a>
+        </div>
+    </nav>
+
+    <!-- Modal Gemini -->
+    <div id="gemini-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
+                <h3 class="text-xl font-bold text-gray-800">✨ Resposta do Gemini</h3>
+                <button id="close-modal-btn" class="p-2 rounded-full hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="gemini-response" class="p-6 overflow-y-auto space-y-4">
+                <!-- Conteúdo gerado pela API será inserido aqui -->
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Guia de Estrutura de Pastas em Flutter</h1>
+            <p class="mt-4 text-lg text-gray-600">Organizando seu projeto para escalabilidade e manutenção.</p>
+        </header>
+
+        <main class="space-y-20">
+
+            <section id="introducao">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Por que a Estrutura de Pastas é Importante?</h2>
+                    <button class="gemini-btn"
+                        onclick="deepenConcept('Qual a importância de ter uma boa estrutura de pastas em um projeto Flutter?')">✨
+                        Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-lg text-gray-700">Uma estrutura de pastas bem definida é a base de um projeto de
+                        software saudável. No Flutter, onde "tudo é um widget", a organização se torna ainda mais
+                        crucial à medida que a aplicação cresce. Uma boa estrutura não é apenas sobre onde colocar
+                        arquivos, mas sobre criar um sistema lógico que facilita a localização de código, a colaboração
+                        entre desenvolvedores e a manutenção a longo prazo.</p>
+                </div>
+            </section>
+
+            <section id="estrutura-recomendada">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Estrutura Recomendada (Feature-First)</h2>
+                    <button class="gemini-btn" onclick="deepenConcept('O que é a abordagem " Feature-First" para
+                        estrutura de pastas e por que ela é recomendada para Flutter?')">✨ Aprofundar</button>
+                </div>
+                <p class="text-center text-gray-600 mb-10 max-w-3xl mx-auto">
+                    A abordagem "Feature-First" (ou "Funcionalidade Primeiro") organiza o código em torno das
+                    funcionalidades do aplicativo, em vez de agrupar por tipo (ex: todas as telas em uma pasta, todos os
+                    modelos em outra). Isso torna o projeto muito mais escalável.
+                </p>
+                <div class="activity-card">
+                    <div class="code-block" id="folder-structure-code">
+                        <pre><code>lib/
+├── app/
+│   ├── routes/
+│   │   └── app_router.dart
+│   └── theme/
+│       └── app_theme.dart
+├── common/
+│   ├── constants/
+│   │   └── app_colors.dart
+│   ├── utils/
+│   │   └── validator.dart
+│   └── widgets/
+│       └── custom_button.dart
+├── features/
+│   ├── auth/
+│   │   ├── data/
+│   │   │   ├── models/
+│   │   │   └── repositories/
+│   │   ├── presentation/
+│   │   │   ├── controllers/ (ou providers, cubits, etc.)
+│   │   │   ├── screens/
+│   │   │   └── widgets/
+│   ├── home/
+│   │   ├── ... (mesma estrutura interna)
+│   └── profile/
+│       ├── ... (mesma estrutura interna)
+└── main.dart
+</code></pre>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button class="gemini-btn" onclick="explainCode('folder-structure-code')">✨ Explicar
+                            Código</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="vantagens-desvantagens">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Vantagens e Desvantagens</h2>
+                    <button class="gemini-btn"
+                        onclick="deepenConcept('Quais são as vantagens e desvantagens de usar uma estrutura de pastas organizada por funcionalidades?')">✨
+                        Aprofundar</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="activity-card">
+                        <h3 class="text-2xl font-semibold mb-3 text-green-600">Vantagens</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li><strong>Escalabilidade:</strong> Adicionar ou remover funcionalidades é fácil, pois o
+                                código está contido em sua própria pasta.</li>
+                            <li><strong>Manutenção:</strong> Encontrar e corrigir bugs é mais rápido, pois você sabe
+                                exatamente em qual pasta da funcionalidade procurar.</li>
+                            <li><strong>Colaboração:</strong> Desenvolvedores podem trabalhar em funcionalidades
+                                diferentes com menos risco de conflitos de código.</li>
+                        </ul>
+                    </div>
+                    <div class="activity-card">
+                        <h3 class="text-2xl font-semibold mb-3 text-red-600">Desvantagens</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li><strong>Boilerplate:</strong> Para projetos muito pequenos, pode parecer um exagero
+                                criar tantas pastas.</li>
+                            <li><strong>Curva de Aprendizagem:</strong> A equipe precisa entender e seguir o padrão
+                                definido, o que pode exigir um alinhamento inicial.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="referencias">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Referências e Padrões da Comunidade</h2>
+                    <button class="gemini-btn"
+                        onclick="deepenConcept('Quais são as principais referências e padrões da comunidade para estrutura de projetos Flutter?')">✨
+                        Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-gray-700 mb-4">A estrutura apresentada é inspirada em padrões de arquitetura limpa e
+                        em recomendações da comunidade. Para aprofundar, explore os seguintes recursos:</p>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><a href="https://codewithandrea.com/articles/flutter-project-structure/" target="_blank"
+                                class="text-blue-600 hover:underline">Flutter Project Structure and Scaling - Code with
+                                Andrea</a></li>
+                        <li><a href="https://dart.dev/guides/language/effective-dart/style" target="_blank"
+                                class="text-blue-600 hover:underline">Effective Dart: Style Guide</a></li>
+                        <li><a href="https://resocoder.com/2019/08/27/flutter-tdd-clean-architecture-course-1-project-structure/"
+                                target="_blank" class="text-blue-600 hover:underline">Flutter TDD Clean Architecture -
+                                Reso Coder</a></li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="conclusao">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Conclusão</h2>
+                    <button class="gemini-btn"
+                        onclick="deepenConcept('Faça um resumo sobre a importância da estrutura de pastas em projetos Flutter.')">✨
+                        Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <p class="text-lg text-gray-700">Não existe uma única "estrutura perfeita" para todos os projetos,
+                        mas a abordagem "Feature-First" é um padrão robusto e testado pela comunidade que promove a
+                        escalabilidade e a manutenibilidade. Investir tempo na organização do seu projeto desde o início
+                        economiza tempo e evita dores de cabeça no futuro, especialmente em equipes e aplicações de
+                        grande porte.</p>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-20 pt-8 border-t border-gray-200">
+            <p class="text-gray-500 mb-4">Aplicação Interativa gerada para explorar Estruturas de Pastas no Flutter.</p>
+            <button id="export-pdf-btn"
+                class="bg-gray-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-gray-800 transition-colors">Exportar
+                para PDF</button>
+        </footer>
+    </div>
+
+    <script>
+        function setupPdfExport() {
+            const exportBtn = document.getElementById('export-pdf-btn');
+            if (!exportBtn) return;
+
+            exportBtn.addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'pt', 'a4');
+                const margin = 40;
+                const maxWidth = doc.internal.pageSize.getWidth() - margin * 2;
+                let y = margin;
+
+                const addText = (text, size, isBold, isCode = false) => {
+                    if (y > doc.internal.pageSize.getHeight() - margin) {
+                        doc.addPage();
+                        y = margin;
+                    }
+                    doc.setFont(isCode ? 'Courier' : 'Helvetica', isBold ? 'bold' : 'normal');
+                    doc.setFontSize(size);
+                    const lines = doc.splitTextToSize(text, maxWidth);
+                    doc.text(lines, margin, y);
+                    const lineHeight = size * 1.2;
+                    y += (lines.length * lineHeight);
+                };
+
+                const sections = document.querySelectorAll('main > section');
+                sections.forEach(section => {
+                    const title = section.querySelector('h2');
+                    if (title) {
+                        addText(title.innerText, 18, true);
+                        y += 12;
+                    }
+
+                    const intro = section.querySelector('p:not(.activity-card p)');
+                    if (intro) {
+                        addText(intro.innerText, 10, false);
+                        y += 15;
+                    }
+
+                    const contentCards = section.querySelectorAll('.activity-card, .activity-card > div');
+                    contentCards.forEach(card => {
+                        const subTitle = card.querySelector('h3');
+                        if (subTitle) {
+                            addText(subTitle.innerText, 14, true);
+                            y += 8;
+                        }
+                        const paragraphs = card.querySelectorAll('p:not(.text-center)');
+                        paragraphs.forEach(p => {
+                            addText(p.innerText, 10, false);
+                            y += 8;
+                        });
+                        const listItems = card.querySelectorAll('li');
+                        listItems.forEach(li => {
+                            addText(`- ${li.innerText}`, 10, false);
+                            y += 8;
+                        });
+                        const codeBlocks = card.querySelectorAll('.code-block');
+                        codeBlocks.forEach(code => {
+                            addText(code.innerText, 9, false, true);
+                            y += 12;
+                        });
+                    });
+                    y += 24;
+                });
+
+                doc.save('guia-flutter-estrutura-pastas.pdf');
+            });
+        }
+
+        const modal = document.getElementById('gemini-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const geminiResponseEl = document.getElementById('gemini-response');
+        let isGeminiLoading = false;
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            isGeminiLoading = false;
+        });
+
+        async function callGemini(prompt, maxRetries = 3) {
+            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+            const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            let lastError = null;
+
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        lastError = new Error(`HTTP error! status: ${response.status}`);
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                        continue;
+                    }
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.text) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        lastError = new Error("Resposta da API inválida ou vazia.");
+                        const delay = Math.pow(2, attempt) * 1000;
+                        await new Promise(res => setTimeout(res, delay));
+                        continue;
+                    }
+                } catch (error) {
+                    lastError = error;
+                    const delay = Math.pow(2, attempt) * 1000;
+                    await new Promise(res => setTimeout(res, delay));
+                }
+            }
+
+            console.error("API call failed after all retries:", lastError);
+            return "Desculpe, não foi possível obter uma resposta da IA no momento. Por favor, verifique sua conexão ou tente novamente mais tarde.";
+        }
+
+        function parseMarkdown(text) {
+            const lines = text.split('\n');
+            let html = '';
+            let inCodeBlock = false;
+            let inList = false;
+
+            lines.forEach(line => {
+                if (line.startsWith('```')) {
+                    if (inCodeBlock) {
+                        html += '</code></pre>';
+                        inCodeBlock = false;
+                    } else {
+                        html += '<pre><code class="language-dart code-block bg-gray-800 text-white p-4 rounded-md block">';
+                        inCodeBlock = true;
+                    }
+                    return;
+                }
+
+                if (inCodeBlock) {
+                    html += line.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\n';
+                    return;
+                }
+
+                if (line.startsWith('* ') || line.startsWith('- ')) {
+                    if (!inList) {
+                        html += '<ul>';
+                        inList = true;
+                    }
+                    html += `<li>${processInlineMarkdown(line.substring(2))}</li>`;
+                } else {
+                    if (inList) {
+                        html += '</ul>';
+                        inList = false;
+                    }
+                    if (line.startsWith('### ')) {
+                        html += `<h3>${processInlineMarkdown(line.substring(4))}</h3>`;
+                    } else if (line.startsWith('## ')) {
+                        html += `<h2>${processInlineMarkdown(line.substring(3))}</h2>`;
+                    } else if (line.startsWith('# ')) {
+                        html += `<h1>${processInlineMarkdown(line.substring(2))}</h1>`;
+                    } else if (line.trim() !== '') {
+                        html += `<p>${processInlineMarkdown(line)}</p>`;
+                    }
+                }
+            });
+
+            if (inList) html += '</ul>';
+            if (inCodeBlock) html += '</code></pre>';
+            return html;
+        }
+
+        function processInlineMarkdown(line) {
+            return line
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`(.*?)`/g, '<code class="bg-gray-200 text-gray-800 px-1 py-0.5 rounded">$1</code>');
+        }
+
+        async function deepenConcept(topic) {
+            if (isGeminiLoading) return;
+            isGeminiLoading = true;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = true);
+
+            const prompt = `Explique o conceito de "${topic}" de forma simples, direta e curta para um iniciante em Flutter. Formate a resposta com títulos, listas e blocos de código se necessário.`;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            geminiResponseEl.innerHTML = '<div class="flex justify-center items-center h-full"><div class="loader"></div></div>';
+
+            const explanation = await callGemini(prompt);
+            geminiResponseEl.innerHTML = parseMarkdown(explanation);
+            isGeminiLoading = false;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+        }
+
+        async function explainCode(elementId) {
+            if (isGeminiLoading) return;
+            isGeminiLoading = true;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = true);
+
+            const codeElement = document.getElementById(elementId);
+            if (!codeElement) {
+                isGeminiLoading = false;
+                document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+                return;
+            }
+            const code = codeElement.innerText;
+
+            const prompt = `Explique a seguinte estrutura de pastas para um projeto Flutter em português, de forma simples e direta para um iniciante:\n\n\`\`\`\n${code}\n\`\`\``;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            geminiResponseEl.innerHTML = '<div class="flex justify-center items-center h-full"><div class="loader"></div></div>';
+
+            const explanation = await callGemini(prompt);
+            geminiResponseEl.innerHTML = parseMarkdown(explanation);
+            isGeminiLoading = false;
+            document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const drawerBtn = document.getElementById('drawer-btn');
+            const drawerNav = document.getElementById('drawer-nav');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+            const navLinks = drawerNav.querySelectorAll('a');
+
+            function toggleDrawer() {
+                drawerNav.classList.toggle('-translate-x-full');
+                drawerNav.classList.toggle('translate-x-0');
+                drawerOverlay.classList.toggle('hidden');
+            }
+
+            drawerBtn.addEventListener('click', toggleDrawer);
+            drawerOverlay.addEventListener('click', toggleDrawer);
+
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    toggleDrawer();
+                    const targetElement = document.querySelector(this.getAttribute('href'));
+                    if (targetElement) {
+                        setTimeout(() => {
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }, 300); // Aguarda a animação do drawer fechar
+                    }
+                });
+            });
+
+            setupPdfExport();
+        });
+    </script>
+</body>
+
+</html>

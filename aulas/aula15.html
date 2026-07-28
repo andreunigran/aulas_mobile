@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase no Flutter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/dart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .code-block, #code-editor, #output-display {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap; /* Ensure code wraps */
+            word-wrap: break-word; /* Ensure long lines break */
+        }
+         #code-editor { /* Textarea inherits code-block styles */
+            width: 100%;
+            height: 300px;
+            border: 1px solid #3d424d;
+         }
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            font-weight: 500;
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+        .nav-link:hover {
+            background-color: #e2e8f0; 
+        }
+        .activity-card {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .gemini-btn {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease-in-out;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .gemini-btn:hover {
+            background-color: #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+        }
+        .gemini-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #gemini-response h2 { font-size: 1.5rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
+        #gemini-response h3 { font-size: 1.25rem; font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.5rem; }
+        #gemini-response ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+        #gemini-response strong { font-weight: 600; }
+        #gemini-response code:not(pre code) {
+            background-color: #e2e8f0;
+            color: #2d3748;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
+            font-size: 0.85em; 
+        }
+        #gemini-response pre code {
+            display: block;
+            white-space: pre-wrap;
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .loader {
+            width: 50px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 8px solid #0000;
+            border-right-color: #818cf8;
+            animation: l24 1s infinite linear;
+        }
+        @keyframes l24 {
+            100% {transform: rotate(1turn)}
+        }
+        /* Tab styles */
+        .tab-button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem 0.375rem 0 0; /* Rounded top corners */
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            border: 1px solid #d1d5db; /* Gray-300 */
+            border-bottom: none; /* Remove bottom border for button */
+            margin-bottom: -1px; /* Overlap the container's top border */
+            background-color: #e5e7eb; /* Gray-200 */
+            color: #4b5563; /* Gray-600 */
+        }
+        .tab-button.active {
+            background-color: #ffffff; /* White background for active tab */
+            color: #3b82f6; /* Blue-500 */
+            border-color: #d1d5db; /* Gray-300 */
+            border-bottom: 1px solid #ffffff; /* White bottom border to merge with content */
+        }
+        .tab-button:not(.active):hover {
+            background-color: #d1d5db; /* Gray-300 */
+        }
+        .tab-content-container {
+             border: 1px solid #d1d5db; /* Gray-300 */
+             border-radius: 0 0.375rem 0.375rem 0.375rem; /* Rounded bottom corners */
+             padding: 1rem;
+             background-color: #ffffff;
+             margin-top: -1px; /* Ensure container border connects */
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Botão para abrir o Drawer -->
+    <button id="drawer-btn" class="fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Overlay -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+    <!-- Drawer Navigation -->
+    <nav id="drawer-nav" class="fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+        <div class="p-4">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Navegação</h3>
+            <a href="#introducao" class="nav-link text-gray-700">Introdução</a>
+            <a href="#configuracao" class="nav-link text-gray-700">Configuração</a>
+            <a href="#prerequisitos-cli" class="nav-link text-gray-700">Pré-requisitos CLI</a> 
+            <a href="#firebase-core" class="nav-link text-gray-700">firebase_core</a>
+            <a href="#firebase-auth" class="nav-link text-gray-700">firebase_auth</a>
+            <a href="#cloud-firestore" class="nav-link text-gray-700">cloud_firestore</a>
+            <a href="#firebase-storage" class="nav-link text-gray-700">firebase_storage</a>
+            <a href="#firebase-messaging" class="nav-link text-gray-700">firebase_messaging</a>
+            <a href="#realtime-database" class="nav-link text-gray-700">Realtime Database</a>
+            <a href="#playground" class="nav-link text-gray-700">Playground</a>
+            <a href="#conclusao" class="nav-link text-gray-700">Conclusão</a>
+        </div>
+    </nav>
+    
+    <!-- Modal Gemini -->
+    <div id="gemini-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
+                <h3 class="text-xl font-bold text-gray-800">✨ Resposta do Gemini</h3>
+                <button id="close-modal-btn" class="p-2 rounded-full hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div id="gemini-response" class="p-6 overflow-y-auto space-y-4">
+                <!-- Conteúdo gerado pela API será inserido aqui -->
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+
+        <header class="text-center mb-16">
+            <h1 class="text-5xl font-extrabold text-gray-900 tracking-tight">Firebase no Flutter</h1>
+            <p class="mt-4 text-xl text-gray-600">Integrando Backend e Funcionalidades Avançadas em Aplicações Mobile</p>
+        </header>
+
+        <main class="space-y-20">
+
+            <section id="introducao">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                        <span class="ml-3">Introdução</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('O que significa BaaS (Backend as a Service) e quais as vantagens de usar o Firebase?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                    <p class="text-lg text-gray-700">O <strong>Firebase</strong> é uma plataforma de desenvolvimento de aplicativos móveis e web do Google, que funciona como um <strong>Backend as a Service (BaaS)</strong>. Ele fornece ferramentas prontas para autenticação, base de dados, notificações push, armazenamento de ficheiros, analytics e muito mais.</p>
+                    <p class="text-gray-700">Integrar o Firebase ao Flutter permite adicionar funcionalidades complexas rapidamente, sem a necessidade de gerir uma infraestrutura de backend própria.</p>
+                     <h3 class="text-xl font-semibold text-gray-800 pt-2">Principais Pacotes Flutter + Firebase:</h3>
+                     <ul class="space-y-2 list-disc list-inside text-gray-700">
+                        <li><code>firebase_core</code>: Essencial para inicialização.</li>
+                        <li><code>firebase_auth</code>: Autenticação de utilizadores.</li>
+                        <li><code>cloud_firestore</code>: Base de dados NoSQL escalável.</li>
+                        <li><code>firebase_storage</code>: Armazenamento de ficheiros (imagens, vídeos).</li>
+                        <li><code>firebase_messaging</code>: Notificações push.</li>
+                        <li><code>firebase_database</code>: Base de dados Realtime NoSQL (alternativa ao Firestore).</li>
+                    </ul>
+                </div>
+            </section>
+
+             <!-- Nova Seção: Configuração do Projeto -->
+            <section id="configuracao">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        <span class="ml-3">Configuração do Projeto</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Qual a função do ficheiro pubspec.yaml num projeto Flutter?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                    <p class="text-lg text-gray-700">Para utilizar os serviços do Firebase no seu projeto Flutter, primeiro precisa de adicionar as dependências necessárias ao seu ficheiro <code>pubspec.yaml</code>.</p>
+                    <pre><code class="language-yaml code-block">dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Dependência principal - OBRIGATÓRIA
+  firebase_core: ^2.30.0 # Use a versão mais recente
+  
+  # Adicione os pacotes dos serviços que vai usar:
+  firebase_auth: ^4.17.0
+  cloud_firestore: ^4.15.0
+  google_sign_in: ^6.2.1 # Necessário para Login com Google
+  flutter_facebook_auth: ^6.1.1 # Necessário para Login com Facebook
+  firebase_storage: ^11.6.0
+  firebase_messaging: ^14.7.10
+  firebase_database: ^10.4.0
+  
+  # Outras dependências do seu projeto...
+</code></pre>
+                    <p class="text-gray-700">Após adicionar as dependências, execute o comando no terminal, na pasta raiz do seu projeto, para descarregar e instalar os pacotes:</p>
+                    <pre><code class="language-bash code-block">flutter pub get</code></pre>
+                     <p class="text-gray-700">Este comando lê o ficheiro <code>pubspec.yaml</code> e baixa as versões especificadas das bibliotecas (e as suas dependências) para a pasta <code>.dart_tool/package_config.json</code> e <code>.pub-cache</code> do seu ambiente.</p>
+                </div>
+            </section>
+
+            <section id="prerequisitos-cli">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span class="ml-3">Pré-requisitos para Usar o FlutterFire CLI</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Como faço login no Firebase CLI?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                    <p class="text-lg text-gray-700">O <strong>FlutterFire CLI</strong> é a ferramenta recomendada para configurar o Firebase no seu projeto Flutter de forma automatizada. Antes de usá-la, certifique-se de ter:</p>
+                     <ul class="space-y-3 list-disc list-inside text-gray-700">
+                        <li><strong>Node.js e npm instalados:</strong> O Firebase CLI (uma dependência) requer Node.js. Verifique com <code>node -v</code> e <code>npm -v</code>.</li>
+                        <li><strong>Firebase CLI instalado:</strong> Instale globalmente via npm:
+                            <pre><code class="language-bash code-block">npm install -g firebase-tools</code></pre>
+                        </li>
+                         <li><strong>Login no Firebase CLI:</strong> Autentique-se com sua conta Google no terminal:
+                            <pre><code class="language-bash code-block">firebase login</code></pre>
+                        </li>
+                        <li><strong>FlutterFire CLI instalado:</strong> Instale globalmente via Dart pub:
+                             <pre><code class="language-bash code-block">dart pub global activate flutterfire_cli</code></pre>
+                         </li>
+                    </ul>
+                     <p class="text-gray-700">Com estes pré-requisitos cumpridos, pode navegar até à pasta raiz do seu projeto Flutter no terminal e executar <code>flutterfire configure</code> para iniciar a configuração guiada.</p>
+                </div>
+            </section>
+            
+            <section id="firebase-core">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                       <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
+                        <span class="ml-3">firebase_core</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Por que `WidgetsFlutterBinding.ensureInitialized()` é necessário antes de inicializar o Firebase?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                    <p class="text-lg text-gray-700">O pacote <code>firebase_core</code> é o ponto de partida obrigatório. Ele permite que a aplicação Flutter se conecte à plataforma Firebase e inicialize os seus serviços.</p>
+                    <p class="text-gray-700">A sua inicialização deve ocorrer antes de usar qualquer outro pacote do Firebase, geralmente no método <code>main()</code>.</p>
+                    <pre><code class="language-dart code-block">import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+// Importe as opções geradas pelo FlutterFire CLI
+import 'firebase_options.dart'; 
+
+void main() async {
+  // Garante que os bindings do Flutter foram inicializados
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inicializa o Firebase usando as opções da plataforma atual
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: Text('Firebase App')),
+        body: Center(child: Text('Firebase inicializado!')),
+      ),
+    );
+  }
+}</code></pre>
+                </div>
+            </section>
+            
+             <section id="firebase-auth">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                        <span class="ml-3">firebase_auth</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Como lidar com o estado de autenticação (usuário logado/deslogado) no Flutter usando Firebase Auth?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                    <p class="text-lg text-gray-700">O <code>firebase_auth</code> fornece funcionalidades completas de autenticação, permitindo que os utilizadores façam login, se registem e gerem as suas contas usando diversos provedores.</p>
+                    
+                    <!-- Abas de Autenticação -->
+                    <div class="border-b border-gray-200">
+                        <nav class="-mb-px flex space-x-4 overflow-x-auto" aria-label="Tabs">
+                            <button class="tab-button active" data-target="#auth-email">Email/Senha</button>
+                            <button class="tab-button" data-target="#auth-google">Google</button>
+                            <button class="tab-button" data-target="#auth-facebook">Facebook</button>
+                        </nav>
+                    </div>
+
+                    <!-- Conteúdo das Abas com container -->
+                    <div id="auth-tabs-content" class="tab-content-container">
+                        <div id="auth-email" class="tab-content active">
+                            <h3 class="font-semibold mb-2 text-xl">Login e Registo com Email/Senha</h3>
+                             <pre><code class="language-dart code-block">import 'package:firebase_auth/firebase_auth.dart';
+
+FirebaseAuth auth = FirebaseAuth.instance;
+
+// Login
+Future<void> signInWithEmailPassword(String email, String password) async {
+  try {
+    UserCredential userCredential = await auth.signInWithEmailAndPassword(email: email, password: password);
+    print('Utilizador logado: ${userCredential.user?.uid}');
+  } on FirebaseAuthException catch (e) { print('Erro de login: ${e.message}'); }
+}
+
+// Criar conta
+Future<void> createUserWithEmailPassword(String email, String password) async {
+  try {
+    UserCredential userCredential = await auth.createUserWithEmailAndPassword(email: email, password: password);
+    print('Utilizador criado: ${userCredential.user?.uid}');
+  } on FirebaseAuthException catch (e) { print('Erro ao criar: ${e.message}'); }
+}
+
+// Logout
+Future<void> signOut() async {
+  await auth.signOut();
+  print('Utilizador deslogado.');
+}</code></pre>
+                        </div>
+                        <div id="auth-google" class="tab-content">
+                             <h3 class="font-semibold mb-2 text-xl">Login com Google</h3>
+                             <p class="text-sm text-gray-600 mb-2">Requer o pacote <code>google_sign_in</code> e configuração específica na consola Firebase e nas plataformas Android/iOS.</p>
+                            <pre><code class="language-dart code-block">import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+Future<UserCredential?> signInWithGoogle() async {
+  try {
+    // Inicia o fluxo de login do Google
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) return null; // Utilizador cancelou
+
+    // Obtém os detalhes de autenticação do pedido
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+    // Cria uma credencial Firebase
+    final OAuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    // Faz login no Firebase com a credencial do Google
+    print('Login com Google bem-sucedido!');
+    return await FirebaseAuth.instance.signInWithCredential(credential);
+  } catch (e) {
+    print("Erro no login com Google: $e");
+    return null;
+  }
+}</code></pre>
+                        </div>
+                         <div id="auth-facebook" class="tab-content">
+                             <h3 class="font-semibold mb-2 text-xl">Login com Facebook</h3>
+                             <p class="text-sm text-gray-600 mb-2">Requer o pacote <code>flutter_facebook_auth</code> e configuração detalhada na consola Firebase, no portal de desenvolvedores do Facebook e nas plataformas Android/iOS.</p>
+                             <pre><code class="language-dart code-block">import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+
+Future<UserCredential?> signInWithFacebook() async {
+  try {
+    // Inicia o fluxo de login do Facebook
+    final LoginResult result = await FacebookAuth.instance.login(); 
+
+    if (result.status == LoginStatus.success) {
+      // Obtém o token de acesso
+      final AccessToken accessToken = result.accessToken!;
+      
+      // Cria uma credencial Firebase
+      final OAuthCredential credential = FacebookAuthProvider.credential(accessToken.tokenString);
+      
+      // Faz login no Firebase com a credencial do Facebook
+      print('Login com Facebook bem-sucedido!');
+      return await FirebaseAuth.instance.signInWithCredential(credential);
+    } else {
+      print('Login com Facebook cancelado ou falhou: ${result.message}');
+      return null;
+    }
+  } catch (e) {
+    print("Erro no login com Facebook: $e");
+    return null;
+  }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="cloud-firestore">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>
+                        <span class="ml-3">cloud_firestore</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Qual a diferença entre usar `.set()` e `.add()` para adicionar documentos no Firestore?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                    <p class="text-lg text-gray-700">O <strong>Cloud Firestore</strong> é uma base de dados NoSQL flexível e escalável. Ele armazena dados em <strong>documentos</strong>, organizados em <strong>coleções</strong>, e oferece sincronização em tempo real.</p>
+                    <pre><code class="language-dart code-block">import 'package:cloud_firestore/cloud_firestore.dart';
+
+FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+// Adicionar um documento
+Future<void> addUser(String userId, String nome, String email) {
+  return firestore.collection('utilizadores').doc(userId).set({
+        'nomeCompleto': nome, 'email': email, 'dataRegisto': Timestamp.now(),
+      })
+      .then((_) => print("Utilizador Adicionado"))
+      .catchError((e) => print("Falha ao adicionar: $e"));
+}
+
+// Ler um documento
+Future<void> getUserData(String userId) async {
+  DocumentSnapshot snapshot = await firestore.collection('utilizadores').doc(userId).get();
+  if (snapshot.exists) print('Dados: ${snapshot.data()}');
+  else print('Não encontrado!');
+}
+
+// Ler todos os documentos
+Future<void> getAllUsers() async {
+   QuerySnapshot query = await firestore.collection('utilizadores').get();
+   query.docs.forEach((doc) => print('ID: ${doc.id} => Dados: ${doc.data()}'));
+}</code></pre>
+                </div>
+            </section>
+            
+             <section id="firebase-storage">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>
+                        <span class="ml-3">firebase_storage</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Como funcionam as regras de segurança do Firebase Storage para controlar quem pode ler ou escrever ficheiros?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                     <p class="text-lg text-gray-700">O <strong>Firebase Storage</strong> é ideal para armazenar e servir conteúdo gerado pelo utilizador, como fotos e vídeos. É robusto, seguro e escalável.</p>
+                     <p class="text-gray-700">Combine com <code>image_picker</code> para selecionar ficheiros e fazer o upload.</p>
+                    <pre><code class="language-dart code-block">import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+
+FirebaseStorage storage = FirebaseStorage.instance;
+
+Future<void> uploadFile() async {
+  final XFile? image = await ImagePicker().pickImage(source: ImageSource.gallery);
+  if (image == null) return;
+
+  File file = File(image.path);
+  String fileName = 'uploads/${DateTime.now().millisecondsSinceEpoch}.jpg';
+  
+  try {
+    Reference ref = storage.ref().child(fileName);
+    UploadTask uploadTask = ref.putFile(file);
+    await uploadTask;
+    String downloadURL = await ref.getDownloadURL();
+    print('Upload concluído! URL: $downloadURL');
+  } on FirebaseException catch (e) { print('Erro no upload: ${e.message}'); }
+}</code></pre>
+                </div>
+            </section>
+            
+            <section id="firebase-messaging">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                       <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                        <span class="ml-3">firebase_messaging</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Qual a diferença entre notificações e mensagens de dados no Firebase Cloud Messaging (FCM)?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                     <p class="text-lg text-gray-700">O <strong>Firebase Cloud Messaging (FCM)</strong> permite enviar notificações push e mensagens de dados para engajar utilizadores.</p>
+                    <pre><code class="language-dart code-block">import 'package:firebase_messaging/firebase_messaging.dart';
+
+FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+Future<void> setupMessaging() async {
+  // Solicita permissão
+  NotificationSettings settings = await messaging.requestPermission();
+  print('Permissão: ${settings.authorizationStatus}');
+
+  // Obtém o token do dispositivo
+  String? token = await messaging.getToken();
+  print("Token FCM: $token");
+
+  // Escuta mensagens em primeiro plano
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('Mensagem recebida: ${message.notification?.title}');
+    // Exibir notificação local ou atualizar UI
+  });
+
+  // Configurar handler para background (requer função top-level)
+  // FirebaseMessaging.onBackgroundMessage(_backgroundHandler);
+}</code></pre>
+                </div>
+            </section>
+            
+            <section id="realtime-database">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7.014A8.003 8.003 0 0117.657 18.657z" /><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 16.121A3 3 0 1014.12 11.88a3 3 0 00-4.242 4.242z" /></svg>
+                        <span class="ml-3">Realtime Database</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Quando devo escolher o Realtime Database em vez do Cloud Firestore?')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card space-y-4">
+                     <p class="text-lg text-gray-700">O <strong>Firebase Realtime Database</strong> armazena dados como um grande JSON e sincroniza em tempo real. Ideal para apps com baixa latência e atualizações constantes.</p>
+                    <pre><code class="language-dart code-block">import 'package:firebase_database/firebase_database.dart';
+
+FirebaseDatabase database = FirebaseDatabase.instance;
+
+// Escrever dados
+void writeData() {
+  DatabaseReference ref = database.ref('users/user1');
+  ref.set({'name': 'John Doe', 'email': 'john@example.com'});
+  print("Dados escritos.");
+}
+// Escrever dados
+void writeDataIDGereado() {
+  DatabaseReference ref = database.ref('users').push();
+  ref.set({'name': 'John Doe', 'email': 'john@example.com'});
+  print("Dados escritos.");
+}
+
+// Ler dados uma vez
+Future<void> readData() async {
+  DatabaseReference ref = database.ref('users/user1');
+  DatabaseEvent event = await ref.once();
+  if (event.snapshot.exists) print('Dados lidos: ${event.snapshot.value}');
+  else print('Nenhum dado encontrado.');
+}
+// Le todos os dados 
+Future<List> listar() async {
+    DatabaseReference ref = database.ref('users');
+    DatabaseEvent event = await ref.once();
+    List users = [];
+    if (event.snapshot.value != null) {
+      Map<dynamic, dynamic> map = event.snapshot.value as Map;
+      map.forEach((key, value) {
+        final userMap = Map<String, dynamic>.from(value as Map);
+        userMap['id'] = key; // 🔸 injeta o key como id
+        produtos.add(user.fromMap(userMap));
+      });
+    }
+    return produtos;
+  }
+
+// Escutar alterações
+void listenData() {
+    DatabaseReference ref = database.ref('users/user1');
+    ref.onValue.listen((DatabaseEvent event) {
+        if (event.snapshot.exists) print('Dados atualizados: ${event.snapshot.value}');
+    });
+}</code></pre>
+                </div>
+            </section>
+
+             <!-- Nova seção Playground com Abas -->
+             <section id="playground">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                        <span class="ml-3">Playground Interativo</span>
+                    </h2>
+                    <button class="gemini-btn" onclick="deepenConcept('Me dê um desafio de programação em Flutter para praticar a integração com o Firebase.')">✨ Aprofundar</button>
+                </div>
+                <div class="activity-card">
+                    <!-- Abas do Playground -->
+                    <div class="border-b border-gray-200">
+                        <nav class="-mb-px flex space-x-4 overflow-x-auto" aria-label="Tabs">
+                            <button class="tab-button active" data-target="#pg-core">Core</button>
+                            <button class="tab-button" data-target="#pg-auth">Auth</button>
+                            <button class="tab-button" data-target="#pg-firestore">Firestore</button>
+                            <button class="tab-button" data-target="#pg-storage">Storage</button>
+                            <button class="tab-button" data-target="#pg-messaging">Messaging</button>
+                            <button class="tab-button" data-target="#pg-realtime">Realtime DB</button>
+                        </nav>
+                    </div>
+
+                    <!-- Conteúdo do Playground com container -->
+                     <div id="playground-content" class="tab-content-container mt-0">
+                        <div id="pg-core" class="tab-content active"></div>
+                        <div id="pg-auth" class="tab-content"></div>
+                        <div id="pg-firestore" class="tab-content"></div>
+                        <div id="pg-storage" class="tab-content"></div>
+                        <div id="pg-messaging" class="tab-content"></div>
+                        <div id="pg-realtime" class="tab-content"></div>
+                          <!-- Textarea e botão ficam fora do content container das abas -->
+                         <textarea id="code-editor" class="text-sm mt-4 code-block"></textarea> 
+                         <button id="run-btn" class="mt-4 w-full bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors text-lg">Executar (Simulado)</button>
+                         <div class="mt-6">
+                             <h3 class="font-semibold text-gray-800 mb-2">Saída Simulada:</h3>
+                             <pre id="output-display" class="text-sm min-h-[100px] code-block"></pre>
+                         </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="conclusao">
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z" /></svg>
+                        <span class="ml-3">Conclusão</span>
+                    </h2>
+                     <button class="gemini-btn" onclick="deepenConcept('Quais são os custos envolvidos no uso do Firebase (plano gratuito vs. pago)?')">✨ Aprofundar</button>
+                </div>
+                 <div class="activity-card">
+                     <p class="text-lg text-gray-700">Integrar o Firebase ao Flutter acelera drasticamente o desenvolvimento de aplicações, oferecendo soluções robustas e escaláveis para backend, autenticação, base de dados, armazenamento e notificações. A combinação permite focar na experiência do utilizador, enquanto o Firebase cuida da infraestrutura.</p>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-20 pt-10 border-t border-gray-300">
+             <p class="text-gray-600 mb-4">Apresentação sobre Firebase no Flutter.</p>
+            <button id="export-pdf-btn" class="bg-gray-800 text-white px-6 py-2 rounded-md font-semibold hover:bg-gray-900 transition-colors">Exportar para PDF</button>
+        </footer>
+    </div>
+
+    <script>
+        function setupPdfExport() {
+            // ... (Função de exportação para PDF omitida para brevidade)
+        }
+
+        const modal = document.getElementById('gemini-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const geminiResponseEl = document.getElementById('gemini-response');
+        let isGeminiLoading = false;
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            isGeminiLoading = false;
+        });
+
+        async function callGemini(prompt, maxRetries = 3) {
+           // ... (Lógica de chamada da API e retry omitida para brevidade)
+             const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+             const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8"; 
+             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+             let lastError = null;
+             for (let attempt = 0; attempt < maxRetries; attempt++) {
+                 try {
+                     const response = await fetch(apiUrl, {
+                         method: 'POST',
+                         headers: { 'Content-Type': 'application/json' },
+                         body: JSON.stringify(payload)
+                     });
+                     if (!response.ok) {
+                         lastError = new Error(`HTTP error! status: ${response.status}`);
+                         await new Promise(res => setTimeout(res, Math.pow(2, attempt) * 1000));
+                         continue;
+                     }
+                     const result = await response.json();
+                     if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.text) {
+                         return result.candidates[0].content.parts[0].text;
+                     } else {
+                         lastError = new Error("Resposta da API inválida ou vazia.");
+                     }
+                 } catch (error) { lastError = error; }
+                 await new Promise(res => setTimeout(res, Math.pow(2, attempt) * 1000));
+             }
+             console.error("API call failed:", lastError);
+             return "Desculpe, não foi possível obter uma resposta. Tente novamente mais tarde.";
+        }
+
+       function parseMarkdown(text) {
+           // ... (Função de parse de Markdown omitida para brevidade, mas deve incluir hljs)
+            const lines = text.split('\n');
+           let html = '';
+           let inCodeBlock = false;
+           let codeLang = 'dart'; // Default to Dart for Firebase examples
+           let inList = false;
+
+           lines.forEach(line => {
+               if (line.startsWith('```')) {
+                   inCodeBlock = !inCodeBlock;
+                   if(inCodeBlock) {
+                       codeLang = line.substring(3).trim() || 'dart';
+                       html += `<pre><code class="language-${codeLang} code-block">`;
+                   } else {
+                       html += '</code></pre>';
+                   }
+                   return;
+               }
+               if (inCodeBlock) {
+                   // Escape HTML characters inside code blocks
+                   html += line.replace(/</g, "&lt;").replace(/>/g, "&gt;") + '\n';
+               } else if (/^\s*[\*\-]\s+/.test(line)) { // Handle Markdown lists (* item or - item)
+                    if (!inList) {
+                        html += '<ul>';
+                        inList = true;
+                    }
+                    // Remove leading space and bullet
+                    html += `<li>${line.replace(/^\s*[\*\-]\s+/, '')}</li>`;
+                } else {
+                    if (inList) { // Close list if the current line is not a list item
+                        html += '</ul>';
+                        inList = false;
+                    }
+                    if (line.startsWith('### ')) html += `<h3>${line.substring(4)}</h3>`;
+                    else if (line.startsWith('## ')) html += `<h2>${line.substring(3)}</h2>`;
+                    else if (line.trim()) html += `<p>${line}</p>`; // Treat non-empty lines as paragraphs
+               }
+           });
+           if (inList) html += '</ul>'; // Close list if it was the last element
+           if (inCodeBlock) html += '</code></pre>'; // Ensure code block is closed
+           
+           // Process inline markdown like **bold** and `code` after block elements
+           html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/`(.*?)`/g, '<code>$1</code>');
+            
+           // Schedule highlighting after the HTML is inserted into the DOM
+            setTimeout(() => {
+                if (typeof hljs !== 'undefined') {
+                    document.querySelectorAll('#gemini-response pre code').forEach((block) => {
+                        try {
+                            hljs.highlightElement(block);
+                        } catch(e) {
+                            console.error("Highlight.js error in parseMarkdown:", e);
+                        }
+                    });
+                }
+            }, 0);
+           return html;
+       }
+        
+        async function deepenConcept(topic) {
+           // ... (Função para chamar o Gemini omitida para brevidade)
+             if (isGeminiLoading) return;
+             isGeminiLoading = true;
+             document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = true);
+             const prompt = `Explique o conceito de "${topic}" no contexto de Firebase e Flutter. Seja claro, objetivo e use exemplos de código Dart se for relevante. Formate a resposta com títulos, listas e blocos de código.`;
+             modal.classList.remove('hidden');
+             modal.classList.add('flex');
+             geminiResponseEl.innerHTML = '<div class="flex justify-center items-center h-full"><div class="loader"></div></div>';
+             const explanation = await callGemini(prompt);
+             geminiResponseEl.innerHTML = parseMarkdown(explanation);
+             isGeminiLoading = false;
+             document.querySelectorAll('.gemini-btn').forEach(btn => btn.disabled = false);
+        }
+
+        // Função para lidar com a troca de abas - CORRIGIDA
+        function setupTabs(tabContainerSelector, contentContainerSelector) {
+            const tabButtons = document.querySelectorAll(`${tabContainerSelector} .tab-button`);
+            // Select direct children with the .tab-content class within the specific container
+            const tabContents = document.querySelectorAll(`${contentContainerSelector} > .tab-content`); 
+
+            if (!tabButtons.length || !tabContents.length) {
+                console.warn(`Tabs not found or misconfigured for: ${tabContainerSelector} / ${contentContainerSelector}`);
+                return; 
+            }
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // 1. Desativar todos os botões e conteúdos DENTRO DESTE CONJUNTO DE ABAS
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                     // Use querySelectorAll within the *specific* content container
+                    document.querySelectorAll(`${contentContainerSelector} > .tab-content`).forEach(content => content.classList.remove('active'));
+
+                    // 2. Ativar o botão clicado
+                    button.classList.add('active');
+
+                    // 3. Ativar o conteúdo correspondente
+                    const targetId = button.getAttribute('data-target'); // e.g., "#auth-email" or "#pg-core"
+                    if (targetId) {
+                        const targetContent = document.querySelector(targetId);
+                        if (targetContent) {
+                            targetContent.classList.add('active');
+                        } else {
+                            console.error(`Tab content not found for selector: ${targetId}`);
+                        }
+                    } else {
+                        console.error("Tab button missing data-target attribute:", button);
+                    }
+
+                    // 4. Se for o playground, carregar o código da aba ativa
+                    if (tabContainerSelector === '#playground nav') {
+                        const activePlaygroundTab = document.querySelector('#playground nav .tab-button.active');
+                        if (activePlaygroundTab) {
+                             const targetKey = activePlaygroundTab.getAttribute('data-target').replace('#pg-', ''); // e.g., 'core', 'auth'
+                             displayPlaygroundCode(targetKey);
+                        }
+                    }
+                });
+            });
+
+             // Initialize: Ensure the initially marked 'active' tab/content are displayed correctly
+             const initiallyActiveButton = document.querySelector(`${tabContainerSelector} .tab-button.active`);
+             if (initiallyActiveButton) {
+                 const targetId = initiallyActiveButton.getAttribute('data-target');
+                 const targetContent = document.querySelector(targetId);
+                 
+                 // Deactivate all *other* content in this set first
+                 document.querySelectorAll(`${contentContainerSelector} > .tab-content:not(${targetId})`).forEach(content => content.classList.remove('active'));
+                 
+                 // Activate the target content if it exists and isn't already active
+                 if (targetContent && !targetContent.classList.contains('active')) {
+                     targetContent.classList.add('active');
+                 } else if (!targetContent) {
+                      console.error(`Initial active tab content not found: ${targetId}`);
+                 }
+
+                 // If it's the playground, load the initial code
+                 if (tabContainerSelector === '#playground nav') {
+                    const targetKey = initiallyActiveButton.getAttribute('data-target').replace('#pg-', '');
+                    displayPlaygroundCode(targetKey);
+                 }
+             } else if (tabButtons.length > 0) {
+                 // Fallback if no tab is initially active in HTML - activate the first one
+                 tabButtons[0].click(); 
+             }
+        }
+        
+        // --- Playground Logic ---
+        const codeSamples = {
+            core: `import 'package:firebase_core/firebase_core.dart';
+// import 'firebase_options.dart'; 
+
+Future<void> main() async {
+  // WidgetsFlutterBinding.ensureInitialized(); 
+  // await Firebase.initializeApp(
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
+  print("Firebase inicializado com sucesso! (Simulado)");
+}`,
+            auth: `import 'package:firebase_auth/firebase_auth.dart';
+
+Future<void> signIn(String email, String password) async {
+  try {
+    // Simulação - Não chama o Firebase real
+    String simulatedUserId = "userXYZ"; 
+    print("Login OK para: \${email} (UID: \${simulatedUserId})");
+  } catch (e) {
+     print("Erro na simulação de login: $e");
+  }
+}
+
+// Simula a chamada da função
+signIn("utilizador@simulado.com", "senha123");
+`,
+           firestore: `import 'package:cloud_firestore/cloud_firestore.dart';
+
+Future<void> addData() async {
+  try {
+    // Simulação - Não chama o Firestore real
+    // CollectionReference items = FirebaseFirestore.instance.collection('items');
+    // await items.add({...});
+    print("Dados adicionados ao Firestore! (Simulado)");
+  } catch (e) { print("Erro (simulado): $e"); }
+}
+
+// Simula a chamada da função
+addData();
+`,
+            storage: `import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
+
+Future<void> uploadSimulatedFile() async {
+  try {
+    // Simulação - Não faz upload real
+    String fileName = 'uploads/simulado.jpg';
+    print("Iniciando upload simulado para: \${fileName}");
+    // Simula espera
+    await Future.delayed(Duration(seconds: 1)); 
+    String downloadURL = "[https://fake.storage.link/simulado.jpg](https://fake.storage.link/simulado.jpg)";
+    print('Upload simulado concluído! URL: $downloadURL');
+  } catch (e) { print('Erro no upload simulado: $e'); }
+}
+
+// Simula a chamada da função
+uploadSimulatedFile();
+`,
+            messaging: `import 'package:firebase_messaging/firebase_messaging.dart';
+
+Future<void> setupSimulatedMessaging() async {
+  // Simulação - Não interage com FCM real
+  print("Solicitando permissão simulada...");
+  await Future.delayed(Duration(milliseconds: 500));
+  print("Permissão simulada concedida: authorized");
+  
+  String? token = "simulated_fcm_token_12345";
+  print("Token FCM simulado: $token");
+
+  print("Escutando mensagens simuladas em primeiro plano...");
+  // Não há mensagens reais para escutar na simulação
+}
+
+// Simula a chamada da função
+setupSimulatedMessaging();
+`,
+           realtime: `import 'package:firebase_database/firebase_database.dart';
+
+void writeSimulatedData() {
+  // Simulação - Não escreve no DB real
+  print("Escrevendo dados simulados em 'users/simUser'...");
+  print("Dados simulados escritos.");
+}
+
+Future<void> readSimulatedData() async {
+  // Simulação - Não lê do DB real
+  print("Lendo dados simulados de 'users/simUser'...");
+  await Future.delayed(Duration(milliseconds: 300));
+  print('Dados simulados lidos: {nome: Simulador, idade: 99}');
+}
+
+// Simula a chamada das funções
+writeSimulatedData();
+readSimulatedData();
+`
+        };
+
+        const codeOutputs = {
+            core: "> Executando...\n\nFirebase inicializado com sucesso! (Simulado)",
+            auth: "> Executando...\n\nLogin OK para: utilizador@simulado.com (UID: userXYZ)",
+            firestore: "> Executando...\n\nDados adicionados ao Firestore! (Simulado)",
+            storage: "> Executando...\n\nIniciando upload simulado para: uploads/simulado.jpg\nUpload simulado concluído! URL: [https://fake.storage.link/simulado.jpg](https://fake.storage.link/simulado.jpg)",
+            messaging: "> Executando...\n\nSolicitando permissão simulada...\nPermissão simulada concedida: authorized\nToken FCM simulado: simulated_fcm_token_12345\nEscutando mensagens simuladas em primeiro plano...",
+            realtime: "> Executando...\n\nEscrevendo dados simulados em 'users/simUser'...\nDados simulados escritos.\nLendo dados simulados de 'users/simUser'...\nDados simulados lidos: {nome: Simulador, idade: 99}"
+        };
+
+        const codeEditor = document.getElementById('code-editor');
+        const outputDisplay = document.getElementById('output-display');
+        const runBtn = document.getElementById('run-btn');
+
+        function displayPlaygroundCode(type) {
+             if (codeEditor && codeSamples[type]) {
+                codeEditor.value = codeSamples[type];
+                 if (outputDisplay) {
+                     outputDisplay.textContent = 'Clique em "Executar" para ver a saída simulada.';
+                 }
+                 // Highlighting for textarea is not standard with highlight.js, 
+                 // but we ensure the code-block class applies styles.
+            } else {
+                 if(codeEditor) codeEditor.value = "// Código não disponível para esta aba.";
+                 if(outputDisplay) outputDisplay.textContent = "";
+                 console.warn(`Playground code sample not found for type: ${type}`);
+            }
+        }
+
+        // --- Fim do Playground Logic ---
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+             try {
+                // Highlight all static <pre><code> blocks on the page initially
+                hljs.highlightAll(); 
+            } catch(e) {
+                 console.error("Initial Highlight.js error:", e);
+            }
+
+            const drawerBtn = document.getElementById('drawer-btn');
+            const drawerNav = document.getElementById('drawer-nav');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+            const navLinks = drawerNav.querySelectorAll('a');
+
+            function toggleDrawer() {
+                if (drawerNav && drawerOverlay) {
+                    drawerNav.classList.toggle('-translate-x-full');
+                    drawerNav.classList.toggle('translate-x-0');
+                    drawerOverlay.classList.toggle('hidden');
+                }
+            }
+
+            if(drawerBtn) drawerBtn.addEventListener('click', toggleDrawer);
+            if(drawerOverlay) drawerOverlay.addEventListener('click', toggleDrawer);
+
+            if (navLinks) {
+                navLinks.forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        toggleDrawer();
+                        const targetSelector = this.getAttribute('href');
+                         if (targetSelector) {
+                            const targetElement = document.querySelector(targetSelector);
+                            if(targetElement) {
+                                setTimeout(() => {
+                                     targetElement.scrollIntoView({ behavior: 'smooth' });
+                                }, 300); // Wait for drawer animation
+                            } else {
+                                 console.warn(`Navigation target not found: ${targetSelector}`);
+                            }
+                         }
+                    });
+                });
+            }
+
+            setupPdfExport();
+            setupTabs('#firebase-auth nav', '#auth-tabs-content'); // Configura abas da seção Auth
+            setupTabs('#playground nav', '#playground-content'); // Configura abas do Playground
+
+            // Configuração do Playground
+             if(codeEditor && outputDisplay && runBtn) {
+                 // Botão de Executar
+                runBtn.addEventListener('click', () => {
+                    const activePlaygroundTab = document.querySelector('#playground nav .tab-button.active');
+                    let matchedKey = 'core'; // Default key
+                    if (activePlaygroundTab) {
+                        const targetAttr = activePlaygroundTab.getAttribute('data-target');
+                        if (targetAttr) {
+                            matchedKey = targetAttr.replace('#pg-', '');
+                        }
+                    }
+                    
+                    // Simulação baseada na aba ativa
+                    if (codeOutputs[matchedKey]) {
+                         outputDisplay.textContent = codeOutputs[matchedKey];
+                    } else {
+                        outputDisplay.textContent = '> Nenhuma simulação disponível para esta aba.';
+                    }
+                     // Highlight the output pre block
+                     try {
+                        hljs.highlightElement(outputDisplay); 
+                     } catch(e) {
+                         console.error("Highlight.js error on output:", e);
+                     }
+                });
+
+                 // Initial code load is handled by setupTabs calling displayPlaygroundCode
+            } else {
+                 console.warn("Playground elements (editor, output, button) not found.");
+            }
+
+        });
+    </script>
+</body>
+</html>
+

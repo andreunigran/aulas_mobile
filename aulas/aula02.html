@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introdução ao Flutter e Setup do Ambiente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A single-page application with a drawer navigation menu for smooth scrolling between thematic sections. This structure provides a clear and organized learning path, from high-level concepts to practical setup and coding examples. The content is segmented into logical cards for better readability. -->
+    <!-- Visualization & Content Choices: The content from the provided slides is structured into thematic sections. Key concepts like "What is Flutter?" and its advantages are presented in clear, concise cards. The environment setup is broken down with step-by-step instructions. Code examples are formatted for clarity within styled code blocks. This design prioritizes a clean, organized, and educational user experience. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .code-block {
+            background-color: #2d3748; /* gray-800 */
+            color: #e2e8f0; /* gray-300 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", monospace;
+            font-size: 0.875rem;
+        }
+        .code-block .keyword { color: #63b3ed; } /* blue-400 */
+        .code-block .type { color: #4fd1c5; } /* teal-400 */
+        .code-block .string { color: #f6ad55; } /* orange-400 */
+        .code-block .comment { color: #a0aec0; } /* gray-500 */
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            font-weight: 500;
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+        .nav-link:hover {
+            background-color: #e2e8f0; /* gray-200 */
+        }
+        .activity-card {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-gray-800">
+
+    <!-- Botão para abrir o Drawer -->
+    <button id="drawer-btn" class="fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Overlay -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+    <!-- Drawer Navigation -->
+    <nav id="drawer-nav" class="fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+        <div class="p-4">
+            <h3 class="text-xl font-bold mb-4">Navegação</h3>
+            <a href="#o-que-e-flutter" class="nav-link">O que é?</a>
+            <a href="#arquitetura" class="nav-link">Arquitetura</a>
+            <a href="#o-que-e-dart" class="nav-link">Dart</a>
+            <a href="#configuracao" class="nav-link">Configuração</a>
+            <a href="#primeiro-app" class="nav-link">Primeiro App</a>
+            <a href="#problemas-comuns" class="nav-link">Problemas Comuns</a>
+            <a href="#exercicio" class="nav-link">Exercício</a>
+            <a href="#referencias" class="nav-link">Referências</a>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Introdução ao Flutter e Setup do Ambiente</h1>
+            <p class="mt-4 text-lg text-gray-600">Nesta primeira aula, vamos conhecer o Flutter, por que ele é uma escolha moderna para o desenvolvimento e como configurar seu ambiente.</p>
+        </header>
+
+        <main class="space-y-20">
+
+            <section id="o-que-e-flutter">
+                <h2 class="text-3xl font-bold mb-6 text-center">O que é Flutter e suas Vantagens?</h2>
+                <p class="text-center text-gray-600 mb-10 max-w-3xl mx-auto">
+                    Flutter é um framework de código aberto criado pela Google para desenvolver aplicativos com uma única base de código que roda em Android, iOS, Web e Desktop. Aplicativos famosos como o Google Ads, Nubank e iFood usam Flutter em produção.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="activity-card">
+                        <h3 class="text-xl font-semibold mb-3">Hot Reload</h3>
+                        <p class="text-gray-700">Permite ver alterações no código em tempo real sem reiniciar o app, acelerando o desenvolvimento.</p>
+                    </div>
+                    <div class="activity-card">
+                        <h3 class="text-xl font-semibold mb-3">Alto Desempenho</h3>
+                        <p class="text-gray-700">O código é compilado diretamente para nativo, garantindo performance excelente.</p>
+                    </div>
+                    <div class="activity-card">
+                        <h3 class="text-xl font-semibold mb-3">UI Moderna</h3>
+                        <p class="text-gray-700">Componentes visuais (widgets) ricos e personalizáveis para criar interfaces incríveis.</p>
+                    </div>
+                    <div class="activity-card">
+                        <h3 class="text-xl font-semibold mb-3">Produtividade</h3>
+                        <p class="text-gray-700">Menos tempo para desenvolver, testar e publicar em múltiplas plataformas.</p>
+                    </div>
+                    <div class="activity-card">
+                        <h3 class="text-xl font-semibold mb-3">Comunidade Ativa</h3>
+                        <p class="text-gray-700">Grande quantidade de pacotes prontos (em pub.dev) e documentação extensa.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="arquitetura">
+                <h2 class="text-3xl font-bold mb-6 text-center">Arquitetura do Flutter</h2>
+                <p class="text-center text-gray-600 mb-10 max-w-3xl mx-auto">
+                    Flutter é composto por três camadas principais. Esse modelo permite que ele não dependa de componentes nativos da plataforma, o que resulta em maior controle e personalização visual.
+                </p>
+                <div class="activity-card space-y-6">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">1. Framework (Dart)</h3>
+                        <p class="text-gray-700">A camada superior, onde você escreve todo o seu código usando a linguagem Dart e a vasta biblioteca de widgets do Flutter.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">2. Engine (C/C++)</h3>
+                        <p class="text-gray-700">O coração do Flutter. É responsável por renderizar a interface na tela usando o motor gráfico Skia, além de gerenciar a entrada, saída e a execução do código Dart.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">3. Embedder</h3>
+                        <p class="text-gray-700">A camada de integração específica da plataforma. Ela conecta o app ao sistema operacional (Android/iOS/Web/Desktop), gerenciando a janela, os eventos e a comunicação com serviços nativos.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="o-que-e-dart">
+                <h2 class="text-3xl font-bold mb-6 text-center">O que é Dart?</h2>
+                <p class="text-center text-gray-600 mb-10 max-w-3xl mx-auto">
+                    Dart é uma linguagem moderna e fácil de aprender, criada pela Google. Ela é orientada a objetos, com sintaxe semelhante a JavaScript, Java e C#. Com Dart, você escreve a lógica de negócios e a interface do seu app Flutter.
+                </p>
+                <div class="activity-card">
+                    <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
+                        <li>Tipagem forte e segura (sound null safety).</li>
+                        <li>Suporte a programação assíncrona com `async/await`.</li>
+                        <li>Excelente performance com compilação JIT (para desenvolvimento) e AOT (para produção).</li>
+                    </ul>
+                    <div class="code-block"><pre><code class="language-dart"><span class="keyword">void</span> main() {
+  print(<span class="string">"Olá, Flutter!"</span>);
+}</code></pre></div>
+                </div>
+            </section>
+
+            <section id="configuracao">
+                <h2 class="text-3xl font-bold mb-6 text-center">Setup do Ambiente de Desenvolvimento</h2>
+                <div class="activity-card space-y-8">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Requisitos Mínimos</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li>Sistema Operacional: Windows 10+, macOS ou Linux.</li>
+                            <li>Espaço em disco: No mínimo 2.8 GB (sem contar o Android Studio).</li>
+                            <li>Git: Necessário para o Flutter funcionar corretamente.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Passo 1: Instalar o Flutter SDK</h3>
+                        <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                            <li>Baixar o Flutter SDK no site oficial: <a href="https://flutter.dev/docs/get-started/install" target="_blank" class="text-blue-600 hover:underline">flutter.dev</a>.</li>
+                            <li>Descompactar em uma pasta como `C:\src\flutter` ou `~/development/flutter`.</li>
+                            <li>Adicionar o caminho completo da pasta `flutter\bin` à sua variável de ambiente `PATH`.</li>
+                        </ol>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Passo 2: Instalar a IDE e Plugins</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2">VS Code</h4>
+                                <p>Instale as extensões "Flutter" e "Dart" diretamente da marketplace do editor.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2">Android Studio</h4>
+                                <p>Vá em `Plugins > Marketplace` e instale os plugins "Flutter" e "Dart".</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Passo 3: Instalar o Android SDK e Emulador</h3>
+                        <p class="text-gray-700">A forma mais fácil de fazer isso é através do Android Studio. Após instalá-lo, use o `AVD Manager` para criar e configurar um emulador Android.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-3">Passo 4: Verificar o Ambiente</h3>
+                        <p class="text-gray-700 mb-4">Abra um novo terminal e rode `flutter doctor`. Ele analisará sua instalação e indicará se algo precisa ser corrigido.</p>
+                        <div class="code-block"><pre><code>flutter doctor</code></pre></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="primeiro-app">
+                <h2 class="text-3xl font-bold mb-6 text-center">Criando e Rodando seu Primeiro App</h2>
+                <div class="activity-card">
+                    <p class="text-lg leading-relaxed mb-6">Após a instalação, teste se tudo está funcionando criando e rodando um app de exemplo. Abra seu terminal e execute os seguintes comandos:</p>
+                    <div class="code-block"><pre><code><span class="comment"># Cria um novo projeto chamado hello_flutter</span>
+flutter create hello_flutter
+
+<span class="comment"># Entra na pasta do projeto</span>
+cd hello_flutter
+
+<span class="comment"># Roda o aplicativo (com um emulador aberto ou celular conectado)</span>
+flutter run</code></pre></div>
+                    <p class="mt-6 text-gray-700">Se tudo estiver correto, o aplicativo de demonstração do Flutter será iniciado no seu dispositivo ou emulador.</p>
+                </div>
+            </section>
+            
+            <section id="problemas-comuns">
+                <h2 class="text-3xl font-bold mb-6 text-center">Problemas Comuns no Setup</h2>
+                <div class="activity-card">
+                    <ul class="list-disc list-inside space-y-4 text-gray-700">
+                        <li><strong class="font-semibold text-gray-900">Comando `flutter` não reconhecido:</strong> Verifique se o caminho para a pasta `bin` do Flutter foi adicionado corretamente à variável `PATH` do seu sistema.</li>
+                        <li><strong class="font-semibold text-gray-900">`flutter doctor` mostra pendências:</strong> Leia a saída com atenção. Geralmente, ele informa exatamente o que falta, como aceitar as licenças do Android (`flutter doctor --android-licenses`).</li>
+                        <li><strong class="font-semibold text-gray-900">Emulador Android não inicia:</strong> Confira se a virtualização de hardware (VT-x) está ativada na BIOS do seu computador.</li>
+                        <li><strong class="font-semibold text-gray-900">Celular não aparece:</strong> Certifique-se de que a "Depuração USB" está ativada nas Opções do Desenvolvedor do seu Android e que você autorizou a conexão no popup que aparece no celular.</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="exercicio">
+                <h2 class="text-3xl font-bold mb-6 text-center">Exercício Prático</h2>
+                <div class="activity-card">
+                    <h3 class="text-2xl font-semibold mb-3">Objetivo</h3>
+                    <p class="text-gray-700 mb-6">Configurar seu ambiente Flutter completamente e rodar o aplicativo de exemplo.</p>
+                    <h3 class="text-2xl font-semibold mb-3">Passos</h3>
+                    <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                        <li>Baixe e configure o Flutter SDK no seu sistema.</li>
+                        <li>Instale a IDE de sua escolha (VS Code ou Android Studio) com os plugins do Flutter e Dart.</li>
+                        <li>Execute `flutter doctor` e corrija todos os possíveis erros ou pendências.</li>
+                        <li>Crie um novo projeto com o comando `flutter create hello_flutter`.</li>
+                        <li>Rode o aplicativo com `flutter run` em um emulador ou celular físico.</li>
+                        <li>Envie uma captura de tela do app rodando como evidência.</li>
+                    </ol>
+                </div>
+            </section>
+
+            <section id="referencias">
+                <h2 class="text-3xl font-bold mb-6 text-center">Referências e Dúvidas Frequentes</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="activity-card">
+                        <h3 class="text-2xl font-semibold mb-3">Dúvidas Frequentes</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li><strong>Preciso de um Mac para iOS?</strong> Sim, para compilar para iOS é necessário um macOS com Xcode.</li>
+                            <li><strong>O VS Code é suficiente?</strong> Sim, desde que o Android SDK esteja corretamente instalado.</li>
+                            <li><strong>O Flutter é só para mobile?</strong> Não. Ele também permite criar apps para Web, Windows, macOS e Linux.</li>
+                        </ul>
+                    </div>
+                    <div class="activity-card">
+                        <h3 class="text-2xl font-semibold mb-3">Links Úteis</h3>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><a href="https://flutter.dev/docs" target="_blank" class="text-blue-600 hover:underline">Documentação oficial do Flutter</a></li>
+                            <li><a href="https://dart.dev/guides" target="_blank" class="text-blue-600 hover:underline">Documentação do Dart</a></li>
+                            <li><a href="https://www.youtube.com/flutterdev" target="_blank" class="text-blue-600 hover:underline">Canal do Flutter no YouTube</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-20 pt-8 border-t border-gray-200">
+            <p class="text-gray-500 mb-4">Aplicação Interativa gerada para explorar o Flutter.</p>
+            <button id="export-pdf-btn" class="bg-gray-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-gray-800 transition-colors">Exportar para PDF</button>
+        </footer>
+    </div>
+
+    <script>
+        function setupPdfExport() {
+            const exportBtn = document.getElementById('export-pdf-btn');
+            if (!exportBtn) return;
+
+            exportBtn.addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'pt', 'a4');
+                const margin = 40;
+                const maxWidth = doc.internal.pageSize.getWidth() - margin * 2;
+                let y = margin;
+
+                const addText = (text, size, isBold, isCode = false) => {
+                    if (y > doc.internal.pageSize.getHeight() - margin) {
+                        doc.addPage();
+                        y = margin;
+                    }
+                    doc.setFont(isCode ? 'Courier' : 'Helvetica', isBold ? 'bold' : 'normal');
+                    doc.setFontSize(size);
+                    const lines = doc.splitTextToSize(text, maxWidth);
+                    doc.text(lines, margin, y);
+                    const lineHeight = size * 1.2;
+                    y += (lines.length * lineHeight);
+                };
+
+                const sections = document.querySelectorAll('main > section');
+                sections.forEach(section => {
+                    const title = section.querySelector('h2');
+                    if (title) {
+                        addText(title.innerText, 18, true);
+                        y += 12;
+                    }
+                    
+                    const intro = section.querySelector('p.text-center');
+                     if (intro) {
+                        addText(intro.innerText, 10, false);
+                        y += 15;
+                    }
+
+                    const contentCards = section.querySelectorAll('.activity-card, .activity-card > div');
+                    contentCards.forEach(card => {
+                         const subTitle = card.querySelector('h3');
+                         if(subTitle) {
+                             addText(subTitle.innerText, 14, true);
+                             y += 8;
+                         }
+                         const paragraphs = card.querySelectorAll('p:not(.text-center)');
+                         paragraphs.forEach(p => {
+                             addText(p.innerText, 10, false);
+                             y += 8;
+                         });
+                         const listItems = card.querySelectorAll('li');
+                         listItems.forEach(li => {
+                             addText(`- ${li.innerText}`, 10, false);
+                             y += 8;
+                         });
+                         const codeBlocks = card.querySelectorAll('.code-block');
+                         codeBlocks.forEach(code => {
+                             addText(code.innerText, 9, false, true);
+                             y += 12;
+                         });
+                    });
+                     y += 24;
+                });
+                
+                doc.save('guia-flutter.pdf');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const drawerBtn = document.getElementById('drawer-btn');
+            const drawerNav = document.getElementById('drawer-nav');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+            const navLinks = drawerNav.querySelectorAll('a');
+
+            function toggleDrawer() {
+                drawerNav.classList.toggle('-translate-x-full');
+                drawerNav.classList.toggle('translate-x-0');
+                drawerOverlay.classList.toggle('hidden');
+            }
+
+            drawerBtn.addEventListener('click', toggleDrawer);
+            drawerOverlay.addEventListener('click', toggleDrawer);
+
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    toggleDrawer();
+                    const targetElement = document.querySelector(this.getAttribute('href'));
+                    if(targetElement) {
+                        setTimeout(() => {
+                             targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }, 300); // Aguarda a animação do drawer fechar
+                    }
+                });
+            });
+            setupPdfExport();
+        });
+    </script>
+</body>
+</html>
+

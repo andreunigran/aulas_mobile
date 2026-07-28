@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+        <meta charset='utf-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <title>Page Title</title>
+        <link rel='stylesheet' href='main.css'>
+</head>
+<body>
+        <main>
+                <h1>Comandos Básicos do Flutter</h1>
+                <pre>
+Verificar Instalação do Flutter:
+flutter doctor
+Verifica se todas as dependências estão instaladas corretamente e identifica problemas.
+
+Criar Novo Projeto Flutter:
+flutter create nome_do_projeto
+
+Executar o projeto (hot reload):
+flutter run
+Executa o app em um dispositivo conectado ou emulador.
+Para dispositivos específicos:
+    flutter run -d chrome           # Executar no navegador
+    flutter run -d emulator-5554    # Executar no emulador (substitua pelo ID do dispositivo)
+
+Limpar o projeto (excluir caches):
+flutter clean
+
+Atualizar Dependências:
+flutter pub get
+Baixa e atualiza as dependências definidas no pubspec.yaml.
+
+Listar dispositivos conectados:
+flutter devices
+
+Comandos para Construção e Build:
+Build para Android:
+    flutter build apk --release
+Gera um APK otimizado para distribuição.
+
+Build para iOS:
+    flutter build ios --release
+Compila o app para iOS. Requer um Mac para execução.
+
+Build para Web:
+    flutter build web
+Gera os arquivos para o deployment de uma versão Web do app.
+
+Depuração e Monitoramento:
+Depurar com Hot Reload:
+    flutter run
+Use `r` no terminal para recarregar a aplicação. (Só funciona no modo de depuração).
+
+Hot Restart:
+    flutter restart
+Reinicia completamente o app (útil para mudanças no estado global).
+
+Observação do Tamanho dos Assets:
+    flutter pub run flutter_launcher_icons:main
+Permite configurar os ícones e assets do app com facilidade.
+
+Comandos de Testes e Depuração:
+Executar testes:
+    flutter test
+
+Inspecionar o aplicativo (Observatório do Flutter):
+    flutter pub global run devtools
+
+Executar modo de inspeção de desempenho:
+    flutter run --profile
+
+Gerenciamento de Dependências:
+Adicionar pacotes com versões específicas:
+    flutter pub add nome_do_pacote:versão
+
+Atualizar todas as dependências:
+    flutter pub upgrade
+
+Outras Ferramentas Úteis:
+Gerar Código a partir do JSON (json_serializable):
+    flutter pub run build_runner build
+Gera classes para serializar dados JSON usando o json_serializable.
+
+Remover Arquivos Build:
+    flutter clean
+Limpa a pasta build e força o Flutter a recompilar o projeto.
+
+Flutter Analyze:
+    flutter analyze
+Analisa o código em busca de problemas de estilo e possíveis bugs.
+                </pre>
+        </main>
+</body>
+</html>
