@@ -1,13 +1,50 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang="pt-BR">
 <head>
-        <meta charset='utf-8'>
-        <meta name='viewport' content='width=device-width, initial-scale=1'>
-        <title>Page Title</title>
-        <link rel='stylesheet' href='main.css'>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Curso Flutter</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-        <main>
+<body class="bg-gray-100">
+
+  <!-- NAVBAR -->
+  <nav class="bg-blue-600 text-white shadow-md fixed top-0 left-0 right-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+
+      <div class="flex items-center gap-3">
+        <button id="menuBtn" class="p-2 rounded hover:bg-blue-700">
+          ☰
+        </button>
+        <span class="font-semibold text-lg">Curso Flutter</span>
+      </div>
+
+      <div id="navbarMenus" class="hidden md:flex items-center gap-4">
+        <!-- menus carregados via JS -->
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- OVERLAY -->
+  <div id="overlay"
+       class="fixed inset-0 bg-black/40 hidden z-40"></div>
+
+  <!-- DRAWER -->
+  <aside id="drawer"
+         class="fixed top-0 left-0 h-full w-72 bg-white shadow-xl -translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
+
+    <div class="p-4 border-b flex items-center justify-between">
+      <span class="font-bold text-lg">Conteúdo</span>
+      <button id="closeBtn" class="text-gray-500 hover:text-black text-xl">×</button>
+    </div>
+
+    <nav id="drawerMenus" class="p-2">
+      <!-- menus carregados via JS -->
+    </nav>
+  </aside>
+<main>
                 <h1>Comandos Básicos do Flutter</h1>
                 <pre>
 Verificar Instalação do Flutter:
@@ -91,5 +128,7 @@ Flutter Analyze:
 Analisa o código em busca de problemas de estilo e possíveis bugs.
                 </pre>
         </main>
-</body>
+<script src='menu.js'></script>
+
+    </body>
 </html>

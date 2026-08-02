@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 2 - Apache Maven</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+      <script src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .code-block, #code-editor {
+            background-color: #1e293b; color: #e2e8f0; padding: 1.25rem;
+            border-radius: 0.75rem; font-family: 'Consolas', monospace; font-size: 0.85rem;
+            overflow-x: auto; line-height: 1.5;
+        }
+        #code-editor { width: 100%; height: 320px; border: 1px solid #475569; outline: none; resize: none; }
+        #drawer-nav { transition: transform 0.3s ease-in-out; z-index: 100; }
+        .nav-link { display: block; padding: 0.6rem 1rem; border-radius: 0.5rem; color: #475569; font-size: 0.85rem; }
+        .nav-link:hover { background: #f1f5f9; color: #4f46e5; }
+        .gemini-btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+            color: white; padding: 0.5rem 1rem; border-radius: 0.75rem;
+            font-size: 0.75rem; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; border: none; margin-top: 10px;
+        }
+        .gemini-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        #presentation-overlay {
+            display: none; position: fixed; inset: 0; background: white; z-index: 200;
+            flex-direction: column; align-items: center; justify-content: center; padding: 4rem;
+        }
+        .slide-inner { max-width: 1000px; width: 100%; }
+        #gemini-modal {
+            display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9);
+            z-index: 300; align-items: center; justify-content: center; padding: 1rem;
+        }
+        .modal-content {
+            background: white; padding: 2rem; border-radius: 1.5rem;
+            max-width: 32rem; width: 100%; max-height: 80vh;
+            display: flex; flex-direction: column;
+        }
+        #gemini-response { overflow-y: auto; padding-right: 0.5rem; font-size: 1rem; line-height: 1.6; color: #475569; }
+        .xml-tag { color: #94a3b8; }
+        .xml-name { color: #f472b6; }
+        .xml-content { color: #e2e8f0; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+<div id="gemini-modal" onclick="this.style.display='none'">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="flex items-center gap-3 mb-4 text-blue-600 flex-shrink-0">
+            <span class="text-2xl">⚙️</span>
+            <h4 class="font-bold text-xl">Explicação Técnica Maven</h4>
+        </div>
+        <div id="gemini-response" class="italic"></div>
+        <button onclick="document.getElementById('gemini-modal').style.display='none'" 
+                class="mt-6 w-full py-3 bg-slate-100 rounded-xl font-bold hover:bg-slate-200 flex-shrink-0">
+            Entendido
+        </button>
+    </div>
+</div>
+
+<div id="presentation-overlay">
+    <div class="absolute top-8 right-8 flex gap-6 items-center">
+        <span id="slide-counter" class="text-slate-400 font-bold text-xl">1 / 10</span>
+        <button onclick="exitPresentation()" class="p-2 hover:bg-slate-100 rounded-full text-slate-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+    </div>
+    <div id="slide-content" class="slide-inner prose prose-2xl max-w-none"></div>
+    <div class="absolute bottom-12 flex gap-10">
+        <button onclick="prevSlide()" class="p-6 bg-slate-100 rounded-full hover:bg-slate-200 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        </button>
+        <button onclick="nextSlide()" class="p-6 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+        </button>
+    </div>
+</div>
+
+<button id="menu-btn" class="fixed top-4 left-4 z-[100] p-3 bg-white shadow-md rounded-xl border border-slate-200">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+</button>
+
+<div id="drawer-overlay" class="fixed inset-0 bg-black/40 hidden z-[90]"></div>
+<nav id="drawer-nav" class="fixed top-0 left-0 h-full w-80 bg-white shadow-2xl transform -translate-x-full overflow-y-auto">
+    <div class="p-6">
+        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Módulos Maven</h2>
+        <div id="nav-links-container" class="space-y-1"></div>
+    </div>
+</nav>
+
+<div class="container mx-auto px-4 py-16 max-w-4xl">
+    <header class="text-center mb-20">
+        <h1 class="text-4xl font-black mb-2">📦 Gestão de Projetos com Maven</h1>
+        <h2 class="text-2xl text-blue-600 font-semibold mb-8">Automação de Build e Dependências</h2>
+        <div class="flex justify-center gap-4">
+            <button onclick="startPresentation()" class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-700 shadow-lg transition">Iniciar Aula</button>
+            <button id="pdf-btn" class="bg-slate-800 text-white px-8 py-3 rounded-full font-bold hover:bg-black transition">Baixar Apostila</button>
+        </div>
+    </header>
+
+    <main class="space-y-16" id="lesson-content">
+        
+        <div class="text-sm font-bold text-slate-400 tracking-widest uppercase">Módulo 1 – Introdução</div>
+
+        <section id="item-1" class="slide-section" data-title="1. O que é o Apache Maven?">
+            <h3 class="text-2xl font-bold mb-4">1. O que é o Apache Maven?</h3>
+            <p class="text-slate-700 leading-relaxed">O Maven é uma ferramenta de automação de compilação (build) e gerenciamento de dependências para projetos Java. Ele utiliza o conceito de <strong>Project Object Model (POM)</strong> para descrever a estrutura do projeto.</p>
+            <p class="mt-4 font-bold">Principais objetivos:</p>
+            <ul class="list-disc ml-6 space-y-1 text-slate-600">
+                <li>Facilitar o processo de build.</li>
+                <li>Prover um sistema de build uniforme.</li>
+                <li>Gerenciar bibliotecas externas automaticamente.</li>
+            </ul>
+            <button class="gemini-btn" onclick="carregarInfoSheet(0, 2)">✨ Maven vs Gradle</button>
+        </section>
+
+        <section id="item-2" class="slide-section" data-title="2. O Arquivo POM.xml">
+            <h3 class="text-2xl font-bold mb-4">2. O Coração do Projeto: POM.xml</h3>
+            <p class="text-slate-700">O <code>pom.xml</code> é o arquivo XML que contém informações sobre o projeto e detalhes de configuração usados pelo Maven para compilar o código.</p>
+            <div class="code-block mt-4">
+                &lt;project&gt;<br>
+                &nbsp;&nbsp;&lt;groupId&gt;com.meuexemplo&lt;/groupId&gt;<br>
+                &nbsp;&nbsp;&lt;artifactId&gt;meu-app&lt;/artifactId&gt;<br>
+                &nbsp;&nbsp;&lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;<br>
+                &lt;/project&gt;
+            </div>
+            <button class="gemini-btn" onclick="carregarInfoSheet(1, 2)">✨ Coordenadas Maven</button>
+        </section>
+
+        <section id="item-3" class="slide-section" data-title="3. Ciclo de Vida (Lifecycle)">
+            <h3 class="text-2xl font-bold mb-4">3. Ciclo de Vida do Build</h3>
+            <p class="text-slate-700">O Maven baseia-se no conceito central de ciclos de vida. Os comandos principais são:</p>
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                    <code class="font-bold">mvn compile</code><br>Compila o código fonte.
+                </div>
+                <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                    <code class="font-bold">mvn test</code><br>Executa testes unitários.
+                </div>
+                <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                    <code class="font-bold">mvn package</code><br>Cria o JAR/WAR.
+                </div>
+                <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                    <code class="font-bold">mvn clean</code><br>Remove a pasta target.
+                </div>
+            </div>
+            <button class="gemini-btn mt-4" onclick="carregarInfoSheet(2, 2)">✨ Install vs Deploy</button>
+        </section>
+
+        <div class="text-sm font-bold text-slate-400 tracking-widest uppercase pt-10">Módulo 2 – Dependências e Repositórios</div>
+
+        <section id="item-4" class="slide-section" data-title="4. Gerenciamento de Dependências">
+            <h3 class="text-2xl font-bold mb-4">4. Gerenciamento de Dependências</h3>
+            <p class="text-slate-700">Em vez de baixar JARs manualmente e colocá-los no classpath, você apenas declara a dependência no POM e o Maven a busca no <strong>Maven Central Repository</strong>.</p>
+            <div class="code-block mt-4">
+                &lt;dependency&gt;<br>
+                &nbsp;&nbsp;&lt;groupId&gt;org.mongodb&lt;/groupId&gt;<br>
+                &nbsp;&nbsp;&lt;artifactId&gt;mongodb-driver-sync&lt;/artifactId&gt;<br>
+                &nbsp;&nbsp;&lt;version&gt;4.11.1&lt;/version&gt;<br>
+                &lt;/dependency&gt;
+            </div>
+            <button class="gemini-btn" onclick="carregarInfoSheet(3, 2)">✨ Dependências Transitivas</button>
+        </section>
+
+        <section id="item-5" class="slide-section" data-title="5. Repositórios">
+            <h3 class="text-2xl font-bold mb-4">5. Repositório Local vs Remoto</h3>
+            <ul class="list-disc ml-6 space-y-3 text-slate-700">
+                <li><strong>Local (~/.m2):</strong> Pasta no seu computador onde o Maven armazena os downloads para não precisar baixar novamente.</li>
+                <li><strong>Remoto:</strong> Servidores na web (como o Maven Central) de onde as bibliotecas são baixadas.</li>
+            </ul>
+            <button class="gemini-btn" onclick="carregarInfoSheet(4, 2)">✨ Repositórios Privados</button>
+        </section>
+
+        <section id="item-6" class="slide-section" data-title="6. Playground do POM">
+            <h3 class="text-2xl font-bold mb-4">6. Estrutura de Diretórios Padrão</h3>
+            <p class="text-slate-700 mb-4">O Maven dita onde cada arquivo deve estar ("Convention over Configuration"):</p>
+            <div class="bg-slate-800 text-white p-6 rounded-xl font-mono text-sm leading-relaxed">
+                meu-projeto/<br>
+                ├── src/<br>
+                │   ├── main/java/      <span class="text-slate-500">(Código fonte)</span><br>
+                │   └── test/java/      <span class="text-slate-500">(Testes unitários)</span><br>
+                ├── target/             <span class="text-slate-500">(Arquivos gerados)</span><br>
+                └── pom.xml             <span class="text-slate-500">(Configuração)</span>
+            </div>
+        </section>
+
+        <section id="item-7" class="slide-section" data-title="7. Resumo e Próximos Passos">
+            <h3 class="text-2xl font-bold mb-4">7. Conclusão do Módulo</h3>
+            <div class="bg-blue-600 text-white p-8 rounded-2xl shadow-xl">
+                <p class="font-bold mb-4 text-xl">Você aprendeu hoje:</p>
+                <ul class="space-y-2 opacity-90">
+                    <li>✅ O que é o Maven e por que usá-lo</li>
+                    <li>✅ A estrutura básica de um arquivo pom.xml</li>
+                    <li>✅ Os comandos fundamentais do ciclo de vida</li>
+                    <li>✅ Como o Maven gerencia bibliotecas externas</li>
+                </ul>
+            </div>
+            <button class="gemini-btn" onclick="deepenConcept('Explique como usar o Maven com o VS Code ou IntelliJ')">✨ Configurar na IDE</button>
+        </section>
+    </main>
+</div>
+
+<script>
+    google.charts.load('current', { packages: ['corechart'] });
+    const modal = document.getElementById('gemini-modal');
+    const resp = document.getElementById('gemini-response');
+    const apiKey = 'AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8'; // Insira sua chave do Google AI Studio
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+     
+ function carregarInfoSheet(linha, coluna) {
+    const sheetId = "1RoWpblL2bmvVqAChmMI8EwF2T0LcJsF3paDGcUAtJ74";
+    const sheetName = "aula0";
+
+    modal.style.display = 'flex';
+    resp.innerText = "📊 Buscando complemento da planilha...";
+
+    const query = new google.visualization.Query(
+        `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${sheetName}`
+    );
+
+    query.send(function (response) {
+        if (response.isError()) {
+            resp.innerText = "Erro ao carregar dados da planilha.";
+            console.error(response.getMessage());
+            return;
+        }
+
+        const data = response.getDataTable();
+        const valor = data.getValue(linha, coluna);
+
+        resp.innerText = valor;
+    });
+}
+  
+    async function deepenConcept(prompt) {
+        modal.style.display = 'flex';
+        resp.innerText = "⚙️ Consultando documentação Maven...";
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: `Você é um especialista em Java e Maven. Explique para um aluno iniciante: ${prompt}. Seja conciso.` }] }]
+                })
+            });
+            const data = await response.json();
+            resp.innerText = data.candidates[0].content.parts[0].text;
+        } catch (error) {
+            resp.innerText = "Conexão com a base de conhecimento falhou. Verifique sua chave de API.";
+        }
+    }
+
+    let curSlide = 0;
+    const slides = document.querySelectorAll('.slide-section');
+    const overlay = document.getElementById('presentation-overlay');
+    const sContent = document.getElementById('slide-content');
+    const counter = document.getElementById('slide-counter');
+
+    function startPresentation() { 
+        curSlide = 0; 
+        overlay.style.display = 'flex'; 
+        updateSlide(); 
+        document.body.style.overflow = 'hidden';
+    }
+    function exitPresentation() { overlay.style.display = 'none'; document.body.style.overflow = 'auto'; }
+    function updateSlide() {
+        sContent.innerHTML = slides[curSlide].innerHTML;
+        counter.innerText = `${curSlide + 1} / ${slides.length}`;
+    }
+    function nextSlide() { if(curSlide < slides.length - 1) { curSlide++; updateSlide(); } else { exitPresentation(); } }
+    function prevSlide() { if(curSlide > 0) { curSlide--; updateSlide(); } }
+
+    document.getElementById('pdf-btn').addEventListener('click', () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        let y = 20;
+        slides.forEach((s, index) => {
+            if(y > 250) { doc.addPage(); y = 20; }
+            doc.setFontSize(14); doc.text(s.getAttribute('data-title'), 20, y);
+            y += 10;
+            doc.setFontSize(10);
+            const text = doc.splitTextToSize(s.innerText.split('✨')[0].trim(), 170);
+            doc.text(text, 20, y);
+            y += (text.length * 5) + 15;
+        });
+        doc.save('Aula_Maven_Introducao.pdf');
+    });
+
+    const menuBtn = document.getElementById('menu-btn');
+    const drawer = document.getElementById('drawer-nav');
+    const dOverlay = document.getElementById('drawer-overlay');
+    menuBtn.onclick = () => { drawer.style.transform = 'translateX(0)'; dOverlay.classList.remove('hidden'); };
+    dOverlay.onclick = () => { drawer.style.transform = 'translateX(-100%)'; dOverlay.classList.add('hidden'); };
+    
+    const navCont = document.getElementById('nav-links-container');
+   slides.forEach(s => {
+    // Criamos um botão em vez de um link <a> para evitar redirecionamento
+    const btn = document.createElement('button');
+    btn.className = "nav-link w-full text-left"; // w-full garante que o clique pegue toda a linha
+    btn.innerText = s.getAttribute('data-title');
+    
+    btn.onclick = (e) => {
+        e.preventDefault(); // Impede qualquer ação padrão do navegador
+        
+        // Faz o scroll suave até o elemento
+        const targetId = s.id;
+        document.getElementById(targetId).scrollIntoView({
+            behavior: 'smooth'
+        });
+        
+        closeDrawer(); // Fecha o menu lateral
+    };
+    
+    navCont.appendChild(btn);
+});
+
+// Garanta que as funções de abrir/fechar usem classes corretamente
+function openDrawer() {
+    const drawer = document.getElementById('drawer-nav');
+    const dOverlay = document.getElementById('drawer-overlay');
+    drawer.style.transform = 'translateX(0)';
+    dOverlay.classList.remove('hidden');
+}
+
+function closeDrawer() {
+    const drawer = document.getElementById('drawer-nav');
+    const dOverlay = document.getElementById('drawer-overlay');
+    drawer.style.transform = 'translateX(-100%)';
+    dOverlay.classList.add('hidden');
+}
+</script>
+</body>
+</html>

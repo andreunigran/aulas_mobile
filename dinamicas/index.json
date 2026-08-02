@@ -1,0 +1,9 @@
+{
+  "menus": [
+    { "titulo": "Início", "url": "/index.html" },
+    { "titulo": "Comandos Flutter", "url": "/aulas/comandos.html" },
+    { "titulo": "Widgets Básicos", "url": "/aulas/widgets.html" },
+    { "titulo": "Layouts", "url": "/aulas/layouts.html" },
+    { "titulo": "Formulários", "url": "/aulas/forms.html" }
+  ]
+}

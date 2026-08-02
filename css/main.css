@@ -1,0 +1,30 @@
+/* main.css - Estilos básicos para a interface das aulas */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html,body { height: 100%; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:#f7f7f8; color:#222; }
+header { background: #0b5cff; color: #fff; padding: 12px 20px; display:flex; align-items:center; justify-content:space-between; }
+header .brand { font-weight:700; font-size:1.1rem; }
+nav { display:flex; gap: 12px; align-items:center; }
+nav a { color: #fff; text-decoration:none; padding:6px 8px; border-radius:6px; }
+nav a:hover { background: rgba(255,255,255,0.12); }
+/* Dropdowns inside nav */
+.dropdown { position:relative; }
+.dropbtn { background:transparent; border:0; color:#fff; padding:6px 8px; border-radius:6px; cursor:pointer; }
+.dropdown-menu { display:none; position:absolute; right:0; top:36px; background:#fff; color:#111; min-width:200px; box-shadow:0 6px 18px rgba(12,20,45,0.12); border-radius:6px; padding:8px 0; z-index:200; }
+.dropdown-menu.show { display:block; }
+.dropdown-menu li { list-style:none; }
+.dropdown-menu li a { display:block; padding:8px 12px; color:#0b2f6b; text-decoration:none; }
+.dropdown-menu li a:hover { background:#f1f5ff; }
+.container { max-width: 980px; margin: 20px auto; padding: 16px; background: #fff; border-radius: 8px; box-shadow: 0 6px 18px rgba(12,20,45,0.06); }
+h1,h2 { color: #0b2f6b; }
+section { margin-bottom: 18px; }
+pre { background:#0d1117; color:#e6eef8; padding:12px; border-radius:6px; overflow:auto; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Linux Libertine', monospace; }
+.code-note { color:#444; margin-top:8px; font-size:0.95rem; }
+/* Responsive menu (simple) */
+.menu-toggle { display:none; background:transparent; border:0; color:#fff; font-size:1.2rem; }
+@media (max-width:720px){
+  nav { display:none; position:absolute; right:12px; top:56px; background:#0b5cff; padding:8px; border-radius:8px; flex-direction:column; }
+  nav.show { display:flex; }
+  .menu-toggle { display:inline-block; }
+  header { position:relative; }
+}
+footer { text-align:center; color:#666; font-size:0.9rem; padding:12px 0; }
