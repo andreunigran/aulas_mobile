@@ -9,10 +9,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Warm Neutrals -->
-    <!-- Application Structure Plan: A single-page application with a drawer navigation menu for smooth scrolling between thematic sections. This structure provides a clear step-by-step guide for learning Dart. The content is segmented into logical cards for better readability. -->
-    <!-- Visualization & Content Choices: The content is structured into thematic sections covering Dart fundamentals. Core concepts like data types, control flow, and OOP are presented in clear, concise cards with commented code examples. Gemini API is integrated for deeper explanations. This design prioritizes a clean, organized, and educational user experience. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <link rel="stylesheet" href="../css/aulas.css">
 </head>
 <body class="bg-stone-50 text-gray-800">
@@ -87,6 +83,7 @@
             <div class="mt-8 flex justify-center gap-4 flex-wrap">
                 <button id="start-presentation-btn" type="button" class="bg-blue-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-700 transition-colors">Iniciar apresentação</button>
                 <button id="export-pdf-btn" class="bg-gray-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-gray-800 transition-colors">Exportar para PDF</button>
+                <button id="voltar" type="button" class="bg-red-700 text-white px-6 py-2 rounded-md font-semibold hover:bg-gray-800 transition-colors" onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href = '../index.html'; }">voltar</button>
             </div>
         </header>
 

@@ -1,0 +1,80 @@
+[
+  {
+    "titulo": "Aulas",
+    "itens": [
+      {
+        "titulo": "Aula 1 — Introdução",
+        "url": "aulas/aula01.html"
+      },
+      {
+        "titulo": "Aula 2 — Widgets",
+        "url": "aulas/aula02.html"
+      },
+      {
+        "titulo": "Aula 3 — Layouts",
+        "url": "aulas/aula03.html"
+      },
+      {
+        "titulo": "Aula 4 — Listas",
+        "url": "aulas/aula04.html"
+      },
+      {
+        "titulo": "Aula 5 — Navegação",
+        "url": "aulas/aula05.html"
+      },
+      {
+        "titulo": "Aula 6 — Animações",
+        "url": "aulas/aula06.html"
+      },
+      {
+        "titulo": "Aula 7 — Banco de Dados",
+        "url": "aulas/aula07.html"
+      },
+      {
+        "titulo": "Aula 8 — Firebase",
+        "url": "aulas/aula08.html"
+      },
+      {
+        "titulo": "Aula 9 — Geolocalização",
+        "url": "aulas/aula09.html"
+      },
+      {
+        "titulo": "Aula 10 — Sensores",
+        "url": "aulas/aula10.html"
+      },
+      {
+        "titulo": "Aula 11 — Câmera",
+        "url": "aulas/aula11.html"
+      },
+      {
+        "titulo": "Aula 12 — Áudio",
+        "url": "aulas/aula12.html"
+      },
+      {
+        "titulo": "Aula 13 — Vídeo",
+        "url": "aulas/aula13.html"
+      },
+      {
+        "titulo": "Aula 14 — Mapas",
+        "url": "aulas/aula14.html"
+      },
+      {
+        "titulo": "Aula 15 — Notificações",
+        "url": "aulas/aula15.html"
+      }
+    ]
+  },
+  {
+    "titulo": "Dinâmicas",
+    "itens": [
+      {
+        "titulo": "Quiz",
+        "url": "quiz.html"
+      },
+      {
+        "titulo": "Desafio",
+        "url": "desafio.html"
+      }
+    ]
+  }
+]
