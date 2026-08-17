@@ -13,13 +13,23 @@
       {
         "titulo": "Aula 3 — Layouts",
         "url": "aulas/aula03.html"
+      },
+      {
+        "titulo": "Aula 00 — widgets",
+        "url": "aulas/aula00.html"
+      },
+      {
+        "titulo": "Aula 4 — Listas",
+        "url": "aulas/aula04.html"
+      },
+      {
+        "titulo": "Aula 5 — Navegação",
+        "url": "aulas/aula05.html"
       }
     ]
   },
   {
     "titulo": "Dinâmicas",
-    "itens": [
-    
-    ]
+    "itens": []
   }
 ]

@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Widgets Flutter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/aulas.css">
+
+
+</head>
+
+<body class="bg-stone-50 text-gray-800">
+
+    <!-- Botão para abrir o Drawer -->
+    <button id="drawer-btn" class="fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Overlay -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+    <!-- Drawer Navigation -->
+    <nav id="drawer-nav"
+        class="fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+        <div class="p-4">
+            <h3 class="text-xl font-bold mb-4">Navegação</h3>
+            <a href="#objetivos" class="nav-link">Objetivos</a>
+            <a href="#estrutura" class="nav-link">Mapa de Widgets</a>
+            <a href="#widgets" class="nav-link">Conteúdo</a>
+            <a href="#layouts" class="nav-link">Layouts</a>
+            <a href="#material" class="nav-link">Material 3</a>
+            <a href="#elevated-button" class="nav-link">ElevatedButton</a>
+            <a href="#navegacao" class="nav-link">Navegação</a>
+            <a href="#listas" class="nav-link">Listas e Scroll</a>
+            <a href="#slivers" class="nav-link">Slivers</a>
+            <a href="#formularios" class="nav-link">Formulários</a>
+            <a href="#interacao" class="nav-link">Interação</a>
+            <a href="#animacoes" class="nav-link">Animações</a>
+            <a href="#responsividade" class="nav-link">Responsividade</a>
+            <a href="#cupertino" class="nav-link">Cupertino</a>
+            <a href="#estado" class="nav-link">Estado</a>
+            <a href="#exemplos" class="nav-link">Exemplos</a>
+            <a href="#exercicio" class="nav-link">Exercício</a>
+            <a href="#referencias" class="nav-link">Referências</a>
+        </div>
+    </nav>
+
+    <!-- Modal Gemini -->
+    <div id="gemini-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
+                <h3 class="text-xl font-bold text-gray-800">✨ Resposta do Gemini</h3>
+                <button id="close-modal-btn" class="p-2 rounded-full hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="gemini-response" class="p-6 overflow-y-auto space-y-4">
+                <!-- Conteúdo gerado pela API será inserido aqui -->
+            </div>
+        </div>
+    </div>
+
+    <div id="presentation-overlay" class="presentation-overlay hidden">
+        <div class="presentation-toolbar">
+            <span id="slide-counter" class="slide-counter">1 / 1</span>
+            <button id="presentation-close-btn" type="button" class="presentation-close-btn"
+                aria-label="Fechar apresentação">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div id="presentation-content" class="presentation-content"></div>
+        <div class="presentation-controls">
+            <button type="button" onclick="prevSlide()" class="presentation-nav-btn" aria-label="Slide anterior">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+            <button type="button" onclick="nextSlide()" class="presentation-nav-btn presentation-nav-btn--primary"
+                aria-label="Próximo slide">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+        </div>
+    </div>
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Catálogo de Widgets Flutter</h1>
+            <p class="mt-4 text-lg text-gray-600">Conheça os principais widgets do Flutter, organizados por categoria,
+                com exemplos práticos e uma atividade de aplicação.</p>
+            <div class="mt-8 flex justify-center gap-4 flex-wrap">
+                <button id="start-presentation-btn" type="button" class="gemini-btn">▶️ Iniciar apresentação</button>
+                <button id="export-pdf-btn" type="button" class="gemini-btn interactive-btn">📄 Exportar PDF</button>
+            </div>
+        </header>
+
+        <main class="space-y-20 content-justify">
+
+                    <section id="objetivos">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">Objetivos da Aula</h2>
+                            <a href="https://docs.flutter.dev/ui/widgets" target="_blank" rel="noopener noreferrer"
+                                class="gemini-btn">📚 Documentação oficial</a>
+                        </div>
+                        <div class="activity-card">
+                            <ul class="list-disc list-inside space-y-2 text-gray-700 text-lg">
+                                <li>Conhecer as principais categorias de widgets do Flutter.</li>
+                                <li>Compreender a função dos widgets de layout, conteúdo e interação.</li>
+                                <li>Utilizar widgets Material 3 e Cupertino.</li>
+                                <li>Construir interfaces com listas, formulários, navegação e animações.</li>
+                                <li>Escolher widgets de acordo com responsividade, acessibilidade e experiência de
+                                    usuário.</li>
+                                <li>Compreender a finalidade, as principais propriedades e o uso de cada componente
+                                    apresentado.</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="estrutura">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">Mapa dos Widgets Flutter</h2>
+                            <a href="https://docs.flutter.dev/ui/widgets" target="_blank" rel="noopener noreferrer"
+                                class="gemini-btn">📚 Documentação oficial</a>
+                        </div>
+                        <p class="text-center text-gray-600 mb-10 max-w-3xl mx-auto">
+                            O Flutter organiza a construção da interface por composição de widgets.
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div class="activity-card">
+                                <h3 class="text-xl font-semibold mb-2">Conteúdo</h3>
+                                <p>Text, Icon, Image, RichText, SelectableText.</p>
+                            </div>
+                            <div class="activity-card">
+                                <h3 class="text-xl font-semibold mb-2">Layout</h3>
+                                <p>Row, Column, Stack, Wrap, Container, Center, Align, Expanded.</p>
+                            </div>
+                            <div class="activity-card">
+                                <h3 class="text-xl font-semibold mb-2">Entrada</h3>
+                                <p>TextField, TextFormField, Form, Checkbox, Radio, Switch, Slider.</p>
+                            </div>
+                            <div class="activity-card">
+                                <h3 class="text-xl font-semibold mb-2">Interação</h3>
+                                <p>GestureDetector, InkWell, Dismissible, Draggable, DragTarget.</p>
+                            </div>
+                            <div class="activity-card">
+                                <h3 class="text-xl font-semibold mb-2">Scrolling</h3>
+                                <p>ListView, GridView, PageView, SingleChildScrollView, CustomScrollView.</p>
+                            </div>
+                            <div class="activity-card">
+                                <h3 class="text-xl font-semibold mb-2">Material 3</h3>
+                                <p>Scaffold, AppBar, Buttons, Cards, Dialogs, NavigationBar e mais.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="widgets">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">Widgets de Conteúdo</h2>
+                            <a href="https://docs.flutter.dev/ui/widgets/basics" target="_blank" rel="noopener noreferrer"
+                                class="gemini-btn">📚 Documentação oficial</a>
+                        </div>
+                        <div class="activity-card">
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li><strong>Text:</strong> exibe texto simples na interface. Pode receber estilo,
+                                    alinhamento, tamanho e outras configurações visuais.</li>
+                                <li><strong>RichText / Text.rich:</strong> permite combinar trechos com estilos
+                                    diferentes dentro de um único conteúdo, sendo útil para destacar palavras ou partes
+                                    específicas.</li>
+                                <li><strong>SelectableText:</strong> apresenta texto que o usuário pode selecionar e
+                                    copiar, sendo útil para códigos, identificadores e informações que precisam ser
+                                    reutilizadas.</li>
+                                <li><strong>Icon:</strong> apresenta um símbolo gráfico da biblioteca de ícones do
+                                    Flutter, ajudando a comunicar visualmente uma ação ou informação.</li>
+                                <li><strong>Image:</strong> apresenta imagens provenientes de diferentes fontes, como
+                                    arquivos locais, internet, memória ou outros recursos disponíveis para a aplicação.
+                                </li>
+                                <li><strong>CircleAvatar:</strong> apresenta uma imagem, ícone ou inicial dentro de uma
+                                    área circular, sendo bastante utilizado para representar usuários.</li>
+                                <li><strong>FlutterLogo:</strong> exibe o logotipo oficial do Flutter e é útil
+                                    principalmente em exemplos, demonstrações e telas relacionadas ao framework.</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="layouts">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">Widgets de Layout</h2>
+                            <a href="https://docs.flutter.dev/ui/widgets/layout" target="_blank" rel="noopener noreferrer"
+                                class="gemini-btn">📚 Documentação oficial</a>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="activity-card">
+                                <h3 class="text-2xl font-semibold mb-3">Organização</h3>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                    <li><strong>Row:</strong> organiza seus widgets filhos horizontalmente,
+                                        distribuindo-os ao longo do eixo principal.</li>
+                                    <li><strong>Column:</strong> organiza seus widgets filhos verticalmente, sendo um
+                                        dos principais componentes para construir formulários e telas em sequência.</li>
+                                    <li><strong>Stack:</strong> coloca widgets uns sobre os outros, permitindo criar
+                                        sobreposições, como texto sobre imagens ou botões sobre cartões.</li>
+                                    <li><strong>Positioned:</strong> permite definir a posição de um filho dentro de um
+                                        Stack usando propriedades como top, bottom, left e right.</li>
+                                    <li><strong>Wrap:</strong> distribui os filhos e quebra automaticamente o conteúdo
+                                        para uma nova linha ou coluna quando o espaço disponível termina.</li>
+                                </ul>
+                            </div>
+                            <div class="activity-card">
+                                <h3 class="text-2xl font-semibold mb-3">Tamanho e espaço</h3>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                    <li><strong>Container:</strong> combina recursos de tamanho, espaçamento,
+                                        alinhamento e decoração em torno de um único filho, sendo muito utilizado para
+                                        estruturar e estilizar interfaces.</li>
+                                    <li><strong>SizedBox:</strong> cria um espaço definido ou impõe largura e altura
+                                        específicas, sendo muito utilizado para controlar espaçamentos entre widgets.
+                                    </li>
+                                    <li><strong>Expanded:</strong> faz com que um filho de Row, Column ou Flex ocupe o
+                                        espaço disponível no eixo principal.</li>
+                                    <li><strong>Flexible:</strong> permite que um filho use o espaço disponível de
+                                        maneira flexível, sem exigir necessariamente que ocupe todo o espaço restante.
+                                    </li>
+                                    <li><strong>Padding:</strong> adiciona espaço interno ao redor de um widget,
+                                        ajudando a evitar que os elementos fiquem visualmente encostados.</li>
+                                    <li><strong>Center / Align:</strong> controlam o posicionamento de um filho dentro
+                                        do espaço disponível, permitindo centralização ou alinhamento em diferentes
+                                        direções.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="material">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">Material 3</h2>
+                            <a href="https://docs.flutter.dev/ui/widgets/material" target="_blank" rel="noopener noreferrer"
+                                class="gemini-btn">📚 Documentação oficial</a>
+                        </div>
+                        <div class="activity-card">
+                            <h3 class="text-2xl font-semibold mb-3">Estrutura, ações e controles</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                                <p><strong>Estrutura:</strong> <strong>MaterialApp</strong> configura a aplicação
+                                    Material; <strong>Scaffold</strong> fornece a estrutura básica de uma tela;
+                                    <strong>AppBar</strong> cria a barra superior; <strong>Card</strong> agrupa conteúdo
+                                    em um cartão; e <strong>ListTile</strong> organiza informações e ações em uma linha
+                                    padronizada.</p>
+                                <p><strong>Botões:</strong> <strong>FilledButton</strong> destaca uma ação principal;
+                                    <strong>ElevatedButton</strong> representa uma ação importante com destaque visual;
+                                    <strong>OutlinedButton</strong> utiliza contorno; <strong>TextButton</strong>
+                                    apresenta uma ação mais discreta; <strong>IconButton</strong> utiliza um ícone como
+                                    ação; e <strong>FloatingActionButton</strong> destaca uma ação principal de uma
+                                    tela.</p>
+                                <p><strong>Seleção:</strong> <strong>Checkbox</strong> permite seleção independente;
+                                    <strong>Radio</strong> permite escolher uma opção entre um grupo;
+                                    <strong>Switch</strong> representa uma opção liga/desliga;
+                                    <strong>ChoiceChip</strong> representa escolhas; <strong>FilterChip</strong> permite
+                                    aplicar filtros; e <strong>SegmentedButton</strong> organiza opções relacionadas em
+                                    segmentos.</p>
+                                <p><strong>Valores:</strong> <strong>Slider</strong> permite selecionar um valor dentro
+                                    de um intervalo; <strong>RangeSlider</strong> permite selecionar simultaneamente um
+                                    valor mínimo e um máximo.</p>
+                                <p><strong>Entrada:</strong> <strong>TextField</strong> recebe texto;
+                                    <strong>TextFormField</strong> adiciona recursos de validação; <strong>Form</strong>
+                                    agrupa campos; <strong>Autocomplete</strong> apresenta sugestões;
+                                    <strong>SearchBar</strong> fornece uma interface de pesquisa; e
+                                    <strong>DropdownMenu</strong> permite escolher uma opção em um menu.</p>
+                                <p><strong>Feedback:</strong> <strong>AlertDialog</strong> apresenta alertas e decisões;
+                                    <strong>Dialog</strong> exibe conteúdo modal; <strong>SnackBar</strong> mostra
+                                    mensagens temporárias; <strong>Tooltip</strong> fornece uma explicação contextual; e
+                                    <strong>Banner</strong> apresenta uma mensagem persistente relacionada à interface.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+
+                    <section id="elevated-button">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">ElevatedButton</h2>
+                            <a href="https://api.flutter.dev/flutter/material/ElevatedButton-class.html" target="_blank"
+                                class="gemini-btn">
+                                📚 Documentação oficial
+                            </a>
+                        </div>
+
+                        <div class="activity-card">
+                            <h3 class="text-2xl font-semibold mb-3">O que é o ElevatedButton?</h3>
+                            <p class="text-gray-700 mb-4">
+                                <strong>ElevatedButton</strong> é um botão do Material 3 utilizado para
+                                representar uma ação importante na interface. Ele apresenta destaque
+                                visual em relação a ações secundárias e executa uma função quando o
+                                usuário interage com ele. A ação normalmente é definida pela propriedade
+                                <strong>onPressed</strong>, enquanto o conteúdo visual do botão é definido
+                                pelo <strong>child</strong>.
+                            </p>
+
+                            <h3 class="text-xl font-semibold mb-3">Principais propriedades</h3>
+                            <div class="component-grid mb-6">
+                                <div class="component-item">
+                                    <h4>onPressed</h4>
+                                    <p class="component-explanation">
+                                        Define a função executada quando o usuário pressiona o botão.
+                                        Quando recebe <strong>null</strong>, o botão fica desabilitado.
+                                    </p>
+                                </div>
+                                <div class="component-item">
+                                    <h4>child</h4>
+                                    <p class="component-explanation">
+                                        Define o conteúdo apresentado dentro do botão. É comum utilizar
+                                        <strong>Text</strong>, <strong>Icon</strong> ou uma combinação
+                                        desses widgets.
+                                    </p>
+                                </div>
+                                <div class="component-item">
+                                    <h4>style</h4>
+                                    <p class="component-explanation">
+                                        Permite personalizar aparência, como cor, tamanho, padding,
+                                        formato e comportamento visual do botão.
+                                    </p>
+                                </div>
+                                <div class="component-item">
+                                    <h4>onLongPress</h4>
+                                    <p class="component-explanation">
+                                        Define uma ação para quando o usuário mantém o botão pressionado
+                                        por mais tempo.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-3">Exemplo</h3>
+                            <div class="code-block">
+                                <pre><code><span class="type">ElevatedButton</span>(
+  onPressed: () {
+    print(<span class="string">'Botão pressionado'</span>);
+  },
+  child: <span class="type">Text</span>(<span class="string">'Salvar'</span>),
+)</code></pre>
+                            </div>
+
+                            <div class="mt-5">
+                                <p class="component-explanation">
+                                    Neste exemplo, <strong>ElevatedButton</strong> cria o botão,
+                                    <strong>onPressed</strong> define o comportamento executado no clique
+                                    e <strong>Text</strong> apresenta o rótulo “Salvar”. A combinação
+                                    demonstra a estrutura básica de um botão de ação no Flutter.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="navegacao">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">Navegação</h2>
+                            <a href="https://docs.flutter.dev/ui/navigation" target="_blank" rel="noopener noreferrer"
+                                class="gemini-btn">📚 Documentação oficial</a>
+                        </div>
+                        <div class="activity-card">
+                            <ul class="list-disc list-inside space-y-2 text-gray-700 text-lg">
+                                <li><strong>Navigator:</strong> gerencia a pilha de rotas, permitindo abrir novas telas
+                                    e retornar para telas anteriores.</li>
+                                <li><strong>NavigationBar:</strong> fornece navegação entre seções principais na parte
+                                    inferior da tela.</li>
+                                <li><strong>NavigationRail:</strong> oferece navegação lateral e é especialmente útil em
+                                    tablets, desktops e telas mais largas.</li>
+                                <li><strong>NavigationDrawer:</strong> apresenta um menu lateral com opções de navegação
+                                    ou funcionalidades da aplicação.</li>
+                                <li><strong>TabBar + TabBarView:</strong> criam uma interface com abas, permitindo
+                                    alternar entre diferentes conjuntos de conteúdo.</li>
+                                <li><strong>MaterialPageRoute:</strong> cria uma rota seguindo o comportamento visual e
+                                    as transições tradicionais do Material.</li>
+                                <li><strong>Router / RouterConfig:</strong> oferecem uma abordagem declarativa para
+                                    navegação, adequada a aplicações com fluxos de rotas mais complexos.</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="listas">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">Listas, Grades e Scroll</h2>
+                            <a href="https://docs.flutter.dev/ui/widgets/scrolling" target="_blank" rel="noopener noreferrer"
+                                class="gemini-btn">📚 Documentação oficial</a>
+                        </div>
+                        <div class="activity-card">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <p><strong>ListView:</strong> apresenta uma lista linear de widgets que pode ser rolada
+                                    vertical ou horizontalmente.</p>
+                                <p><strong>ListView.builder:</strong> constrói os itens sob demanda, sendo indicado para
+                                    listas grandes ou cujo conteúdo é gerado dinamicamente.</p>
+                                <p><strong>ListView.separated:</strong> cria uma lista com um widget separador entre os
+                                    itens, facilitando a organização visual.</p>
+                                <p><strong>GridView:</strong> organiza widgets em linhas e colunas, formando uma grade
+                                    rolável.</p>
+                                <p><strong>PageView:</strong> permite navegar entre páginas ou painéis, normalmente por
+                                    deslizamento horizontal.</p>
+                                <p><strong>SingleChildScrollView:</strong> permite que um único widget com conteúdo
+                                    maior que a área disponível seja rolado.</p>
+                                <p><strong>CustomScrollView:</strong> permite combinar diferentes Slivers em uma única
+                                    área de rolagem personalizada.</p>
+                                <p><strong>ReorderableListView:</strong> permite ao usuário arrastar itens para alterar
+                                    a ordem de uma lista.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="slivers">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">Slivers</h2>
+                            <a href="https://api.flutter.dev/flutter/widgets/CustomScrollView-class.html" target="_blank" rel="noopener noreferrer"
+                                class="gemini-btn">📚 Documentação oficial</a>
+                        </div>
+                        <div class="activity-card">
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li><strong>SliverList:</strong> apresenta uma lista eficiente dentro de um
+                                    CustomScrollView e participa do sistema de rolagem baseado em Slivers.</li>
+                                <li><strong>SliverGrid:</strong> apresenta uma grade de itens dentro de um
+                                    CustomScrollView.</li>
+                                <li><strong>SliverAppBar:</strong> integra a barra superior ao comportamento de rolagem,
+                                    permitindo efeitos como expansão e recolhimento.</li>
+                                <li><strong>SliverToBoxAdapter:</strong> permite inserir um widget comum dentro de uma
+                                    sequência de Slivers.</li>
+                                <li><strong>SliverPadding:</strong> aplica espaçamento ao redor de outro Sliver.</li>
+                                <li><strong>SliverFillRemaining:</strong> faz um Sliver ocupar o espaço restante
+                                    disponível na área de rolagem.</li>
+                                <li><strong>SliverPersistentHeader:</strong> cria um cabeçalho que pode permanecer
+                                    visível ou reagir à rolagem conforme a configuração.</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="formularios">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">Formulários e Entrada de Dados</h2>
+                            <a href="https://docs.flutter.dev/ui/widgets/input" target="_blank" rel="noopener noreferrer"
+                                class="gemini-btn">📚 Documentação oficial</a>
+                        </div>
+                        <div class="activity-card">
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li><strong>Form:</strong> agrupa campos de entrada relacionados e permite executar
+                                    operações de validação e salvamento de forma organizada.</li>
+                                <li><strong>TextFormField:</strong> campo de texto integrado a Form, permitindo definir
+                                    regras de validação e mensagens de erro.</li>
+                                <li><strong>InputDecoration:</strong> configura a apresentação de campos de entrada,
+                                    incluindo rótulo, dica, ícone, borda e mensagens de validação.</li>
+                                <li><strong>DropdownMenu:</strong> apresenta opções em um menu para que o usuário
+                                    selecione um valor.</li>
+                                <li><strong>Autocomplete:</strong> apresenta sugestões enquanto o usuário digita,
+                                    facilitando a escolha de valores existentes.</li>
+                                <li><strong>SearchBar / SearchAnchor:</strong> fornecem componentes para construir
+                                    experiências de pesquisa e seleção de resultados.</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="interacao">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">Gestos e Interação</h2>
+                            <a href="https://api.flutter.dev/flutter/widgets/GestureDetector-class.html" target="_blank" rel="noopener noreferrer"
+                                class="gemini-btn">📚 Documentação oficial</a>
+                        </div>
+                        <div class="activity-card">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                                <p><strong>GestureDetector:</strong> detecta diferentes gestos do usuário, como toque,
+                                    arraste, toque duplo, toque prolongado e outros eventos de interação.</p>
+                                <p><strong>InkWell:</strong> adiciona interação por toque com efeitos visuais
+                                    característicos do Material, como o efeito de ondulação.</p>
+                                <p><strong>Dismissible:</strong> permite que um item seja dispensado, normalmente por
+                                    meio de um gesto de arrastar.</p>
+                                <p><strong>Draggable:</strong> transforma um widget em um elemento que pode ser
+                                    arrastado pela interface.</p>
+                                <p><strong>DragTarget:</strong> define uma área capaz de receber um elemento que está
+                                    sendo arrastado.</p>
+                                <p><strong>AbsorbPointer / IgnorePointer:</strong> controlam a passagem de eventos de
+                                    ponteiro para os widgets, permitindo bloquear ou ignorar interações.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="animacoes">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">Animações</h2>
+                            <a href="https://docs.flutter.dev/ui/animations" target="_blank" rel="noopener noreferrer"
+                                class="gemini-btn">📚 Documentação oficial</a>
+                        </div>
+                        <div class="activity-card">
+                            <h3 class="text-2xl font-semibold mb-3">Animações implícitas e explícitas</h3>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li><strong>AnimatedContainer:</strong> anima tamanho, cor, margem e decoração.</li>
+                                <li><strong>AnimatedOpacity:</strong> anima transparência.</li>
+                                <li><strong>AnimatedPadding / AnimatedAlign:</strong> anima espaço e alinhamento.</li>
+                                <li><strong>AnimatedSwitcher:</strong> anima a troca de widgets.</li>
+                                <li><strong>Hero:</strong> transição compartilhada entre telas.</li>
+                                <li><strong>AnimationController:</strong> controle explícito de animações.</li>
+                                <li><strong>AnimatedBuilder:</strong> reconstrói parte da árvore durante a animação.
+                                </li>
+                                <li><strong>FadeTransition / ScaleTransition / SlideTransition:</strong> transições
+                                    especializadas.</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="responsividade">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">Responsividade e Acessibilidade</h2>
+                            <a href="https://docs.flutter.dev/ui/layout/responsive/adaptive-responsive" target="_blank" rel="noopener noreferrer"
+                                class="gemini-btn">📚 Documentação oficial</a>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="activity-card">
+                                <h3 class="text-2xl font-semibold mb-3">Responsividade</h3>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                    <li>MediaQuery</li>
+                                    <li>LayoutBuilder</li>
+                                    <li>OrientationBuilder</li>
+                                    <li>SafeArea</li>
+                                    <li>AspectRatio</li>
+                                    <li>FractionallySizedBox</li>
+                                    <li>Expanded e Flexible</li>
+                                </ul>
+                            </div>
+                            <div class="activity-card">
+                                <h3 class="text-2xl font-semibold mb-3">Acessibilidade</h3>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                    <li>Semantics</li>
+                                    <li>MergeSemantics</li>
+                                    <li>ExcludeSemantics</li>
+                                    <li>Tooltip</li>
+                                    <li>Focus e FocusScope</li>
+                                    <li>FocusableActionDetector</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="cupertino">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">Cupertino — Widgets para iOS</h2>
+                            <a href="https://docs.flutter.dev/ui/widgets/cupertino" target="_blank" rel="noopener noreferrer"
+                                class="gemini-btn">📚 Documentação oficial</a>
+                        </div>
+                        <div class="activity-card">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                                <p><strong>CupertinoApp:</strong> aplicação com estilo Cupertino.</p>
+                                <p><strong>CupertinoPageScaffold:</strong> estrutura de página.</p>
+                                <p><strong>CupertinoNavigationBar:</strong> barra de navegação.</p>
+                                <p><strong>CupertinoButton:</strong> botão.</p>
+                                <p><strong>CupertinoTextField:</strong> campo de texto.</p>
+                                <p><strong>CupertinoSwitch:</strong> controle liga/desliga.</p>
+                                <p><strong>CupertinoSlider:</strong> controle de valor.</p>
+                                <p><strong>CupertinoAlertDialog:</strong> diálogo.</p>
+                                <p><strong>CupertinoActionSheet:</strong> folha de ações.</p>
+                                <p><strong>CupertinoActivityIndicator:</strong> indicador de carregamento.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="estado">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">Estado e Construção Dinâmica</h2>
+                            <a href="https://docs.flutter.dev/data-and-backend/state-mgmt/intro" target="_blank" rel="noopener noreferrer"
+                                class="gemini-btn">📚 Documentação oficial</a>
+                        </div>
+                        <div class="activity-card">
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li><strong>StatelessWidget:</strong> interface sem estado mutável próprio.</li>
+                                <li><strong>StatefulWidget:</strong> interface associada a um State.</li>
+                                <li><strong>setState:</strong> solicita reconstrução do StatefulWidget.</li>
+                                <li><strong>ValueListenableBuilder:</strong> reage a ValueListenable.</li>
+                                <li><strong>FutureBuilder:</strong> constrói a UI com base em Future.</li>
+                                <li><strong>StreamBuilder:</strong> constrói a UI com base em Stream.</li>
+                                <li><strong>Builder:</strong> cria um novo BuildContext em um ponto da árvore.</li>
+                                <li><strong>InheritedWidget:</strong> mecanismo base para compartilhar dados pela
+                                    árvore.</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="exemplos">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">Exemplos de Código</h2>
+                            <a href="https://docs.flutter.dev/cookbook" target="_blank" rel="noopener noreferrer"
+                                class="gemini-btn">📚 Documentação oficial</a>
+                        </div>
+
+                        <div class="activity-card mb-8">
+                            <h3 class="text-2xl font-semibold mb-3">Exemplo 1 — Layout básico</h3>
+                            <div class="code-block" id="layout-example-code">
+                                <pre><code><span class="type">Scaffold</span>(
+  appBar: <span class="type">AppBar</span>(title: <span class="type">Text</span>(<span class="string">'Cadastro'</span>)),
+  body: <span class="type">SafeArea</span>(
+    child: <span class="type">Padding</span>(
+      padding: <span class="type">EdgeInsets</span>.all(16),
+      child: <span class="type">Column</span>(
+        children: [
+          <span class="type">Text</span>(<span class="string">'Nome'</span>),
+          <span class="type">TextField</span>(),
+          <span class="type">SizedBox</span>(height: 16),
+          <span class="type">FilledButton</span>(
+            onPressed: () {},
+            child: <span class="type">Text</span>(<span class="string">'Salvar'</span>),
+          ),
+        ],
+      ),
+    ),
+  ),
+)</code></pre>
+                            </div>
+                            <p class="component-explanation mt-4">
+                                <strong>Scaffold</strong> estrutura a tela; <strong>AppBar</strong> cria o cabeçalho;
+                                <strong>SafeArea</strong> evita áreas inseguras; <strong>Padding</strong> cria
+                                espaçamento;
+                                <strong>Column</strong> organiza os elementos verticalmente; <strong>TextField</strong>
+                                recebe o nome; <strong>SizedBox</strong> cria espaço; e <strong>FilledButton</strong>
+                                executa a ação de salvar. Esses componentes trabalham juntos para formar uma tela
+                                simples de cadastro.
+                            </p>
+                            <div class="text-center mt-4">
+                                <button class="gemini-btn" onclick="explainCode('layout-example-code')">✨ Explicar
+                                    Código</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="activity-card">
+                                <h3 class="text-2xl font-semibold mb-3">Exemplo 2 — Lista dinâmica</h3>
+                                <div class="code-block" id="list-example-code">
+                                    <pre><code><span class="type">ListView</span>.builder(
+  itemCount: itens.length,
+  itemBuilder: (context, index) {
+    return <span class="type">ListTile</span>(
+      leading: <span class="type">Icon</span>(<span class="type">Icons</span>.person),
+      title: <span class="type">Text</span>(itens[index]),
+      onTap: () {},
+    );
+  },
+)</code></pre>
+                                </div>
+                                <p class="component-explanation mt-4">
+                                    <strong>ListView.builder</strong> cria uma lista dinâmica;
+                                    <strong>itemCount</strong>
+                                    informa quantos elementos serão apresentados; <strong>itemBuilder</strong> constrói
+                                    cada item; <strong>ListTile</strong> organiza o conteúdo de uma linha;
+                                    <strong>Icon</strong>
+                                    apresenta o ícone; <strong>Text</strong> mostra o valor do item; e
+                                    <strong>onTap</strong>
+                                    define a ação executada quando o usuário toca na linha.
+                                </p>
+                                <div class="text-center mt-4">
+                                    <button class="gemini-btn" onclick="explainCode('list-example-code')">✨ Explicar
+                                        Código</button>
+                                </div>
+                            </div>
+
+                            <div class="activity-card">
+                                <h3 class="text-2xl font-semibold mb-3">Exemplo 3 — Estado</h3>
+                                <div class="code-block" id="state-example-code">
+                                    <pre><code><span class="type">int</span> contador = 0;
+
+<span class="type">FilledButton</span>(
+  onPressed: () {
+    setState(() {
+      contador++;
+    });
+  },
+  child: <span class="type">Text</span>(<span class="string">'Adicionar'</span>),
+)</code></pre>
+                                </div>
+                                <p class="component-explanation mt-4">
+                                    A variável <strong>contador</strong> armazena o estado atual. O
+                                    <strong>FilledButton</strong> executa uma ação ao ser pressionado.
+                                    Dentro de <strong>setState</strong>, o valor é incrementado e o Flutter
+                                    reconstrói a interface para apresentar o novo estado.
+                                </p>
+                                <div class="text-center mt-4">
+                                    <button class="gemini-btn" onclick="explainCode('state-example-code')">✨ Explicar
+                                        Código</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+
+                    <section id="referencias">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-bold">Referências e Próximos Passos</h2>
+                          </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="activity-card">
+                                <h3 class="text-2xl font-semibold mb-3">Oficial</h3>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                    <li><a href="https://flutter.dev/docs/development/ui/widgets" target="_blank"
+                                            class="text-blue-600 hover:underline">Catálogo de Widgets - Flutter.dev</a>
+                                    </li>
+                                    <li><a href="https://dartpad.dev/?sample=flutter" target="_blank"
+                                            class="text-blue-600 hover:underline">DartPad com Flutter</a></li>
+                                    <li><a href="https://docs.flutter.dev/cookbook" target="_blank"
+                                            class="text-blue-600 hover:underline">Receitas (Cookbook) do Flutter</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="activity-card">
+                                <h3 class="text-2xl font-semibold mb-3">Links Úteis</h3>
+                                <ul class="list-disc list-inside space-y-2">
+                                    <li><a href="https://docs.flutter.dev/ui/widgets" target="_blank"
+                                            class="text-blue-600 hover:underline">Catálogo de Widgets - Flutter</a></li>
+                                    <li><a href="https://api.flutter.dev/" target="_blank"
+                                            class="text-blue-600 hover:underline">API Reference - Flutter</a></li>
+                                    <li><a href="https://dartpad.dev/?sample=flutter" target="_blank"
+                                            class="text-blue-600 hover:underline">DartPad com Flutter</a></li>
+                                    <li><a href="https://docs.flutter.dev/cookbook" target="_blank"
+                                            class="text-blue-600 hover:underline">Flutter Cookbook</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    </main>
+                    <footer class="text-center mt-20 pt-8 border-t border-gray-200">
+                        <p class="text-gray-500 mb-4">Aplicação Interativa gerada para explorar a Estrutura do Flutter.
+                        </p>
+                    </footer>
+            </div>
+
+            <script src="../js/aulas.js"></script>
+
+</body>
+
+</html>

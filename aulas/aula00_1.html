@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widgets Essenciais do Flutter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/aulas.css">
+</head>
+
+<body class="bg-stone-50 text-gray-800">
+
+    <!-- Botão para abrir o Drawer -->
+    <button id="drawer-btn" class="fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+
+    <!-- Overlay -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+    <!-- Drawer Navigation -->
+    <nav id="drawer-nav"
+        class="fixed top-0 left-0 h-full w-64 bg-white shadow-xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+        <div class="p-4">
+            <h3 class="text-xl font-bold mb-4">Navegação</h3>
+            <a href="#objetivos" class="nav-link">Objetivos</a>
+            <a href="#conteudo" class="nav-link">Conteúdo (Text, Icon, Image)</a>
+            <a href="#layout" class="nav-link">Layout (Column, Row, Center)</a>
+            <a href="#formularios" class="nav-link">Formulários (TextField, TextFormField, Form)</a>
+            <a href="#exemplos" class="nav-link">Exemplos Práticos</a>
+            <a href="#referencias" class="nav-link">Referências</a>
+        </div>
+    </nav>
+
+    <!-- Modal Gemini -->
+    <div id="gemini-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
+                <h3 class="text-xl font-bold text-gray-800">✨ Resposta do Gemini</h3>
+                <button id="close-modal-btn" class="p-2 rounded-full hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="gemini-response" class="p-6 overflow-y-auto space-y-4">
+                <!-- Conteúdo gerado pela API será inserido aqui -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Presentation Overlay -->
+    <div id="presentation-overlay" class="presentation-overlay hidden">
+        <div class="presentation-toolbar">
+            <span id="slide-counter" class="slide-counter">1 / 1</span>
+            <button id="presentation-close-btn" type="button" class="presentation-close-btn"
+                aria-label="Fechar apresentação">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div id="presentation-content" class="presentation-content"></div>
+        <div class="presentation-controls">
+            <button type="button" onclick="prevSlide()" class="presentation-nav-btn" aria-label="Slide anterior">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+            <button type="button" onclick="nextSlide()" class="presentation-nav-btn presentation-nav-btn--primary"
+                aria-label="Próximo slide">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Widgets Essenciais do Flutter</h1>
+            <p class="mt-4 text-lg text-gray-600">Aprenda a utilizar os blocos fundamentais de construção do Flutter: exibição de conteúdo, estrutura de layout e captura de dados com formulários.</p>
+        </header>
+
+        <main class="space-y-20 content-justify">
+
+            <!-- SEÇÃO OBJETIVOS -->
+            <section id="objetivos">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Objetivos da Aula</h2>
+                    <a href="https://docs.flutter.dev/ui/widgets" target="_blank" class="gemini-btn">
+                        📚 Documentação oficial
+                    </a>
+                </div>
+                <div class="activity-card">
+                    <ul class="list-disc list-inside space-y-2 text-gray-700 text-lg">
+                        <li>Dominar a exibição básica de dados com <strong>Text</strong>, <strong>Icon</strong> e <strong>Image</strong>.</li>
+                        <li>Organizar elementos em tela utilizando os widgets de layout <strong>Column</strong>, <strong>Row</strong> e <strong>Center</strong>.</li>
+                        <li>Capturar e validar entradas do usuário usando <strong>TextField</strong>, <strong>TextFormField</strong> e <strong>Form</strong>.</li>
+                        <li>Compreender o papel do <code>GlobalKey&lt;FormState&gt;</code> na validação de campos.</li>
+                        <li>Construir um formulário completo e funcional combinando todos esses widgets.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- SEÇÃO WIDGETS DE CONTEÚDO -->
+            <section id="conteudo">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Widgets de Conteúdo</h2>
+                    <a href="https://docs.flutter.dev/ui/widgets/text" target="_blank" class="gemini-btn">
+                        📚 Documentação oficial
+                    </a>
+                </div>
+
+                <div class="activity-card mb-6">
+                    <h3 class="text-2xl font-semibold mb-3">1. Text</h3>
+                    <p class="text-gray-700 mb-4">
+                        O widget <strong>Text</strong> exibe uma cadeia de caracteres na interface com formatação personalizada por meio da propriedade <code>style</code> (`TextStyle`).
+                    </p>
+                    <div class="code-block">
+                        <pre><code><span class="type">Text</span>(
+  <span class="string">'Bem-vindo ao Flutter!'</span>,
+  style: <span class="type">TextStyle</span>(
+    fontSize: <span class="number">24</span>,
+    fontWeight: <span class="type">FontWeight</span>.bold,
+    color: <span class="type">Colors</span>.blue,
+  ),
+)</code></pre>
+                    </div>
+                </div>
+
+                <div class="activity-card mb-6">
+                    <h3 class="text-2xl font-semibold mb-3">2. Icon</h3>
+                    <p class="text-gray-700 mb-4">
+                        O widget <strong>Icon</strong> desenha um ícone vetorial vindo de uma biblioteca de glifos (como `Icons`). É leve e escalável sem perda de qualidade.
+                    </p>
+                    <div class="code-block">
+                        <pre><code><span class="type">Icon</span>(
+  <span class="type">Icons</span>.favorite,
+  color: <span class="type">Colors</span>.red,
+  size: <span class="number">36.0</span>,
+)</code></pre>
+                    </div>
+                </div>
+
+                <div class="activity-card">
+                    <h3 class="text-2xl font-semibold mb-3">3. Image</h3>
+                    <p class="text-gray-700 mb-4">
+                        O widget <strong>Image</strong> exibe imagens a partir de diversas fontes. Os construtores nomeados mais comuns são <code>Image.network</code> (para imagens da web) e <code>Image.asset</code> (para arquivos locais definidos no `pubspec.yaml`).
+                    </p>
+                    <div class="code-block">
+                        <pre><code><span class="type">Image</span>.network(
+  <span class="string">'https://flutter.dev/assets/404/dash_nest.png'</span>,
+  width: <span class="number">150</span>,
+  height: <span class="number">150</span>,
+  fit: <span class="type">BoxFit</span>.cover,
+)</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO WIDGETS DE LAYOUT -->
+            <section id="layout">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Widgets de Layout</h2>
+                    <a href="https://docs.flutter.dev/ui/widgets/layout" target="_blank" class="gemini-btn">
+                        📚 Documentação oficial
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="activity-card">
+                        <h3 class="text-2xl font-semibold mb-3">Column</h3>
+                        <p class="text-gray-700 mb-4">Dispõe seus widgets filhos em uma <strong>linha vertical</strong> (um abaixo do outro).</p>
+                        <div class="code-block">
+                            <pre><code><span class="type">Column</span>(
+  mainAxisAlignment: <span class="type">MainAxisAlignment</span>.center,
+  children: [
+    <span class="type">Text</span>(<span class="string">'Item 1'</span>),
+    <span class="type">Text</span>(<span class="string">'Item 2'</span>),
+  ],
+)</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="activity-card">
+                        <h3 class="text-2xl font-semibold mb-3">Row</h3>
+                        <p class="text-gray-700 mb-4">Dispõe seus widgets filhos em uma <strong>linha horizontal</strong> (um ao lado do outro).</p>
+                        <div class="code-block">
+                            <pre><code><span class="type">Row</span>(
+  mainAxisAlignment: <span class="type">MainAxisAlignment</span>.spaceBetween,
+  children: [
+    <span class="type">Icon</span>(<span class="type">Icons</span>.star),
+    <span class="type">Text</span>(<span class="string">'Avaliação'</span>),
+  ],
+)</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="activity-card">
+                        <h3 class="text-2xl font-semibold mb-3">Center</h3>
+                        <p class="text-gray-700 mb-4">Posiciona seu widget filho exatamente no <strong>centro</strong> do espaço disponível.</p>
+                        <div class="code-block">
+                            <pre><code><span class="type">Center</span>(
+  child: <span class="type">Text</span>(
+    <span class="string">'Centralizado'</span>
+  ),
+)</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO WIDGETS DE FORMULÁRIO -->
+            <section id="formularios">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Widgets de Formulário</h2>
+                    <a href="https://docs.flutter.dev/cookbook/forms/validation" target="_blank" class="gemini-btn">
+                        📚 Documentação oficial
+                    </a>
+                </div>
+
+                <div class="activity-card mb-6">
+                    <h3 class="text-2xl font-semibold mb-3">1. TextField</h3>
+                    <p class="text-gray-700 mb-4">
+                        O <strong>TextField</strong> é o campo basico para entrada de texto via teclado. Permite capturar eventos como <code>onChanged</code> e controlar o conteúdo com um <code>TextEditingController</code>.
+                    </p>
+                    <div class="code-block">
+                        <pre><code><span class="type">TextField</span>(
+  decoration: <span class="type">InputDecoration</span>(
+    labelText: <span class="string">'Pesquisar'</span>,
+    prefixIcon: <span class="type">Icon</span>(<span class="type">Icons</span>.search),
+    border: <span class="type">OutlineInputBorder</span>(),
+  ),
+)</code></pre>
+                    </div>
+                </div>
+
+                <div class="activity-card mb-6">
+                    <h3 class="text-2xl font-semibold mb-3">2. TextFormField</h3>
+                    <p class="text-gray-700 mb-4">
+                        O <strong>TextFormField</strong> envolve um `TextField` e adiciona integração nativa ao widget <strong>Form</strong>. Suporta função de validação (<code>validator</code>) e salvamento (<code>onSaved</code>).
+                    </p>
+                    <div class="code-block">
+                        <pre><code><span class="type">TextFormField</span>(
+  decoration: <span class="type">InputDecoration</span>(labelText: <span class="string">'E-mail'</span>),
+  validator: (value) {
+    if (value == null || !value.contains(<span class="string">'@'</span>)) {
+      return <span class="string">'Informe um e-mail válido'</span>;
+    }
+    return null;
+  },
+)</code></pre>
+                    </div>
+                </div>
+
+                <div class="activity-card">
+                    <h3 class="text-2xl font-semibold mb-3">3. Form</h3>
+                    <p class="text-gray-700 mb-4">
+                        O widget <strong>Form</strong> serve como um container para agrupar múltiplos campos de entrada (como `TextFormField`). Ele permite gerenciar, validar e redefinir o estado de todos os seus campos filhos de uma só vez utilizando uma <code>GlobalKey&lt;FormState&gt;</code>.
+                    </p>
+                    <div class="code-block">
+                        <pre><code><span class="type">Form</span>(
+  key: _formKey,
+  child: <span class="type">Column</span>(
+    children: [
+      <span class="type">TextFormField</span>(/* ... */),
+      <span class="type">ElevatedButton</span>(
+        onPressed: () {
+          if (_formKey.currentState!.validate()) {
+            <span class="type">ScaffoldMessenger</span>.of(context).showSnackBar(
+              <span class="type">SnackBar</span>(content: <span class="type">Text</span>(<span class="string">'Formulário válido!'</span>)),
+            );
+          }
+        },
+        child: <span class="type">Text</span>(<span class="string">'Enviar'</span>),
+      ),
+    ],
+  ),
+)</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO EXEMPLOS PRÁTICOS -->
+            <section id="exemplos">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Exemplos Práticos Integrados</h2>
+                    <a href="https://docs.flutter.dev/cookbook" target="_blank" class="gemini-btn">
+                        📚 Documentação oficial
+                    </a>
+                </div>
+
+                <!-- Exemplo 1: Cartão de Perfil -->
+                <div class="activity-card mb-8">
+                    <h3 class="text-2xl font-semibold mb-3">Exemplo 1 — Cartão de Perfil (Center, Column, Row, Image, Icon, Text)</h3>
+                    <div class="code-block" id="profile-card-code">
+                        <pre><code><span class="type">Center</span>(
+  child: <span class="type">Column</span>(
+    mainAxisAlignment: <span class="type">MainAxisAlignment</span>.center,
+    children: [
+      <span class="type">Image</span>.network(
+        <span class="string">'https://flutter.dev/assets/404/dash_nest.png'</span>,
+        height: <span class="number">100</span>,
+      ),
+      <span class="type">SizedBox</span>(height: <span class="number">12</span>),
+      <span class="type">Text</span>(
+        <span class="string">'Dash Flutter'</span>,
+        style: <span class="type">TextStyle</span>(fontSize: <span class="number">22</span>, fontWeight: <span class="type">FontWeight</span>.bold),
+      ),
+      <span class="type">SizedBox</span>(height: <span class="number">8</span>),
+      <span class="type">Row</span>(
+        mainAxisAlignment: <span class="type">MainAxisAlignment</span>.center,
+        children: [
+          <span class="type">Icon</span>(<span class="type">Icons</span>.star, color: <span class="type">Colors</span>.amber),
+          <span class="type">SizedBox</span>(width: <span class="number">4</span>),
+          <span class="type">Text</span>(<span class="string">'4.9 (Desenvolvedor Mascot)'</span>),
+        ],
+      ),
+    ],
+  ),
+)</code></pre>
+                    </div>
+                    <p class="component-explanation mt-4">
+                        Este código utiliza <strong>Center</strong> para centralizar a estrutura principal. A <strong>Column</strong> organiza a imagem (<strong>Image.network</strong>), o título (<strong>Text</strong>) e as métricas na vertical. A <strong>Row</strong> combina o ícone de estrela (<strong>Icon</strong>) com o texto descritivo lado a lado.
+                    </p>
+                    <div class="text-center mt-4">
+                        <button class="gemini-btn" onclick="explainCode('profile-card-code')">✨ Explicar Código</button>
+                    </div>
+                </div>
+
+                <!-- Exemplo 2: Formulário de Login Completo -->
+                <div class="activity-card">
+                    <h3 class="text-2xl font-semibold mb-3">Exemplo 2 — Formulário de Login (Form, TextFormField, Column, Row, Icon, Text)</h3>
+                    <div class="code-block" id="login-form-code">
+                        <pre><code><span class="type">final</span> _formKey = <span class="type">GlobalKey</span>&lt;<span class="type">FormState</span>&gt;();
+
+<span class="type">Form</span>(
+  key: _formKey,
+  child: <span class="type">Column</span>(
+    crossAxisAlignment: <span class="type">CrossAxisAlignment</span>.stretch,
+    children: [
+      <span class="type">Row</span>(
+        children: [
+          <span class="type">Icon</span>(<span class="type">Icons</span>.login, size: <span class="number">28</span>, color: <span class="type">Colors</span>.blue),
+          <span class="type">SizedBox</span>(width: <span class="number">8</span>),
+          <span class="type">Text</span>(<span class="string">'Acesse sua conta'</span>, style: <span class="type">TextStyle</span>(fontSize: <span class="number">20</span>)),
+        ],
+      ),
+      <span class="type">SizedBox</span>(height: <span class="number">16</span>),
+      <span class="type">TextFormField</span>(
+        decoration: <span class="type">InputDecoration</span>(
+          labelText: <span class="string">'E-mail'</span>,
+          prefixIcon: <span class="type">Icon</span>(<span class="type">Icons</span>.email),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return <span class="string">'Por favor, insira o e-mail'</span>;
+          }
+          return null;
+        },
+      ),
+      <span class="type">SizedBox</span>(height: <span class="number">12</span>),
+      <span class="type">TextFormField</span>(
+        obscureText: true,
+        decoration: <span class="type">InputDecoration</span>(
+          labelText: <span class="string">'Senha'</span>,
+          prefixIcon: <span class="type">Icon</span>(<span class="type">Icons</span>.lock),
+        ),
+        validator: (value) {
+          if (value == null || value.length &lt; <span class="number">6</span>) {
+            return <span class="string">'A senha deve ter pelo menos 6 caracteres'</span>;
+          }
+          return null;
+        },
+      ),
+      <span class="type">SizedBox</span>(height: <span class="number">20</span>),
+      <span class="type">FilledButton</span>(
+        onPressed: () {
+          if (_formKey.currentState!.validate()) {
+            print(<span class="string">'Formulário validado com sucesso!'</span>);
+          }
+        },
+        child: <span class="type">Text</span>(<span class="string">'Entrar'</span>),
+      ),
+    ],
+  ),
+)</code></pre>
+                    </div>
+                    <p class="component-explanation mt-4">
+                        Neste exemplo, o widget <strong>Form</strong> gerencia os dois campos de entrada (<strong>TextFormField</strong>) usando a chave de estado <code>_formKey</code>. Quando o usuário clica no botão, a chamada <code>_formKey.currentState!.validate()</code> aciona as funções de validação de cada campo.
+                    </p>
+                    <div class="text-center mt-4">
+                        <button class="gemini-btn" onclick="explainCode('login-form-code')">✨ Explicar Código</button>
+                    </div>
+                </div>
+            </section>
+
+           
+            <!-- SEÇÃO REFERÊNCIAS -->
+            <section id="referencias">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Referências e Documentação</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="activity-card">
+                        <h3 class="text-2xl font-semibold mb-3">Links dos Widgets</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li><a href="https://api.flutter.dev/flutter/widgets/Text-class.html" target="_blank" class="text-blue-600 hover:underline">Text Class - API Reference</a></li>
+                            <li><a href="https://api.flutter.dev/flutter/widgets/Icon-class.html" target="_blank" class="text-blue-600 hover:underline">Icon Class - API Reference</a></li>
+                            <li><a href="https://api.flutter.dev/flutter/widgets/Image-class.html" target="_blank" class="text-blue-600 hover:underline">Image Class - API Reference</a></li>
+                            <li><a href="https://api.flutter.dev/flutter/widgets/Column-class.html" target="_blank" class="text-blue-600 hover:underline">Column Class - API Reference</a></li>
+                            <li><a href="https://api.flutter.dev/flutter/widgets/Row-class.html" target="_blank" class="text-blue-600 hover:underline">Row Class - API Reference</a></li>
+                            <li><a href="https://api.flutter.dev/flutter/widgets/Center-class.html" target="_blank" class="text-blue-600 hover:underline">Center Class - API Reference</a></li>
+                        </ul>
+                    </div>
+                    <div class="activity-card">
+                        <h3 class="text-2xl font-semibold mb-3">Formulários no Flutter</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li><a href="https://api.flutter.dev/flutter/material/TextField-class.html" target="_blank" class="text-blue-600 hover:underline">TextField Class - API Reference</a></li>
+                            <li><a href="https://api.flutter.dev/flutter/material/TextFormField-class.html" target="_blank" class="text-blue-600 hover:underline">TextFormField Class - API Reference</a></li>
+                            <li><a href="https://api.flutter.dev/flutter/widgets/Form-class.html" target="_blank" class="text-blue-600 hover:underline">Form Class - API Reference</a></li>
+                            <li><a href="https://docs.flutter.dev/cookbook/forms/validation" target="_blank" class="text-blue-600 hover:underline">Cookbook: Form Validation</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-20 pt-8 border-t border-gray-200">
+            <p class="text-gray-500 mb-4">Aplicação Interativa gerada para explorar os Widgets Essenciais do Flutter.</p>
+        </footer>
+    </div>
+
+    <script src="../js/aulas.js"></script>
+
+</body>
+
+</html>
