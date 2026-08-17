@@ -132,7 +132,37 @@ Flutter Analyze:
     flutter analyze
 Analisa o código em busca de problemas de estilo e possíveis bugs.
                 </pre>
-        </main>
+
+                <pre class="code-note">
+                
+No Flutter, o `mainAxisAlignment` controla o alinhamento ao longo da direção principal de uma `Row` (Linha) ou `Column` (Coluna), enquanto o `crossAxisAlignment` controla o alinhamento ao longo da direção perpendicular.
+As direções físicas exatas mudam dependendo se você está usando um widget `Row` ou `Column`:
+
+LinkedIn
+·Muhammad Furqan Ul Haq
+Widget	mainAxisAlignment (Principal)	crossAxisAlignment (Perpendicular)
+Row	Horizontal (Esquerda para a Direita)	Vertical (Topo para a Base)
+Column	Vertical (Topo para a Base)	Horizontal (Esquerda para a Direita)
+MainAxisAlignment
+Essa propriedade distribui os widgets filhos ao longo da linha de fluxo principal do layout.
+
+MainAxisAlignment.start: Coloca os filhos no início (esquerda para `Row`, topo para `Column`).
+MainAxisAlignment.end: Coloca os filhos no final (direita para `Row`, base para `Column`).
+MainAxisAlignment.center: Centraliza os filhos agrupados no meio.
+MainAxisAlignment.spaceBetween: Coloca o primeiro e o último filho nas extremidades, distribuindo o espaço restante uniformemente entre eles.
+MainAxisAlignment.spaceAround: Distribui o espaço livre uniformemente entre os filhos, com espaços de tamanho reduzido (metade do tamanho) alocados antes do primeiro filho e depois do último filho.
+MainAxisAlignment.spaceEvenly: Distribui o espaço livre de forma totalmente uniforme antes, entre e depois de cada filho.
+
+CrossAxisAlignment
+Essa propriedade alinha os widgets filhos ao longo do eixo oposto.
+
+CrossAxisAlignment.start: Alinha os filhos ao topo de uma `Row` ou ao lado esquerdo de uma `Column`.
+CrossAxisAlignment.end: Alinha os filhos à base de uma `Row` ou ao lado direito de uma `Column`.
+CrossAxisAlignment.center: Centraliza os filhos ao longo do eixo transversal (este é o valor padrão).
+CrossAxisAlignment.stretch: Força os filhos a se expandirem completamente e preencherem o espaço disponível ao longo do eixo transversal.
+CrossAxisAlignment.baseline: Alinha elementos de texto ao longo de sua linha de base tipográfica comum (requer que você também defina a propriedade `textBaseline`). 
+</pre>    
+                </main>
 <script src='menu.js'></script>
 
     </body>
