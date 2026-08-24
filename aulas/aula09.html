@@ -394,7 +394,8 @@
 
         async function callGemini(prompt, maxRetries = 3) {
             const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-            const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8";
+            // WARNING: Do NOT hard-code API keys in client-side code. Use a server-side proxy.
+            const apiKey = "REPLACE_WITH_SERVER_SIDE_KEY";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
             
             let lastError = null;

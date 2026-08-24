@@ -149,7 +149,7 @@
             <section id="introducao">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Introdução ao Drawer</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('O que é o widget Drawer no Flutter e qual sua principal função?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/design/drawer" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-lg text-gray-700">O `Drawer` é um widget do Material Design que implementa um painel de navegação lateral deslizante. Sua principal função é oferecer um menu acessível com as principais seções ou ações do aplicativo, sem ocupar espaço fixo na interface principal. Ele geralmente é acionado por um ícone (conhecido como "hamburger menu") na `AppBar`.</p>
@@ -159,7 +159,7 @@
             <section id="estrutura">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Estrutura Básica</h2>
-                    <button class="gemini-btn" onclick="deepenConcept('Como o Drawer se integra com o Scaffold no Flutter?')">✨ Aprofundar</button>
+                    <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/design/drawer" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card space-y-8">
                      <div>
@@ -214,7 +214,7 @@
             <section id="elementos">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Elementos Comuns do Drawer</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Quais são os principais widgets usados para construir o conteúdo de um Drawer?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/design/drawer" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="activity-card">
@@ -239,7 +239,7 @@
             <section id="vantagens-limitacoes">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Vantagens e Limitações</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Quais são as vantagens e desvantagens de usar um Drawer na UI de um app?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/design/drawer" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="activity-card">
@@ -263,7 +263,7 @@
             <section id="boas-praticas">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Boas Práticas de Design</h2>
-                    <button class="gemini-btn" onclick="deepenConcept('Quais são as boas práticas de design ao implementar um Drawer em Flutter?')">✨ Aprofundar</button>
+                    <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/design/drawer" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <ul class="list-disc list-inside space-y-3 text-gray-700">
@@ -278,7 +278,7 @@
             <section id="conclusao">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Conclusão</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Faça um resumo sobre o uso do Drawer no Flutter.')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/design/drawer" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-lg text-gray-700">O `Drawer` é uma ferramenta poderosa e padrão para a navegação em aplicativos Flutter. Ele oferece uma maneira organizada e limpa de apresentar as principais seções de um app, mas deve ser usado com critério. Para apps com poucas seções principais, alternativas como `BottomNavigationBar` podem oferecer uma experiência de usuário mais direta. A chave é entender o fluxo de navegação do seu app e escolher a solução que melhor atenda às necessidades do seu usuário.</p>
@@ -374,7 +374,8 @@
 
         async function callGemini(prompt, maxRetries = 3) {
             const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-            const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8"; 
+            // WARNING: Do NOT hard-code API keys in client-side code. Use a server-side proxy.
+            const apiKey = "REPLACE_WITH_SERVER_SIDE_KEY";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
             
             let lastError = null;

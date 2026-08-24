@@ -150,7 +150,7 @@
             <section id="introducao">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">O que é um Banco de Dados?</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('O que é um banco de dados e por que é importante em apps mobile?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs/development/data-and-backend/state-mgmt" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-lg text-gray-700 mb-4">Um banco de dados é um conjunto organizado de informações armazenadas e acessadas eletronicamente. Sua principal função é permitir o armazenamento, a manipulação e a recuperação de dados de forma eficiente.</p>
@@ -166,7 +166,7 @@
             <section id="tipos-bd">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Tipos de Bancos de Dados</h2>
-                    <button class="gemini-btn" onclick="deepenConcept('Qual a diferença entre bancos de dados relacionais (SQL) e não relacionais (NoSQL) para Flutter?')">✨ Aprofundar</button>
+                    <a class="gemini-btn" href="https://flutter.dev/docs" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="activity-card">
@@ -185,7 +185,7 @@
             <section id="sqlite">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">SQLite em Flutter</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Como funciona o SQLite em aplicativos Flutter e quais suas vantagens?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/persistence/sqlite" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card space-y-8">
                      <div>
@@ -215,7 +215,7 @@
             <section id="async">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Programação Assíncrona</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('O que é programação assíncrona com Future, async e await em Dart e por que é essencial para bancos de dados?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://dart.dev/codelabs/async-await" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card space-y-8">
                      <div>
@@ -263,7 +263,7 @@
             <section id="crud">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Operações CRUD com SQLite</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('O que são operações CRUD e como elas são implementadas com sqflite em Flutter?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/persistence/sqlite" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card space-y-8">
                     <div>
@@ -317,7 +317,7 @@
              <section id="entidade">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Modelando Entidades</h2>
-                    <button class="gemini-btn" onclick="deepenConcept('O que é uma classe de entidade e por que os métodos toMap e fromMap são importantes ao usar SQLite no Flutter?')">✨ Aprofundar</button>
+                    <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/persistence/sqlite" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card space-y-8">
                      <div>
@@ -371,7 +371,7 @@
             <section id="conclusao">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Conclusão</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Qual a importância de escolher o banco de dados correto para uma aplicação Flutter?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-lg text-gray-700">Escolher e implementar uma solução de banco de dados é um passo crucial no desenvolvimento de aplicativos robustos. O Flutter oferece excelentes opções tanto para armazenamento local com SQLite quanto para soluções em nuvem com NoSQL. Entender os fundamentos de como modelar seus dados e interagir com o banco de forma assíncrona é a chave para construir apps performáticos e escaláveis.</p>
@@ -467,7 +467,8 @@
 
         async function callGemini(prompt, maxRetries = 3) {
             const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-            const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8"; 
+            // WARNING: Do NOT hard-code API keys in client-side code. Use a server-side proxy.
+            const apiKey = "REPLACE_WITH_SERVER_SIDE_KEY"; 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
             
             let lastError = null;

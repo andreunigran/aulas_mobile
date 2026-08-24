@@ -150,7 +150,7 @@
             <section id="introducao">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">O que são Dependências?</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('O que são dependências no Flutter?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://dart.dev/tools/pub" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-lg text-gray-700 mb-4">Dependências, também conhecidas como pacotes ou bibliotecas, são códigos externos que você pode adicionar ao seu projeto para ampliar suas funcionalidades. Elas permitem reutilizar soluções prontas e testadas pela comunidade, em vez de reescrever tudo do zero.</p>
@@ -161,7 +161,7 @@
             <section id="declaracao">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Onde são Declaradas?</h2>
-                    <button class="gemini-btn" onclick="deepenConcept('Como declarar dependências no arquivo pubspec.yaml do Flutter?')">✨ Aprofundar</button>
+                    <a class="gemini-btn" href="https://dart.dev/tools/pub" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-gray-700 mb-4">Todas as dependências do seu projeto são gerenciadas no arquivo `pubspec.yaml`, localizado na raiz do seu projeto. É neste arquivo que você lista os pacotes que seu aplicativo precisa.</p>
@@ -180,7 +180,7 @@
             <section id="tipos">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Tipos de Dependências</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Quais os tipos de dependências em um projeto Flutter?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://dart.dev/tools/pub" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <ul class="list-disc list-inside space-y-3 text-gray-700">
@@ -194,7 +194,7 @@
             <section id="exemplos">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Exemplos Comuns</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Quais são as dependências mais comuns em projetos Flutter?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://pub.dev" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card overflow-x-auto">
                     <table class="w-full text-left">
@@ -218,7 +218,7 @@
             <section id="gerenciamento">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Como Gerenciar Dependências</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Como gerenciar e atualizar dependências em um projeto Flutter?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://dart.dev/tools/pub" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card space-y-6">
                     <div>
@@ -242,7 +242,7 @@
             <section id="boas-praticas">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Cuidados e Boas Práticas</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Quais são as boas práticas ao gerenciar dependências no Flutter?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://dart.dev/tools/pub" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-gray-700 mb-4">Gerenciar dependências vai além de simplesmente adicioná-las. Um bom gerenciamento garante a estabilidade e a segurança do seu aplicativo.</p>
@@ -258,7 +258,7 @@
             <section id="conclusao">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Conclusão</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Qual a importância do gerenciamento de dependências no Flutter?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://dart.dev/tools/pub" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-lg text-gray-700">As dependências são essenciais para acelerar o desenvolvimento em Flutter, mas exigem um gerenciamento cuidadoso para evitar problemas de compatibilidade e segurança. Um bom controle garante a eficiência, a manutenibilidade e a escalabilidade do seu aplicativo a longo prazo.</p>
@@ -354,7 +354,8 @@
 
         async function callGemini(prompt, maxRetries = 3) {
             const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-            const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8"; 
+            // WARNING: Do NOT hard-code API keys in client-side code. Use a server-side proxy.
+            const apiKey = "REPLACE_WITH_SERVER_SIDE_KEY";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
             
             let lastError = null;

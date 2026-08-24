@@ -152,7 +152,7 @@
             <section id="introducao">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Objetivo do Tutorial</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Qual o objetivo de criar um app de cadastro de contatos simples no Flutter?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs/get-started/codelab" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-lg text-gray-700">Este guia apresenta um passo a passo para montar uma aplicação Flutter com um formulário de cadastro (nome e telefone), validação de dados, armazenamento em memória e listagem dos contatos cadastrados, tudo na mesma tela. Ao final, adicionaremos a funcionalidade de exclusão, consolidando os principais conceitos de manipulação de estado e listas interativas.</p>
@@ -162,7 +162,7 @@
             <section id="passo1">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Passo 1: Criar a Classe `Contato`</h2>
-                    <button class="gemini-btn" onclick="deepenConcept('Qual a importância de criar uma classe de modelo de dados como `Contato` no Flutter?')">✨ Aprofundar</button>
+                    <a class="gemini-btn" href="https://dart.dev/guides/language/language-tour#classes" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-gray-700 mb-4">O primeiro passo é definir a estrutura de dados que representará cada contato. Criamos uma classe simples chamada `Contato` que conterá o nome e o telefone. O uso de `final` garante que, uma vez criado, um objeto `Contato` não poderá ser alterado (imutabilidade).</p>
@@ -178,10 +178,10 @@
             </section>
             
             <section id="passo2">
-                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-3xl font-bold">Passo 2: Criar a Classe `Dados`</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Por que criar uma classe separada como `Dados` para gerenciar a lista de contatos?')">✨ Aprofundar</button>
-                </div>
+                      <div class="flex justify-between items-center mb-6">
+                          <h2 class="text-3xl font-bold">Passo 2: Criar a Classe `Dados`</h2>
+                            <a class="gemini-btn" href="https://flutter.dev/docs/development/data-and-backend/state-mgmt" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
+                     </div>
                 <div class="activity-card">
                     <p class="text-gray-700 mb-4">Para gerenciar nossa lista de contatos em memória, criamos uma classe `Dados`. Ela encapsula a lista, tornando o código mais organizado. O `_` antes de `_contatos` torna a lista privada, e o `getter` `contatos` expõe uma versão somente leitura para o resto do app.</p>
                     <div class="code-block"><pre><code><span class="comment">// Classe para gerenciar a lista de contatos em memória</span>
@@ -208,7 +208,7 @@
             <section id="passo3">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Passo 3: Estrutura da Tela Principal</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Qual a estrutura básica de uma tela com formulário e lista no Flutter?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs/development/ui/layout" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-gray-700 mb-4">A tela principal será um `StatefulWidget`, pois precisamos gerenciar o estado do formulário e da lista de contatos. A estrutura utiliza um `Scaffold` para o layout base, um `Form` para agrupar e validar os campos de texto, e um `ListView.builder` para exibir a lista de contatos de forma eficiente.</p>
@@ -227,10 +227,10 @@
             </section>
             
             <section id="passo4">
-                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-3xl font-bold">Passo 4: Executar o App</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Como funciona a função `main` e o `MaterialApp` no Flutter?')">✨ Aprofundar</button>
-                </div>
+                      <div class="flex justify-between items-center mb-6">
+                          <h2 class="text-3xl font-bold">Passo 4: Executar o App</h2>
+                            <a class="gemini-btn" href="https://flutter.dev/docs/get-started/test-drive" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
+                     </div>
                 <div class="activity-card">
                     <p class="text-gray-700 mb-4">Finalmente, para rodar a aplicação, modificamos o arquivo `lib/main.dart`. A função `main` chama `runApp` com o `MaterialApp` como widget raiz, que por sua vez define nossa `TelaContatos` como a tela inicial (`home`).</p>
                     <div class="code-block"><pre><code><span class="keyword">void</span> main() {
@@ -245,7 +245,7 @@
             <section id="passo5">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Passo 5: Adicionar Exclusão</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Como funciona o widget Dismissible no Flutter?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://api.flutter.dev/flutter/widgets/Dismissible-class.html" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-gray-700 mb-4">Para permitir a exclusão de contatos, envolvemos nosso `ListTile` com o widget `Dismissible`. Ele permite que o usuário arraste o item para o lado para acionar uma ação, como remover o contato da lista. Também adicionamos um `IconButton` como uma alternativa de exclusão.</p>
@@ -416,7 +416,7 @@
             <section id="desafio-editar">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Desafio: Editar Contatos</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Como implementar a função de editar um item em uma lista no Flutter?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/forms/validation" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-gray-700 mb-4">Agora que você já sabe adicionar e remover contatos, o próximo passo é implementar a funcionalidade de edição. Este é um excelente exercício para aprofundar seus conhecimentos em manipulação de estado e interação com o usuário.</p>
@@ -434,7 +434,7 @@
             <section id="conclusao">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Conclusão</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Quais os principais conceitos do Flutter aprendidos ao criar um app de cadastro de contatos?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-lg text-gray-700">Com este guia, você construiu uma aplicação funcional que integra vários conceitos essenciais do Flutter: gerenciamento de estado com `StatefulWidget`, criação de formulários com `Form` e `TextFormField`, validação de dados, e renderização de listas dinâmicas com `ListView.builder` e `Dismissible`. Este projeto serve como uma base sólida para a criação de aplicações mais complexas.</p>
@@ -530,7 +530,8 @@
 
         async function callGemini(prompt, maxRetries = 3) {
             const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-            const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8"; 
+            // WARNING: Do NOT hard-code API keys in client-side code. Use a server-side proxy.
+            const apiKey = "REPLACE_WITH_SERVER_SIDE_KEY";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
             
             let lastError = null;

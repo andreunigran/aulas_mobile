@@ -150,7 +150,7 @@
             <section id="introducao">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Introdução à Navegação</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('O que é navegação em Flutter e como funciona o modelo de pilha?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs/development/ui/navigation" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card space-y-8">
                     <div>
@@ -167,7 +167,7 @@
             <section id="tipos-navegacao">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Tipos de Navegação</h2>
-                    <button class="gemini-btn" onclick="deepenConcept('Quais são os principais tipos de navegação em Flutter e quando usar cada um?')">✨ Aprofundar</button>
+                    <a class="gemini-btn" href="https://flutter.dev/docs/development/ui/navigation" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                  <div class="activity-card space-y-8">
                     <div>
@@ -188,7 +188,7 @@
             <section id="navegacao-imperativa">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Navegação Imperativa: `push` e `pop`</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Como usar `Navigator.push` e `Navigator.pop` para navegação básica em Flutter?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/navigation/navigation-basics" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card space-y-8">
                      <div>
@@ -226,7 +226,7 @@
             <section id="navegacao-nomeada">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Navegação Nomeada</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Como configurar e usar rotas nomeadas no Flutter?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/navigation/named-routes" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card space-y-8">
                      <div>
@@ -256,7 +256,7 @@
              <section id="passando-argumentos">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Passando Argumentos entre Telas</h2>
-                    <button class="gemini-btn" onclick="deepenConcept('Como passar dados entre telas ao navegar no Flutter?')">✨ Aprofundar</button>
+                    <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/navigation/passing-data" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card space-y-8">
                      <div>
@@ -295,7 +295,7 @@
             <section id="exercicio">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Exercício Prático</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Como posso resolver o exercício de criar um app com duas telas e passagem de argumentos?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/navigation/navigation-basics" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <h3 class="text-2xl font-semibold mb-3">Objetivo</h3>
@@ -312,7 +312,7 @@
             <section id="referencias">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Referências Oficiais</h2>
-                     <button class="gemini-btn" onclick="deepenConcept('Quais são as melhores referências para continuar aprendendo sobre navegação em Flutter?')">✨ Aprofundar</button>
+                     <a class="gemini-btn" href="https://flutter.dev/docs/development/ui/navigation" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                      <ul class="list-disc list-inside space-y-2">
@@ -412,7 +412,8 @@
 
         async function callGemini(prompt, maxRetries = 3) {
             const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-            const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8"; 
+            // WARNING: Do NOT hard-code API keys in client-side code. Use a server-side proxy.
+            const apiKey = "REPLACE_WITH_SERVER_SIDE_KEY";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
             
             let lastError = null;

@@ -147,7 +147,7 @@
             <section id="o-que-e">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">1. O que é o Dismissible?</h2>
-                    <button class="gemini-btn" onclick="deepenConcept('O que é o widget Dismissible no Flutter e quais seus casos de uso?')">✨ Aprofundar</button>
+                    <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/gestures/dismissible" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-lg text-gray-700">Um widget inovador que permite remover ou interagir com itens por gestos de deslize. Suas principais características são:</p>
@@ -162,7 +162,7 @@
             <section id="estrutura">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">2. Estrutura básica</h2>
-                    <button class="gemini-btn" onclick="deepenConcept('Descreva em detalhes as propriedades essenciais do widget Dismissible: key, onDismissed, background e child.')">✨ Aprofundar</button>
+                    <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/gestures/dismissible" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <div class="code-block" id="estrutura-code"><pre><code class="language-dart"><span class="type">Dismissible</span>(
@@ -189,7 +189,7 @@
             <section id="direcoes">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">3. Direções de deslize</h2>
-                    <button class="gemini-btn" onclick="deepenConcept('Quais são as diferentes DismissDirection no Flutter e como usar direções diferentes para ações distintas?')">✨ Aprofundar</button>
+                    <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/gestures/dismissible" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                      <p class="text-gray-700 mb-4">Você pode controlar para qual lado o item pode ser deslizado:</p>
@@ -207,7 +207,7 @@
              <section id="exemplo-pratico">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">4. Exemplo prático em lista</h2>
-                    <button class="gemini-btn" onclick="deepenConcept('Como funciona a integração do Dismissible com o ListView.builder?')">✨ Aprofundar</button>
+                    <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/gestures/dismissible" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <div class="code-block" id="exemplo-pratico-code"><pre><code class="language-dart"><span class="type">ListView</span>.<span class="keyword">builder</span>(
@@ -255,7 +255,7 @@
             <section id="vantagens">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">5. Vantagens</h2>
-                    <button class="gemini-btn" onclick="deepenConcept('Resuma as principais vantagens de usar o widget Dismissible na UI de um app Flutter.')">✨ Aprofundar</button>
+                    <a class="gemini-btn" href="https://flutter.dev/docs/cookbook/gestures/dismissible" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <ul class="list-disc list-inside space-y-2 text-gray-700">
@@ -357,7 +357,8 @@
 
         async function callGemini(prompt, maxRetries = 3) {
             const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-            const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8"; 
+            // WARNING: Do NOT hard-code API keys in client-side code. Use a server-side proxy.
+            const apiKey = "REPLACE_WITH_SERVER_SIDE_KEY";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
             
             let lastError = null;

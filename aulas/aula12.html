@@ -209,9 +209,7 @@
             <section id="introducao">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Por que a Estrutura de Pastas é Importante?</h2>
-                    <button class="gemini-btn"
-                        onclick="deepenConcept('Qual a importância de ter uma boa estrutura de pastas em um projeto Flutter?')">✨
-                        Aprofundar</button>
+                    <a class="gemini-btn" href="https://flutter.dev/docs" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-lg text-gray-700">Uma estrutura de pastas bem definida é a base de um projeto de
@@ -225,8 +223,7 @@
             <section id="estrutura-recomendada">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Estrutura Recomendada (Feature-First)</h2>
-                    <button class="gemini-btn" onclick="deepenConcept('O que é a abordagem " Feature-First" para
-                        estrutura de pastas e por que ela é recomendada para Flutter?')">✨ Aprofundar</button>
+                    <a class="gemini-btn" href="https://flutter.dev/docs" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <p class="text-center text-gray-600 mb-10 max-w-3xl mx-auto">
                     A abordagem "Feature-First" (ou "Funcionalidade Primeiro") organiza o código em torno das
@@ -274,9 +271,7 @@
             <section id="vantagens-desvantagens">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Vantagens e Desvantagens</h2>
-                    <button class="gemini-btn"
-                        onclick="deepenConcept('Quais são as vantagens e desvantagens de usar uma estrutura de pastas organizada por funcionalidades?')">✨
-                        Aprofundar</button>
+                    <a class="gemini-btn" href="https://flutter.dev/docs" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="activity-card">
@@ -305,9 +300,7 @@
             <section id="referencias">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Referências e Padrões da Comunidade</h2>
-                    <button class="gemini-btn"
-                        onclick="deepenConcept('Quais são as principais referências e padrões da comunidade para estrutura de projetos Flutter?')">✨
-                        Aprofundar</button>
+                    <a class="gemini-btn" href="https://flutter.dev/docs" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-gray-700 mb-4">A estrutura apresentada é inspirada em padrões de arquitetura limpa e
@@ -328,9 +321,7 @@
             <section id="conclusao">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold">Conclusão</h2>
-                    <button class="gemini-btn"
-                        onclick="deepenConcept('Faça um resumo sobre a importância da estrutura de pastas em projetos Flutter.')">✨
-                        Aprofundar</button>
+                    <a class="gemini-btn" href="https://flutter.dev/docs" target="_blank" rel="noopener noreferrer">Documentação oficial</a>
                 </div>
                 <div class="activity-card">
                     <p class="text-lg text-gray-700">Não existe uma única "estrutura perfeita" para todos os projetos,
@@ -432,7 +423,8 @@
 
         async function callGemini(prompt, maxRetries = 3) {
             const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-            const apiKey = "AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8";
+            // WARNING: Do NOT hard-code API keys in client-side code. Use a server-side proxy.
+            const apiKey = "REPLACE_WITH_SERVER_SIDE_KEY";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
             let lastError = null;

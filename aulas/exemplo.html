@@ -118,7 +118,7 @@
                 <li>Prover um sistema de build uniforme.</li>
                 <li>Gerenciar bibliotecas externas automaticamente.</li>
             </ul>
-            <button class="gemini-btn" onclick="carregarInfoSheet(0, 2)">✨ Maven vs Gradle</button>
+            <a class="gemini-btn" href="https://maven.apache.org/" target="_blank" rel="noopener noreferrer">Maven</a>
         </section>
 
         <section id="item-2" class="slide-section" data-title="2. O Arquivo POM.xml">
@@ -131,7 +131,7 @@
                 &nbsp;&nbsp;&lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;<br>
                 &lt;/project&gt;
             </div>
-            <button class="gemini-btn" onclick="carregarInfoSheet(1, 2)">✨ Coordenadas Maven</button>
+            <a class="gemini-btn" href="https://maven.apache.org/guides/introduction/introduction-to-the-pom.html" target="_blank" rel="noopener noreferrer">Coordenadas Maven</a>
         </section>
 
         <section id="item-3" class="slide-section" data-title="3. Ciclo de Vida (Lifecycle)">
@@ -202,7 +202,7 @@
                     <li>✅ Como o Maven gerencia bibliotecas externas</li>
                 </ul>
             </div>
-            <button class="gemini-btn" onclick="deepenConcept('Explique como usar o Maven com o VS Code ou IntelliJ')">✨ Configurar na IDE</button>
+            <a class="gemini-btn" href="https://maven.apache.org/guides/getting-started/index.html" target="_blank" rel="noopener noreferrer">Configurar na IDE</a>
         </section>
     </main>
 </div>
@@ -211,7 +211,8 @@
     google.charts.load('current', { packages: ['corechart'] });
     const modal = document.getElementById('gemini-modal');
     const resp = document.getElementById('gemini-response');
-    const apiKey = 'AIzaSyBzmKvKC1gr2OrDpwcIj2gsljGjjh8dNy8'; // Insira sua chave do Google AI Studio
+    // WARNING: Do NOT hard-code API keys in client-side code. Use a server-side proxy.
+    const apiKey = 'REPLACE_WITH_SERVER_SIDE_KEY';
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
      
  function carregarInfoSheet(linha, coluna) {
